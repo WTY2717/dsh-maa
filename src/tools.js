@@ -1,5 +1,5 @@
 /**
- * 工具定义（15 个）：远程控制 8 个 + 抄作业 3 个 + 自检 1 个 + 点击 1 个 + 滑动 1 个 + 模拟器 1 个。
+ * 工具定义（17 个）：远程控制 8 个 + 抄作业 3 个（+ 后台 2 个） + 自检 1 个 + 点击 1 个 + 滑动 1 个 + 模拟器 1 个。
  *
  * 这里是**唯一**把能力暴露给模型的地方；实现都在 src/ 下，工具只做参数校验与调度。
  * 描述里的口径与禁则是踩过坑的结论，改之前先读 docs/tools/maa*.md。
@@ -48,7 +48,7 @@ const clampSec = (v, def, max) => Math.min(Math.max(Number(v) || def, 1), max);
  * @param {() => Promise<object|null>} deps.getBridge 取（必要时启动）bridge 实例
  * @param {string} deps.pkgVersion 插件版本
  */
-export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiState = () => null }) {
+export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiState = () => null, copilotRunner = null }) {
   /** 每次调用都重新解析配置：路径、端口、开关都立即生效。 */
   const cfgOf = async () => resolveConfig(getConfig() ?? {}, pkgDir);
 
@@ -224,7 +224,12 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
       description:
         '用 MaaCore 直连跑一条作业（不经过 MAA GUI）。三选一给作业：file（maa_copilot_find 落盘的文件）/ stage（自动挑播放量最高的一条）/ id（作业站 id）。' +
         '前置：模拟器在跑、游戏已登录、**停在目标关卡的详情页或编队页**（Copilot 不会自己导航；到不了就用 maa_swipe 走过去）、**代理指挥要关**（否则队伍锁死选不上人）。' +
-        'dryRun=true 只让 core 解析作业，不连模拟器、不消耗理智。跑完必看返回的 screenshot 判断是否三星：任务返回 done 不代表三星。' +
+        'dryRun=true 只让 core 解析作业，不连模拟器、不消耗理智。' +
+        '**`background:true` 是推荐用法**：立刻返回 runId，然后用 `maa_copilot_status` 轮询 + `maa_screenshot`/`read_image` 盯画面。' +
+        '**优先防非三星**：战斗里盯「目标生命值」——一旦掉血（生命值右侧出现红色负值/生命图标变红），立刻 `maa_copilot_stop`，再点「暂停 → 退出行动」：' +
+        '**结算前退出关卡会返还全部理智**；掉过血还打到底 = 花了理智还拿不满奖励。换作业重来；所有作业都掉血就如实告诉用户「没有能三星通关的作业」。' +
+        '阻塞模式（background:false）会一直等到战斗结束，中途没法干预，只适合已经验证过的作业。' +
+        '返回里 `jobMeta` 说明这条是严格档还是放宽档；失败时 `advice` 给出对用户口径（放宽档失败 = 没有可抄作业，不要重试、不要建议提升练度）。' +
         '涉及真实理智消耗，动手前先跟用户确认。',
       parameters: obj(
         {
@@ -232,6 +237,7 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
           stage: str('关卡代号；给这个就自动挑播放量最高的一条作业'),
           id: num('作业站作业 id'),
           dryRun: bool('只校验 core 能解析作业，不连接、不消耗。默认 false'),
+          background: bool('后台跑：立刻返回 runId，用 maa_copilot_status 盯、maa_copilot_stop 停。推荐 true'),
           formation: bool('自动编队（按作业干员选人）。默认 true'),
           formationIndex: num('用哪个编队栏位，0=当前编队。默认取插件设置'),
           timeoutSeconds: num('最长等待秒数，默认取插件设置（900）'),
@@ -269,18 +275,46 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
             throw new Error('必须给 file / stage / id 之一');
           }
         }
-        const onEvent = () => {};
-        const result = await runCopilot({
-          jobFile: file,
-          cfg,
+        const options = {
           dryRun: Boolean(args.dryRun),
           formation: args.formation === undefined ? true : Boolean(args.formation),
           formationIndex: args.formationIndex ?? cfg.formationIndex,
           timeoutSeconds: Number(args.timeoutSeconds) || cfg.copilotTimeoutSeconds,
           popupGuard: args.popupGuard === undefined ? cfg.popupGuard : Boolean(args.popupGuard),
-          onEvent,
-        });
+        };
+        // 后台模式：立刻返回，让模型能一边跑一边盯生命值（docs/tools/maa-copilot.md「生命值守则」）
+        if (args.background && !args.dryRun) {
+          if (!copilotRunner) return { ok: false, error: '后台模式不可用：runner 未注入（用 background:false 或重载插件）' };
+          const started = copilotRunner.start({ jobFile: file, cfg, options });
+          return picked ? { ...started, pickedFromFind: picked } : started;
+        }
+        const result = await runCopilot({ jobFile: file, cfg, ...options, onEvent: () => {} });
         return picked ? { ...result, pickedFromFind: picked } : result;
+      },
+    },
+    {
+      name: 'maa_copilot_status',
+      description:
+        '查后台作业（`maa_copilot_run({background:true})` 起的）的进度：state / 已跑多久 / 最近的回调 / 结束后的完整结果。不给 runId 就查最近一条。' +
+        '配 `maa_screenshot` + `read_image` 一起用：看画面里的**目标生命值**有没有掉。',
+      parameters: obj({ runId: str('maa_copilot_run 返回的 runId；不填=最近一条') }),
+      output: textOut('后台作业状态'),
+      async execute(args) {
+        if (!copilotRunner) return { ok: false, error: '后台模式不可用：runner 未注入' };
+        return copilotRunner.status(args.runId ? String(args.runId) : undefined);
+      },
+    },
+    {
+      name: 'maa_copilot_stop',
+      description:
+        '停掉后台作业的 MAA 任务（AsstStopTask）——**发现目标生命值掉了就立刻调它**，然后自己去点「暂停 → 退出行动」把理智退回来。' +
+        '停的只是 MaaCore 的任务链，游戏仍停在战斗里；退出关卡的动作必须自己点（MAA 的任务表里没有「中途退出」）。' +
+        '不给 runId 就停最近一条。',
+      parameters: obj({ runId: str('maa_copilot_run 返回的 runId；不填=最近一条') }),
+      output: textOut('已停止后台作业'),
+      async execute(args) {
+        if (!copilotRunner) return { ok: false, error: '后台模式不可用：runner 未注入' };
+        return copilotRunner.stop(args.runId ? String(args.runId) : undefined);
       },
     },
     {

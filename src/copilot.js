@@ -22,6 +22,38 @@ const MATCH_NOTES = {
   none: '严格匹配与放宽都没有命中：换关卡/换时间再找，或核对练度文件',
 };
 
+/** 作业旁的元数据（练度档位 / 来源关卡）：MAA 只读 .json 本身，多出来的 sidecar 不会干扰它。 */
+export function jobMetaPath(file) {
+  return `${file}.meta.json`;
+}
+
+export function writeJobMeta(file, meta) {
+  try {
+    fs.writeFileSync(jobMetaPath(file), JSON.stringify({ ...meta, writtenAt: new Date().toISOString() }, null, 2));
+  } catch { /* 元数据写失败不影响作业本身 */ }
+}
+
+export function readJobMeta(file) {
+  try { return JSON.parse(fs.readFileSync(jobMetaPath(file), 'utf8')); } catch { return null; }
+}
+
+/** 失败后该对用户说什么（用户口径：放宽档失败 = 没找到这个账号可以抄的作业）。 */
+export function failureAdvice(jobMeta) {
+  if (jobMeta?.matchMode === 'relaxed') {
+    return {
+      verdict: 'no-job-for-this-account',
+      message:
+        '没有找到这个账号可以抄的作业：这条是**放宽练度**档的作业（' +
+        `${jobMeta.relaxedBecause ?? '练度不满足原要求'}），强行跑并没有通过。` +
+        '不要再重试同一关的放宽作业，也不要建议提升练度——如实告诉用户没有可抄的作业。',
+    };
+  }
+  return {
+    verdict: 'strict-job-failed',
+    message: '这条是**完全达标**档的作业，跑失败了：换下一条（同关其它作业）；若都失败，告诉用户当前没有可抄的作业。',
+  };
+}
+
 /** 一条作业在工具输出里的脸面。 */
 function jobRow({ id, views, job, stageId, patched, file }) {
   return {
@@ -83,6 +115,15 @@ export async function findJobs({ stage, cfg, limit = 8, writeFiles = true }) {
     if (writeFiles) {
       file = path.join(cfg.jobsDir, `${String(stage).replace(/[^\w-]/g, '_')}_${p.id}.json`);
       fs.writeFileSync(file, JSON.stringify(job));
+      // sidecar：告诉 maa_copilot_run「这条是放宽档还是严格档」，失败时按口径回话
+      writeJobMeta(file, {
+        matchMode: mode,
+        relaxedBecause: p.strictReason ?? null,
+        toleranceNotes: tol.notes,
+        stageId: found.stageId,
+        stageInput: String(stage),
+        jobId: p.id,
+      });
     }
     rows.push({
       ...jobRow({ id: p.id, views: p.views, job, stageId: found.stageId, patched: tol.applied, file }),
@@ -107,7 +148,7 @@ export async function findJobs({ stage, cfg, limit = 8, writeFiles = true }) {
  * 跑一条作业（MaaCore 直连）。
  * 前置：模拟器在跑、游戏已登录、**停在目标关卡的详情页或编队页**、「代理指挥」是关的。
  */
-export async function runCopilot({ jobFile, cfg, dryRun = false, formation = true, formationIndex, timeoutSeconds, popupGuard, onEvent }) {
+export async function runCopilot({ jobFile, cfg, dryRun = false, formation = true, formationIndex, timeoutSeconds, popupGuard, onEvent, onReady }) {
   const abs = path.resolve(jobFile);
   if (!fs.existsSync(abs)) return { ok: false, error: `作业文件不存在: ${abs}` };
   let job;
@@ -119,6 +160,7 @@ export async function runCopilot({ jobFile, cfg, dryRun = false, formation = tru
   if (!(job.actions ?? []).length) {
     return { ok: false, error: '作业没有 actions（很可能存的是列表接口的元数据）。用 maa_copilot_find 重新落盘' };
   }
+  const jobMeta = readJobMeta(abs);
   const params = {
     filename: abs,
     formation: Boolean(formation),
@@ -175,6 +217,20 @@ export async function runCopilot({ jobFile, cfg, dryRun = false, formation = tru
 
     const appended = await worker.append('Copilot', params);
     await worker.startTask();
+    // 后台模式（copilot-runner.js）要拿 worker 句柄：停止任务 / 查进度都靠它
+    if (typeof onReady === 'function') {
+      try {
+        onReady({
+          worker,
+          taskId: appended.taskId,
+          jobFile: abs,
+          progressLines,
+          stopTask: () => worker.stop(),
+        });
+      } catch (e) {
+        onEvent?.({ event: 'onReady-failed', error: String(e?.message || e) });
+      }
+    }
     // 任务结束（成功/失败/超时）后就不该再补点击了：guardClick 每 500ms 检查一次这个标志
     let runFinished = false;
     if (popupGuard ?? cfg.popupGuard) {
@@ -196,8 +252,9 @@ export async function runCopilot({ jobFile, cfg, dryRun = false, formation = tru
         : result.timedOut ? 'timeout'
           : result.idleExit ? 'idle-exit(unknown)'
             : 'ended-unknown';
+    const ok = !result.failed && sawCompletion;
     return {
-      ok: !result.failed && sawCompletion,
+      ok,
       status,
       done: result.done,
       failed: result.failed,
@@ -215,8 +272,15 @@ export async function runCopilot({ jobFile, cfg, dryRun = false, formation = tru
         actions: job.actions.length,
         operSummary: summarizeOpers(job),
       },
+      jobMeta: jobMeta
+        ? { matchMode: jobMeta.matchMode ?? null, relaxedBecause: jobMeta.relaxedBecause ?? null, toleranceNotes: jobMeta.toleranceNotes ?? [] }
+        : null,
+      // 失败时的对用户口径（用户定）：放宽档失败 = 这个账号没有可抄作业
+      advice: ok ? null : failureAdvice(jobMeta),
       screenshot: shot.ok ? { file: shot.file, bytes: shot.bytes } : { error: shot.error },
-      verifyHint: '任务返回只代表任务链结束：用 read_image 看截图确认是否三星；不是三星就换作业（不要重跑同一条）',
+      verifyHint:
+        '任务返回只代表任务链结束：用 read_image 看截图确认是否三星；不是三星就换作业（不要重跑同一条）。' +
+        '三星要求目标生命值一点都不能掉——掉过血先看 advice：放宽档 → 告诉用户没有可抄作业。',
       progress: progressLines(),
       logFile: worker.logFile,
     };

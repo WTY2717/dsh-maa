@@ -39,7 +39,8 @@ whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打�
 | 肉鸽 / 生息演算 | `LinkStart-AutoRoguelike` / `-Reclamation`（需 MAA 里已有配置） |
 | 牛牛抽卡 | `Toolbox-GachaOnce` / `GachaTenTimes`（**先问用户**） |
 | 看画面 | `maa_screenshot` → `read_image`（桥离线会自动退回 adb 截图） |
-| 抄作业 | `maa_copilot_find(stage)` → `maa_copilot_run({file})` → 看截图验收 |
+| 抄作业 | `maa_copilot_find(stage)` → `maa_copilot_run({file, background:true})` → 盯生命值 → 看截图验收 |
+| 盯/停抄作业 | `maa_copilot_status()` / `maa_copilot_stop()`（掉血时立刻停，再去点退出关卡） |
 | 点掉游戏弹窗 | `maa_click({x,y})`（**1280×720** 坐标，独立核心会话） |
 | 走到要滑动的关卡 / 列表翻页 | `maa_swipe({from,to})`（**1280×720**，起点选空白，不消耗理智） |
 | 模拟器没开 / 连不上模拟器 | `maa_emulator({action:"start"})`（会等到能连上；插件启动时已自动做一次） |
@@ -50,16 +51,20 @@ whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打�
 
 `maa_run` 只拿 `taskId`，不阻塞；`maa_wait` 每次 ≤55s 循环；每 3–5 轮插一张 `maa_screenshot` 确认没卡在登录/弹窗。`LinkStart` 整轮可能 30–60 分钟；`pending` / `lost` 都**不等于**失败。
 
-## 抄作业（六步）
+## 抄作业（防非三星版；**生命值守则优先级最高**）
 
-1. `maa_doctor` 四项都对（MAA 版本 / 练度解析 / adb 设备 / 无 problems）。
-2. `maa_copilot_find({stage:"1-7"})` → 取 `jobs[]` 里 `views` 最高的一条的 `file`；先看 `matchMode`：`strict` 说明有完全达标的作业（首选），`relaxed` 说明全是放宽出来的（挑 `relaxedBecause` 差距最小的一条）。
-3. `maa_copilot_run({file, dryRun:true})` 零消耗验证 core 能解析。
-4. `maa_copilot_run({file})` 真跑（**真实理智**，跑前先跟用户确认）。
-5. `read_image` 看返回的 `screenshot` 确认**三星**；不是三星就换作业（同一条不重跑）。
-6. 失败看返回的 `progress` 与 `logFile`（`data\logs\core-*.log`）；`status` 为 `idle-exit(unknown)` 说明可能压根没开打（先查游戏是否停在关卡页）。
+0. 前置：模拟器在跑、游戏停在目标关卡详情页/编队页、**代理指挥关**；`maa_doctor` 四项都对（MAA 版本 / 练度解析 / adb 设备 / 无 problems）。
+1. `maa_copilot_find({stage})` → 先看 `matchMode`（`strict` = 有完全达标的作业，首选；`relaxed` = 全是放宽出来的），取 `jobs[]` 里 `views` 最高的一条的 `file`。
+2. `maa_copilot_run({file, dryRun:true})` 零消耗验证 core 能解析。
+3. `maa_copilot_run({file, background:true})` 真跑（**真实理智，跑前先问用户**）→ 拿到 `runId`。
+4. **盯生命值（不能省）**：每约 10 秒 `maa_copilot_status()` 看进度 + `maa_screenshot` 后 `read_image` 看画面。重点是**目标生命值**：一旦掉血（生命值右侧出现红色负值 / 生命图标变红），马上进第 5 步。
+5. **掉血立刻止损**：`maa_copilot_stop()` 停掉 MAA 任务 → `maa_screenshot` 看画面 → `maa_click` 点「暂停」→ 点「退出行动」→ 确认。**结算前退出关卡会返还全部理智**；掉过血还打到底 = 花了理智还拿不满奖励。
+6. 换下一条作业重来（**同一条不重跑**）。如果所有作业都掉血/都失败 → 如实告诉用户：**没有能三星通关的作业**。
+7. 正常跑完后 `maa_screenshot` + `read_image` 确认三星；`maa_copilot_status().result.advice` 是给用户的口径，照它说。
 
-**练度口径（用户定，不许自行放宽）**：**先找完全达标的作业**；只有当这一关**所有候选都做不到完全达标**时，才按容差放宽（专精要求按 7 级技能代替；精二等级下浮 30 但不低于 60；模组原样交给 MAA 复验）。`maa_copilot_find` 输出的 `matchMode` 说明用了哪一档：`strict` = 没放宽，`relaxed` = 已放宽（`relaxedBecause` 写明差在哪）。**练度不够就换作业，不要提示提升练度**。练度文件路径在 **设置 → 插件 → 「MAA 助手」** 里改。
+**练度口径（用户定，不许自行放宽）**：**先找完全达标的作业**；只有当这一关**所有候选都做不到完全达标**时，才按容差放宽（专精要求按 7 级技能代替；精二等级下浮 30 但不低于 60；模组原样交给 MAA 复验）。`matchMode` 说明用了哪一档，`relaxedBecause` 写明差在哪。**练度不够就换作业，不要提示提升练度**。
+
+**失败口径**：**放宽档作业跑失败 → 直接告诉用户「没有找到这个账号可以抄的作业」**（不重试、不建议提升练度）；严格档失败才换下一条。这条 sidecar 会带到 `maa_copilot_run` 的 `advice` 里，照它说。练度文件路径在 **设置 → 插件 → 「MAA 助手」** 里改。
 
 ## 验收（`SUCCESS` / `ok` 都不算数）
 
@@ -70,7 +75,8 @@ whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打�
 - 抽卡 / 碎石 / 吃药 / `StopTask` 打断正在跑的长草 → **先征得用户同意**。
 - 一次只排一个长任务；**同一个 `LinkStart` 绝不重发**（会抢占、从头重开）。
 - 任务跑着时 `maa_set` 会排在它后面，别以为立刻生效。
-- 抄作业失败换下一条，不重试同一条。
+- 抄作业：**不许起跑后不管生命值**（阻塞模式只用于已验证过的作业）；掉血必须立刻退，别赌能三星。
+- 抄作业失败换下一条，**不重试同一条**；放宽档失败就下「没有可抄作业」的结论。
 
 ## 手册（详细版与故障库）
 

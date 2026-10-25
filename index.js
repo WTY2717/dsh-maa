@@ -5,7 +5,7 @@
  *   - 启动远程控制桥（MAA 反向轮询的那一端，默认 127.0.0.1:18764）；
  *   - **启动时先看 MuMu 模拟器开没开，没开就拉起来**（可在设置里关 `autoStartEmulator`）；
  *   - 注册设置页读写路由（/maa/api/config）；
- *   - 注册 15 个工具：远程控制 8 个、抄作业 3 个、自检 1 个、点击 1 个、滑动 1 个、模拟器 1 个。
+ *   - 注册 17 个工具：远程控制 8 个、抄作业 3 个 + 后台 2 个（status/stop）、自检 1 个、点击 1 个、滑动 1 个、模拟器 1 个。
  *
  * 稳定性红线（2026-10-25 崩溃事故的教训）：
  *   - **任何 Promise 都不许裸奔**：Node 24 里未捕获的 Promise 拒绝会直接退出进程，
@@ -21,6 +21,7 @@ import { Bridge } from './src/remote/bridge.js';
 import { resolveConfig, Config } from './src/config.js';
 import { installConfigRoute } from './src/ui-config.js';
 import { ensureEmulator } from './src/emulator.js';
+import { createCopilotRunner } from './src/copilot-runner.js';
 
 const PKG_DIR = path.dirname(fileURLToPath(import.meta.url));
 
@@ -163,8 +164,12 @@ export function apply(ctx, config) {
   };
   fireAndForget('ensureEmulator(initial)', ensureEmulatorOnStart());
 
+  /* ── 后台作业（background:true）的登记处：卸载时必须把子进程全收掉 ── */
+  const copilotRunner = createCopilotRunner({ log: remember });
+
   ctx.effect(() => () => {
     disposed = true;
+    fireAndForget('copilotRunner.dispose', copilotRunner.dispose());
     if (bridge) fireAndForget('bridge.stop(dispose)', bridge.stop());
     bridge = null;
     uiState.routeInstalled = false;
@@ -200,6 +205,7 @@ export function apply(ctx, config) {
       getBridge,
       pkgVersion,
       getUiState: () => uiState,
+      copilotRunner,
     });
     /**
      * 工具返回值必须是「无损 JSON」：带 undefined 会让注册表拒绝整个结果

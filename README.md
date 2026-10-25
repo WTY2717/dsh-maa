@@ -1,14 +1,17 @@
 # @local/dsh-maa —— MAA 插件（DSH）
 
-把 MAA（MaaAssistantArknights）接到 DSH 里的**正式插件**：15 个原生工具，三条通道并存；**启动时先检查 MuMu 模拟器，没开就自动拉起**。
+把 MAA（MaaAssistantArknights）接到 DSH 里的**正式插件**：17 个原生工具，三条通道并存；**启动时先检查 MuMu 模拟器，没开就自动拉起**；抄作业带**中途生命值守则**（掉血立刻停、退出关卡返还理智）。
 
 | 能力 | 后端 | 工具 |
 |---|---|---|
 | 日常 / 刷关 / 基建 / 公招 / 截图 / 改配置 | **远程控制协议**（MAA 主动轮询本机桥） | `maa_health` `maa_run` `maa_tasks` `maa_wait` `maa_screenshot` `maa_current` `maa_stop` `maa_set` |
 | 到作业站找作业并自动抄（含练度容差） | **MaaCore 直连**（koffi + 子进程） | `maa_copilot_find` `maa_copilot_run` `maa_copilot_verify` `maa_click` |
+| 抄作业中途盯防（后台跑 / 看进度 / 掉血止损） | 同上（后台子进程 + adb 截图） | `maa_copilot_status` `maa_copilot_stop` |
 | 导航（拖地图 / 翻关卡列表，不消耗理智） | **adb `input`**（1280×720 换算成设备坐标） | `maa_swipe` |
 | 模拟器自启（查状态 / 没开就拉起并等到能连） | `MuMuManager.exe` | `maa_emulator` |
 | 自检 | 纯读本地文件 + PE 导出表 | `maa_doctor` |
+
+**防非三星（v1.6.0）**：三星要求**目标生命值不掉**。正式抄作业用 `background:true` 起跑，每 ~10 秒 `maa_copilot_status` + 截图盯生命值；一旦掉血 → `maa_copilot_stop` → 点「暂停 → 退出行动」（结算前退出**返还全部理智**）。所有作业都掉血就如实告诉用户「没有能三星通关的作业」。
 
 **为什么三条通道**：MAA 的远程控制协议里**没有 Copilot 任务**（只有 `LinkStart*` / `CaptureImage` / `StopTask` / `HeartBeat` / `Toolbox-*` / `Settings-*`），抄作业只能直连 `MaaCore.dll`；而 Copilot 不做导航、MaaCore 也没有 swipe 导出接口，所以滑动走 adb `input swipe`。都是协议事实，不是实现偷懒。
 

@@ -12,7 +12,8 @@ whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打�
 
 1. `maa_health`：`online=false` = MAA 没开或「远程控制」端点没配 → 如实告诉用户，**不要重试、不要换方案瞎试**。
 2. 第一次用 / 任何异常 → `maa_doctor`：看 `problems`（必修为空）、MAA 版本、能力表、练度解析（N 行 / 拥有 M）、adb 设备。
-3. 抄作业前：游戏必须停在**目标关卡的详情页或编队页**（Copilot 不会导航），**代理指挥必须关**（开着会锁死队伍）。
+3. 抄作业前：游戏必须停在**目标关卡的详情页或编队页**（Copilot 不会导航；到不了就用 `maa_swipe` 自己滑过去），**代理指挥必须关**（开着会锁死队伍）。
+4. 滑动前确认没有 MAA 任务在跑（有任务时 `maa_swipe` 会拒绝）；滑动起点必须落在空白处，压在按钮上会真的点进去。
 
 ## 工具选择
 
@@ -26,6 +27,7 @@ whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打�
 | 看画面 | `maa_screenshot` → `read_image`（桥离线会自动退回 adb 截图） |
 | 抄作业 | `maa_copilot_find(stage)` → `maa_copilot_run({file})` → 看截图验收 |
 | 点掉游戏弹窗 | `maa_click({x,y})`（**1280×720** 坐标，独立核心会话） |
+| 走到要滑动的关卡 / 列表翻页 | `maa_swipe({from,to})`（**1280×720**，起点选空白，不消耗理智） |
 | 停 | `maa_stop` → `maa_current` / 截图确认（无回执） |
 | 自检 / 路径不对 / 练度没解析出来 | `maa_doctor` |
 
@@ -59,4 +61,4 @@ whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打�
 
 - 用法/环境事实/验收：`docs\tools\maa.md`
 - 抄作业细节与故障：`docs\tools\maa-copilot.md`
-- 「现象 → 原因 → 做法」故障库：`docs\tools\maa-errors.md`（桥端口冲突、一直 offline、秒回 SUCCESS、MuMu 多开取错实例、练度解析不出、改代码不生效）
+- 「现象 → 原因 → 做法」故障库：`docs\tools\maa-errors.md`（桥端口冲突、一直 offline、秒回 SUCCESS、MuMu 多开取错实例、练度解析不出、改代码不生效、**滑动没反应**）

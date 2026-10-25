@@ -1,14 +1,15 @@
 # @local/dsh-maa —— MAA 插件（DSH）
 
-把 MAA（MaaAssistantArknights）接到 DSH 里的**正式插件**：13 个原生工具，两条后端并存。
+把 MAA（MaaAssistantArknights）接到 DSH 里的**正式插件**：14 个原生工具，三条通道并存。
 
 | 能力 | 后端 | 工具 |
 |---|---|---|
 | 日常 / 刷关 / 基建 / 公招 / 截图 / 改配置 | **远程控制协议**（MAA 主动轮询本机桥） | `maa_health` `maa_run` `maa_tasks` `maa_wait` `maa_screenshot` `maa_current` `maa_stop` `maa_set` |
 | 到作业站找作业并自动抄（含练度容差） | **MaaCore 直连**（koffi + 子进程） | `maa_copilot_find` `maa_copilot_run` `maa_copilot_verify` `maa_click` |
+| 导航（拖地图 / 翻关卡列表，不消耗理智） | **adb `input`**（1280×720 换算成设备坐标） | `maa_swipe` |
 | 自检 | 纯读本地文件 + PE 导出表 | `maa_doctor` |
 
-**为什么两条后端**：MAA 的远程控制协议里**没有 Copilot 任务**（只有 `LinkStart*` / `CaptureImage` / `StopTask` / `HeartBeat` / `Toolbox-*` / `Settings-*`），抄作业只能直连 `MaaCore.dll`。这是协议事实，不是实现偷懒。
+**为什么三条通道**：MAA 的远程控制协议里**没有 Copilot 任务**（只有 `LinkStart*` / `CaptureImage` / `StopTask` / `HeartBeat` / `Toolbox-*` / `Settings-*`），抄作业只能直连 `MaaCore.dll`；而 Copilot 不做导航、MaaCore 也没有 swipe 导出接口，所以滑动走 adb `input swipe`。都是协议事实，不是实现偷懒。
 
 ## 安装
 
@@ -18,9 +19,10 @@
 plugins\maa-plugin\
 ├─ package.json        # dsh.bundle.patch / dsh.client + 依赖（koffi / schemastery）
 ├─ cordis.patch.yml    # 唯一的 Loader 行：id=maa-plugin
-├─ index.js            # apply(ctx, config)：起桥 + 设置页路由 + 注册 13 个工具
+├─ index.js            # apply(ctx, config)：起桥 + 设置页路由 + 注册 14 个工具
 ├─ client.js           # Web 客户端半：设置页（settings.plugins.tab）
-├─ src\                # 实现：config / maa / pe / doctor / roster / stages / copilot / adb
+├─ src\                # 实现：config / maa / pe / doctor / roster / stages / stages-hard / copilot / adb
+│  ├─ input\           #   滑动手势：coords（换算）/ adb-input（注入）/ backend（后端探测）
 │  ├─ prts\            #   作业站查询与练度容差匹配
 │  ├─ remote\          #   远程控制桥（MAA 反向轮询）
 │  └─ core\            #   MaaCore 子进程驱动（koffi 绑定 + 回调语义表）
@@ -28,7 +30,7 @@ plugins\maa-plugin\
 ├─ icon.svg
 ├─ skill\SKILL.md      # 模型侧技能（复制到 ~\.dsh\skills\ 后所有会话可见）
 ├─ scripts\recover.ps1 # 插件把 DSH 搞挂时的自救脚本
-└─ test\               # selftest.mjs（功能）/ hardening.test.mjs（崩溃回归）
+└─ test\               # selftest.mjs（功能）/ hardening.test.mjs（崩溃回归）/ swipe.test.mjs（滑动与 H 关别名）
 ```
 
 装进当前 profile（走插件管理器，不要手改 profile）：

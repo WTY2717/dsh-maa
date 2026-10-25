@@ -3,9 +3,12 @@
  *
  * 实测：作业站的 `level_keyword` 只认内部 stageId（`main_01-07`、`pro_d_2`），
  * 不认显示代号（`1-7`、`PR-D-2`）；返回体里的 `stage_name` 也是 stageId。
+ *
+ * H 关（绝境作战）**不在** stages.json 里（没有掉落），靠 ./stages-hard.js 的别名兜底。
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { loadHardAliases, resolveHardStage } from './stages-hard.js';
 
 const cache = new Map(); // absPath → { mtimeMs, byCode, byId }
 
@@ -36,7 +39,7 @@ export function loadStages(installDir) {
   return value;
 }
 
-/** 用户输入（`1-7` / `PR-D-2` / `main_01-07`）→ 内部 stageId。 */
+/** 用户输入（`1-7` / `PR-D-2` / `main_01-07` / `H12-2`）→ 内部 stageId。 */
 export function resolveStageId(stages, input) {
   const raw = String(input ?? '').trim();
   if (!raw) return { stageId: null, error: '关卡为空' };
@@ -47,11 +50,30 @@ export function resolveStageId(stages, input) {
   const dashed = raw.replace(/[－—–]/g, '-').replace(/\s+/g, '');
   const again = stages.byCode.get(dashed.toLowerCase());
   if (again) return { stageId: again, from: 'code' };
-  return { stageId: null, error: `stages.json 里没有这个关卡代号: ${raw}` };
+
+  // 兜底：H 关别名（stages.json 里没有 H 关，见 stages-hard.js）
+  const installDir = stages.path ? path.dirname(path.dirname(stages.path)) : '';
+  const aliases = loadHardAliases(installDir);
+  const hard = resolveHardStage(raw, aliases);
+  if (hard.stageId) {
+    const out = { stageId: hard.stageId, from: hard.via };
+    if (hard.verified === false) {
+      out.note = `别名 ${hard.stageId} 是按规则推导的，没能在 ${aliases.source ?? 'Tile-Pos 目录'} 里校验（目录读不到）`;
+    }
+    return out;
+  }
+  const extra = hard.error ? `；${hard.error}` : '';
+  return {
+    stageId: null,
+    error: `stages.json 里没有这个关卡代号: ${raw}，也没在 Arknights-Tile-Pos 文件名里找到${extra}（H 关写法示例：H12-2 或 hard_12-02）`,
+  };
 }
 
-/** 显示代号（有就用 code，没有就 stageId），用于回显。 */
+/** 显示代号（有就用 code，没有就 stageId；H 关反推成 H12-2 这种写法）。 */
 export function displayCode(stages, stageId) {
   const entry = stages?.byId?.get(stageId);
-  return entry?.code || stageId;
+  if (entry?.code) return entry.code;
+  const m = /^hard_(\d{2})-(\d{2})$/.exec(String(stageId ?? ''));
+  if (m) return `H${Number(m[1])}-${Number(m[2])}`;
+  return stageId;
 }

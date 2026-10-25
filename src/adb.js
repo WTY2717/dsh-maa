@@ -3,19 +3,26 @@
  *
  * 存在的理由：MAA GUI 没开时（或 MaaCore 直连后端在处理别的任务时），
  * 唯一能观察游戏画面的手段就是 `adb exec-out screencap -p`（见 docs/tools/maa-copilot.md）。
- * 注意 adb 的 `input tap/swipe` 对这个 Unity 游戏无效，所以这里不提供 tap。
+ *
+ * 关于 `input tap/swipe`（2026-10-25 复测修正）：**它们是可用的**，旧结论「对这个 Unity 游戏无效」
+ * 是坐标错误造成的假象 —— adb 吃的是设备坐标（本机 1920×1080），当年直接喂了 1280×720 的坐标。
+ * 滑动实现在 src/input/（换算见 src/input/coords.js）；这里只提供 adb 进程执行与截图。
  */
 import { execFile } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-const run = (cmd, args, { timeoutMs = 20000, encoding = 'utf8' } = {}) =>
+/** 跑一条 adb 命令（永不 reject，失败在返回值里）。给 input/ 复用，便于单测注入假实现。 */
+export const adbRun = (cmd, args, { timeoutMs = 20000, encoding = 'utf8' } = {}) =>
   new Promise((resolve) => {
     execFile(cmd, args, { timeout: timeoutMs, encoding, maxBuffer: 32 * 1024 * 1024, windowsHide: true }, (error, stdout, stderr) => {
       resolve({ ok: !error, code: error?.code ?? 0, error: error ? String(error.message || error) : null, stdout, stderr: String(stderr ?? '') });
     });
   });
+
+/** 本文件内部沿用短名字。 */
+const run = adbRun;
 
 const isFile = (p) => {
   try { return fs.statSync(p).isFile(); } catch { return false; }

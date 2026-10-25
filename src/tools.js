@@ -1,5 +1,5 @@
 /**
- * 工具定义（13 个）：远程控制 8 个 + 抄作业 3 个 + 自检 1 个 + 点击 1 个。
+ * 工具定义（14 个）：远程控制 8 个 + 抄作业 3 个 + 自检 1 个 + 点击 1 个 + 滑动 1 个。
  *
  * 这里是**唯一**把能力暴露给模型的地方；实现都在 src/ 下，工具只做参数校验与调度。
  * 描述里的口径与禁则是踩过坑的结论，改之前先读 docs/tools/maa*.md。
@@ -7,6 +7,7 @@
 import { doctor } from './doctor.js';
 import { findJobs, runCopilot, verifyScreenshot, clickScreen } from './copilot.js';
 import { resolveConfig } from './config.js';
+import { swipe } from './input/index.js';
 
 /* ────────────────────── JSON Schema 小工具 ────────────────────── */
 
@@ -19,6 +20,15 @@ const obj = (properties = {}, required = []) => ({
 const str = (description) => ({ type: 'string', description });
 const num = (description) => ({ type: 'number', description });
 const bool = (description) => ({ type: 'boolean', description });
+
+/** 1280×720 系的点。 */
+const point = (description) => ({
+  type: 'object',
+  description,
+  properties: { x: num('0 ≤ x < 1280'), y: num('0 ≤ y < 720') },
+  required: ['x', 'y'],
+  additionalProperties: false,
+});
 
 /** 输出统一成「一段可读 JSON」，卡片不折腾。 */
 const textOut = (title) => ({
@@ -284,12 +294,58 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
       name: 'maa_click',
       description:
         '用独立 MaaCore 会话点一下屏幕（坐标是 1280×720 系，不是设备 1920×1080）。用途：点掉 MAA 不认识的游戏弹窗（如「干员等级过低」点 (640,360)）、点掉「点击画面以继续」。' +
-        '必须是独立会话：同一会话里 AsstAsyncClick 会排在任务链之后，等于没点。adb input tap 对这个 Unity 游戏无效，不要试。',
+        '必须是独立会话：同一会话里 AsstAsyncClick 会排在任务链之后，等于没点。' +
+        '（旧说法「adb input tap 对这个 Unity 游戏无效」已推翻：adb 也能点，只是要吃设备坐标；滑动见 maa_swipe。）',
       parameters: obj({ x: num('1280 系 x'), y: num('1280 系 y') }, ['x', 'y']),
       output: textOut('点击结果'),
       async execute(args) {
         const cfg = await cfgOf();
         return clickScreen({ x: Number(args.x), y: Number(args.y), cfg });
+      },
+    },
+    {
+      name: 'maa_swipe',
+      description:
+        '滑动手势（**不消耗理智**）：拖动/甩动游戏画面，用来自己走到 Copilot 到不了的关卡。' +
+        '为什么需要它：Copilot 不负责导航，必须先把游戏停在目标关卡的详情页/编队页；' +
+        '像「主题曲 → 第十二章 → 磨难险地 → 关卡列表滑到最右端 → H12-2」这种必须先滑动才能到的关卡，没有它永远到不了。' +
+        '坐标是 1280×720 系（与 maa_click 一致），不是设备 1920×1080 —— 换算和注入由本工具内部按当前旋转/分辨率完成。' +
+        '**起点必须落在空白处**（地图空地、列表间隙）：按下即触发，压在按钮或关卡节点上会直接点进去（可能是「开始行动 / 使用源石 / 抽卡」）。' +
+        'durationMs < 150 近似「甩」，有惯性会多翻一段；慢拖大约只移动 |dx|。地图翻页建议 180~260px / 120~180ms，抬起后 settleMs 至少 300。' +
+        '抬起 + settle 后自动截一张图，**验收只看截图**（ok 只代表 adb 注入成功，不代表画面真的动了）。' +
+        'backend 目前只有 adb-input 可用（实测 adb input 能拖动本机 Unity 游戏）；maatouch/minitouch 只留了拒绝理由。' +
+        'MAA 正在跑任务时会被拒绝（两路触摸会打架）：先 maa_stop 或等它跑完。',
+      parameters: obj(
+        {
+          from: point('1280×720 系起点（放在空白处：按下即触发）'),
+          to: point('1280×720 系终点'),
+          durationMs: num('按下→抬起总时长 ms，默认 200，范围 50~3000；<150 近似甩动（有惯性）'),
+          steps: num('中间 MOVE 次数，默认 8（只在 holdMs>0 时生效；默认的 input swipe 由系统自己插值）'),
+          holdMs: num('按下后先停多久再移动 ms，默认 0，范围 0~3000；>0 时改用 input motionevent 序列（长按拖动）'),
+          settleMs: num('抬起后等多久再截图 ms，默认 400，范围 0~5000；地图惯性大就用 500'),
+          backend: { type: 'string', enum: ['auto', 'adb-input', 'maatouch', 'minitouch'], description: '默认 auto（= adb-input）' },
+        },
+        ['from', 'to'],
+      ),
+      output: textOut('滑动结果'),
+      async execute(args) {
+        try {
+          const cfg = await cfgOf();
+          const bridge = await getBridge().catch(() => null);
+          return await swipe({
+            cfg,
+            bridge,
+            from: args.from,
+            to: args.to,
+            durationMs: args.durationMs,
+            steps: args.steps,
+            holdMs: args.holdMs,
+            settleMs: args.settleMs,
+            backend: args.backend ?? 'auto',
+          });
+        } catch (e) {
+          return { ok: false, error: `滑动手势执行失败: ${e?.message || e}` };
+        }
       },
     },
   ];

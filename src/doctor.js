@@ -10,8 +10,10 @@ import { resolveInstallCached, describeInstall, validateInstallDir, instanceDirF
 import { describeMaaConfigHint } from './maa-config.js';
 import { loadRoster } from './roster.js';
 import { loadStages } from './stages.js';
+import { loadHardAliases } from './stages-hard.js';
 import { resolveAdbPath, listDevices } from './adb.js';
 import { connectionExtras } from './copilot.js';
+import { detectInputBackend } from './input/backend.js';
 
 /** 能力表里视为「必需」的符号；缺一个就说明这个 MaaCore 用不了。 */
 const REQUIRED = ['AsstSetUserDir', 'AsstLoadResource', 'AsstCreateEx', 'AsstAppendTask', 'AsstStart', 'AsstConnected', 'AsstDestroy'];
@@ -50,6 +52,7 @@ export async function doctor({ cfg, bridge = null, bridgeError = null, pkgVersio
   /* 关卡表 */
   const stages = loadStages(maa?.dir);
   if (maa && !stages.ok) problems.push(`关卡表不可用: ${stages.error}`);
+  const hardAliases = loadHardAliases(maa?.dir);
 
   /* 练度文件 */
   const roster = loadRoster(cfg.rosterPathResolved);
@@ -65,6 +68,19 @@ export async function doctor({ cfg, bridge = null, bridgeError = null, pkgVersio
     if (devices.ok && devices.devices.length && !devices.devices.includes(cfg.adbAddress)) {
       warnings.push(`adb 里的设备（${devices.devices.join(', ')}）和配置的 adbAddress（${cfg.adbAddress}）不一致`);
     }
+  }
+
+  /* 滑动输入后端（maa_swipe）：探测一次就够，失败只降级成 warning —— 不滑动也能用别的工具 */
+  let input = null;
+  try {
+    const r = await detectInputBackend({ cfg, force: 'auto' });
+    input = r.ok
+      ? { backend: r.backend, view: r.view, viewSource: r.viewSource ?? null, adb: r.adb, reason: r.reason }
+      : { backend: null, error: r.error };
+    if (!r.ok && adb.ok) warnings.push(`滑动手势不可用（maa_swipe）: ${r.error}`);
+  } catch (e) {
+    input = { backend: null, error: String(e?.message || e) };
+    warnings.push(`滑动手势后端探测失败: ${e?.message || e}`);
   }
 
   /* MaaCore 子进程依赖 */
@@ -116,7 +132,15 @@ export async function doctor({ cfg, bridge = null, bridgeError = null, pkgVersio
           candidates: candidates.map((c) => ({ path: c.dir, version: c.version })),
         }
       : { path: null, candidates: candidates.map((c) => ({ path: c.dir, version: c.version })) },
-    stages: stages.ok ? { path: stages.path, count: stages.count } : { error: stages.error },
+    stages: stages.ok
+      ? {
+          path: stages.path,
+          count: stages.count,
+          hardAliases: hardAliases.ok ? hardAliases.hard.length : null,
+          hardAliasSource: hardAliases.ok ? hardAliases.source : hardAliases.error,
+          hardAliasNote: 'H 关（hard_*）不在 stages.json 里，靠 Arknights-Tile-Pos 文件名反推；maa_copilot_find 支持 H12-2 这种写法',
+        }
+      : { error: stages.error },
     maaConfigHint: describeMaaConfigHint(cfg.maaHint),
     roster: {
       path: roster.path,
@@ -137,6 +161,17 @@ export async function doctor({ cfg, bridge = null, bridgeError = null, pkgVersio
       extras: connectionExtras(cfg, adb.path),
       instanceDir: adb.ok ? instanceDirFromAdb(adb.path) : null,
     },
+    input: input
+      ? {
+          backend: input.backend,
+          view: input.view ?? null,
+          viewSource: input.viewSource ?? null,
+          adb: input.adb ?? null,
+          reason: input.reason ?? null,
+          error: input.error ?? null,
+          note: input.backend ? 'maa_swipe 走 adb input（1280×720 → 设备坐标由插件换算）' : 'maa_swipe 不可用，其余工具不受影响',
+        }
+      : null,
     core: {
       koffi: koffi ?? null,
       node: nodeExe ? { bin: nodeExe.bin, label: nodeExe.label } : null,

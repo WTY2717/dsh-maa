@@ -1,6 +1,6 @@
 {
   "name": "@local/dsh-maa",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "private": true,
   "type": "module",
   "description": "MAA (MaaAssistantArknights) remote-control bridge + MaaCore direct driver as native DSH tools: run MAA task types, screenshot, and auto-play PRTS copilot jobs matched against the local operator roster.",

@@ -62,7 +62,7 @@ https://github.com/WTY2717/dsh-maa
 git+https://github.com/WTY2717/dsh-maa.git#v1.2.2     （钉 tag/commit）
 ```
 
-私有库的安装端需要有该仓库读权限（自己机器上 Git Credential Manager 登录一次即可）；要给别人装，把对方加成 collaborator，或直接发 tarball。
+私有库的安装端需要有该仓库读权限（本机 Git Credential Manager 登录一次即可）。
 
 发布到 npm 才有「只填包名」：改两行再 `npm publish`。
 

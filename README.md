@@ -46,19 +46,17 @@ DSH 的安装框直接吃 pnpm 的 spec，宿主 `parseInstallSpec` 支持四类
 
 **会被拒的**：相对路径（`plugins\maa-plugin` → “a local path must be absolute”）、非 git 也非 tgz 的 URL（比如 `.zip` 直链 → “a URL must point at a git repository or a tarball”）。
 
-所以「填包名 / GitHub 地址就能装」这件事，插件这边不需要改代码——**前提是这个包在 npm 上、或在 GitHub 上**。本目录已经 `git init` 并提交（34 个文件，`.gitignore` 排除了 `node_modules/`、`data/`、`dist/`），你只差推送：
+所以「填包名 / GitHub 地址就能装」这件事，插件这边不需要改代码——**前提是这个包在 npm 上、或在 GitHub 上**。
 
-```powershell
-# 1) 先在 GitHub 建一个空仓库（不要勾 README），然后
-cd plugins\maa-plugin
-git remote add origin https://github.com/<你的用户名>/dsh-maa.git
-git branch -M main
-git push -u origin main
+本仓库已发布在 GitHub（私有）：`https://github.com/WTY2717/dsh-maa`。安装框里填以下任一即可：
 
-# 2) 之后任何人（包括你自己换台机器）在安装框里填：
-#    github:<你的用户名>/dsh-maa
-#    或 https://github.com/<你的用户名>/dsh-maa
 ```
+github:WTY2717/dsh-maa
+https://github.com/WTY2717/dsh-maa
+git+https://github.com/WTY2717/dsh-maa.git#v1.2.2     （钉 tag/commit）
+```
+
+私有库的安装端需要有该仓库读权限（自己机器上 Git Credential Manager 登录一次即可）；要给别人装，把对方加成 collaborator，或直接发 tarball。
 
 发布到 npm 才有「只填包名」：改两行再 `npm publish`。
 

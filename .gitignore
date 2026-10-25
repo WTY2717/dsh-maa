@@ -1,0 +1,14 @@
+# 依赖与运行产物：不该进仓库
+node_modules/
+data/
+dist/
+
+# 打包产物
+*.tgz
+*.tar.gz
+
+# 日志/临时文件
+*.log
+*.tmp
+.DS_Store
+Thumbs.db

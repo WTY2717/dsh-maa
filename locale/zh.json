@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "MAA 明日方舟助手",
+    "description": "远程控制 MAA（任务/截图/配置）+ 直连 MaaCore 按作业站自动抄作业（练度容差匹配、截图验收），并自带 maa_doctor 自检。"
+  }
+}

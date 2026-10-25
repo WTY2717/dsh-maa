@@ -1,0 +1,51 @@
+{
+  "name": "@local/dsh-maa",
+  "version": "1.2.2",
+  "private": true,
+  "type": "module",
+  "description": "MAA (MaaAssistantArknights) remote-control bridge + MaaCore direct driver as native DSH tools: run MAA task types, screenshot, and auto-play PRTS copilot jobs matched against the local operator roster.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WTY2717/dsh-maa.git"
+  },
+  "homepage": "https://github.com/WTY2717/dsh-maa#readme",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "src/**/*.js",
+    "src/**/*.mjs",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "scripts/**",
+    "skill/**",
+    "test/**"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
+    },
+    "engines": {
+      "dsh": ">=0.2.1-rc.3"
+    }
+  },
+  "dependencies": {
+    "@deepseek-ai/cosmokit": "~1.8.6",
+    "@deepseek-ai/schemastery": "^3.18.5",
+    "koffi": "^2.16.3"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT"
+}

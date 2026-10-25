@@ -1,0 +1,19 @@
+# MAA（明日方舟）插件的 Loader 行。
+# 只有一行 Host 插件：它自己启动远程控制桥并注册 maa_* 工具。
+# config 里的字段对应 src/config.js 的 Config；设置页会按 schema 渲染表单。
+- insert:
+    - id: maa-plugin
+      name: '@local/dsh-maa'
+      config:
+        maaInstallPath: ''
+        rosterPath: ''
+        adbPath: ''
+        adbAddress: '127.0.0.1:16384'
+        adbConfig: 'MuMuEmulator12'
+        formationIndex: 0
+        bridgePort: 18764
+        dataDir: ''
+        nodePath: ''
+        connectExtras: ''
+        popupGuard: false
+        copilotTimeoutSeconds: 900

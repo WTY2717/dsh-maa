@@ -1,10 +1,11 @@
 # @local/dsh-maa —— MAA 插件（DSH）
 
-把 MAA（MaaAssistantArknights）接到 DSH 里的**正式插件**：17 个原生工具，三条通道并存；**启动时先检查 MuMu 模拟器，没开就自动拉起**；抄作业带**中途生命值守则**（掉血立刻停、退出关卡返还理智）。
+把 MAA（MaaAssistantArknights）接到 DSH 里的**正式插件**：18 个原生工具，三条通道并存；**启动时先检查 MuMu 模拟器，没开就自动拉起**；`maa_wakeup` 复用 MAA「开始唤醒」直接进主界面（实测可单独调用，不用自己点登录）；抄作业带**中途生命值守则**（掉血立刻停、退出关卡返还理智）。
 
 | 能力 | 后端 | 工具 |
 |---|---|---|
 | 日常 / 刷关 / 基建 / 公招 / 截图 / 改配置 | **远程控制协议**（MAA 主动轮询本机桥） | `maa_health` `maa_run` `maa_tasks` `maa_wait` `maa_screenshot` `maa_current` `maa_stop` `maa_set` |
+| 唤醒到主界面（= MAA「开始唤醒」，可单独调用） | 远程控制协议 | `maa_wakeup` |
 | 到作业站找作业并自动抄（含练度容差） | **MaaCore 直连**（koffi + 子进程） | `maa_copilot_find` `maa_copilot_run` `maa_copilot_verify` `maa_click` |
 | 抄作业中途盯防（后台跑 / 看进度 / 掉血止损） | 同上（后台子进程 + adb 截图） | `maa_copilot_status` `maa_copilot_stop` |
 | 导航（拖地图 / 翻关卡列表，不消耗理智） | **adb `input`**（1280×720 换算成设备坐标） | `maa_swipe` |

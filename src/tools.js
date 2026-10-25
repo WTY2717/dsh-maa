@@ -9,6 +9,7 @@ import { findJobs, runCopilot, verifyScreenshot, clickScreen } from './copilot.j
 import { resolveConfig } from './config.js';
 import { swipe } from './input/index.js';
 import { ensureEmulator } from './emulator.js';
+import { wakeupGame } from './wakeup.js';
 
 /* ────────────────────── JSON Schema 小工具 ────────────────────── */
 
@@ -62,6 +63,23 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
       throw new Error('远程控制桥未启动：看 maa_doctor 的 bridge 段（端口被占用就改 bridgePort，或禁用仍占着端口的旧插件）');
     }
     return bridge;
+  };
+
+  /** 截一张当前画面：桥在线用 MAA（1280×720），否则退回 adb。maa_screenshot / maa_wakeup 共用。 */
+  const captureScreen = async ({ cfg, bridge, timeoutMs = 20000 }) => {
+    let online = false;
+    try { online = Boolean(bridge?.health?.().online); } catch { online = false; }
+    if (online) {
+      try {
+        const task = bridge.enqueue('CaptureImageNow');
+        const r = await bridge.waitFor(task, timeoutMs);
+        if (r?.state === 'done' && r.file) return { via: 'maa-remote', file: r.file, bytes: r.payloadLen ?? null };
+        if (r?.state === 'lost') return { via: 'maa-remote', ok: false, note: r.note };
+      } catch { /* 桥抽风就退回 adb */ }
+    }
+    const shot = await verifyScreenshot({ cfg });
+    if (!shot.ok) return { via: 'adb', ok: false, error: shot.error, hint: '先用 maa_doctor 看 adb 与设备状态' };
+    return { via: 'adb', file: shot.file, bytes: shot.bytes };
   };
 
   return [
@@ -151,15 +169,34 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
       async execute(args) {
         const cfg = await cfgOf();
         const bridge = await getBridge().catch(() => null);
-        if (bridge?.health().online) {
-          const task = bridge.enqueue('CaptureImageNow');
-          const r = await bridge.waitFor(task, clampSec(args.timeoutSeconds, 20, 55) * 1000);
-          if (r.state === 'done' && r.file) return { via: 'maa-remote', file: r.file, bytes: r.payloadLen };
-          if (r.state === 'lost') return { via: 'maa-remote', ok: false, note: r.note };
-        }
-        const shot = await verifyScreenshot({ cfg });
-        if (!shot.ok) return { via: 'adb', ok: false, error: shot.error, hint: '先用 maa_doctor 看 adb 与设备状态' };
-        return { via: 'adb', file: shot.file, bytes: shot.bytes };
+        return captureScreen({ cfg, bridge, timeoutMs: clampSec(args.timeoutSeconds, 20, 55) * 1000 });
+      },
+    },
+    {
+      name: 'maa_wakeup',
+      description:
+        '把游戏唤醒到主界面：先确认 MuMu 模拟器在跑（没开就开），再让 MAA 跑「一键长草」里的**开始唤醒**（`LinkStart-WakeUp`）。' +
+        '实测（2026-10-25）：这个子任务**可以单独调用**，不需要跑整套一键长草——模拟器刚启动后调它，约 60~110 秒游戏就停在主界面，' +
+        '**不用自己截图去找「开始唤醒」按钮、点公告/登录**。不消耗理智。' +
+        '`SUCCESS` 只代表任务链结束：返回里带 `screenshot`，用 read_image 确认是不是主界面。',
+      parameters: obj(
+        {
+          timeoutSeconds: num('等唤醒完成的上限秒数，默认 240，范围 30~900'),
+          skipEmulator: bool('跳过模拟器检查（默认先确认模拟器在跑，没开就拉起）'),
+        },
+      ),
+      output: textOut('唤醒游戏'),
+      async execute(args) {
+        const cfg = await cfgOf();
+        const bridge = await bridgeOf();
+        const timeoutMs = Math.min(Math.max(Number(args.timeoutSeconds) || 240, 30), 900) * 1000;
+        return wakeupGame({
+          cfg,
+          bridge,
+          timeoutMs,
+          skipEmulator: Boolean(args.skipEmulator),
+          deps: { capture: (a) => captureScreen(a) },
+        });
       },
     },
     {

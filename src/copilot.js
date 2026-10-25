@@ -7,12 +7,20 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { queryJobs, fetchJob } from './prts/api.js';
-import { applyTolerance, jobMatches, summarizeOpers } from './prts/match.js';
+import { applyTolerance, summarizeOpers } from './prts/match.js';
+import { scanCandidates } from './prts/select.js';
 import { resolveStageId, loadStages, displayCode } from './stages.js';
 import { loadRoster } from './roster.js';
 import { CoreWorker } from './core/driver.js';
 import { classify, summarize } from './core/callbacks.js';
 import { resolveAdbPath, screencap, ensureConnected } from './adb.js';
+
+/** matchMode 的人话解释（工具输出里直接给模型看）。 */
+const MATCH_NOTES = {
+  strict: '有完全达标的作业：本结果**没有放宽**任何练度要求',
+  relaxed: '没有完全达标的作业：已按容差口径放宽，逐条看 relaxedBecause 与 toleranceNotes',
+  none: '严格匹配与放宽都没有命中：换关卡/换时间再找，或核对练度文件',
+};
 
 /** 一条作业在工具输出里的脸面。 */
 function jobRow({ id, views, job, stageId, patched, file }) {
@@ -50,29 +58,14 @@ export async function findJobs({ stage, cfg, limit = 8, writeFiles = true }) {
   }
 
   const { items, total } = await queryJobs(found.stageId);
-  const seen = new Set();
-  const picked = [];
-  const rejected = { notOwned: 0, notEnough: 0, noRequirements: 0 };
-  let sameStage = 0;
-
-  for (const item of items) {
-    if (!item || seen.has(item.id)) continue;
-    seen.add(item.id);
-    let job;
-    try { job = typeof item.content === 'string' ? JSON.parse(item.content) : item.content; } catch { continue; }
-    if (!job) continue;
-    if (job.stage_name && job.stage_name !== found.stageId && job.stage_name !== stage) continue;
-    sameStage += 1;
-    const m = jobMatches(job, roster.byName);
-    if (!m.ok) {
-      if (/未拥有/.test(m.reason ?? '')) rejected.notOwned++;
-      else if (/requirements/.test(m.reason ?? '')) rejected.noRequirements++;
-      else rejected.notEnough++;
-      continue;
-    }
-    picked.push({ id: item.id, views: item.views ?? 0, title: job?.doc?.title ?? '' });
-  }
-  picked.sort((a, b) => b.views - a.views);
+  // 先完全达标、实在没有才放宽（见 src/prts/select.js 顶部注释）
+  const { mode, picked, scanned } = scanCandidates({
+    items,
+    rosterByName: roster.byName,
+    stageId: found.stageId,
+    stage,
+    limit,
+  });
 
   const rows = [];
   if (writeFiles) fs.mkdirSync(cfg.jobsDir, { recursive: true });
@@ -84,19 +77,26 @@ export async function findJobs({ stage, cfg, limit = 8, writeFiles = true }) {
       continue;
     }
     if (!(job.actions ?? []).length) continue; // 列表接口的元数据作业喂 MAA 会 CopilotFileReadError
-    const tol = applyTolerance(job);
+    // 严格命中时原样落盘（压根不放宽）；只有 relaxed 模式才改 requirements
+    const tol = mode === 'relaxed' ? applyTolerance(job) : { applied: 0, notes: [] };
     let file = null;
     if (writeFiles) {
       file = path.join(cfg.jobsDir, `${String(stage).replace(/[^\w-]/g, '_')}_${p.id}.json`);
       fs.writeFileSync(file, JSON.stringify(job));
     }
-    rows.push({ ...jobRow({ id: p.id, views: p.views, job, stageId: found.stageId, patched: tol.applied, file }), toleranceNotes: tol.notes });
+    rows.push({
+      ...jobRow({ id: p.id, views: p.views, job, stageId: found.stageId, patched: tol.applied, file }),
+      relaxedBecause: mode === 'relaxed' ? (p.strictReason ?? null) : null,
+      toleranceNotes: tol.notes,
+    });
   }
 
   return {
     ok: true,
     stage: { input: stage, stageId: found.stageId, code: displayCode(stages, found.stageId), matchedBy: found.from },
-    scanned: { candidates: items.length, sameStage, reportedTotal: total ?? null, rejected },
+    matchMode: mode,
+    matchNote: MATCH_NOTES[mode] ?? null,
+    scanned: { ...scanned, reportedTotal: total ?? null },
     roster: { path: roster.path, format: roster.format, total: roster.total, owned: roster.owned },
     count: rows.length,
     jobs: rows,

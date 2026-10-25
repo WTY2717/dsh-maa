@@ -201,8 +201,10 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
       name: 'maa_copilot_find',
       description:
         '按关卡到作业站（prts.plus）找本号能抄的作业，并把作业全文落盘成可直接执行的 JSON。' +
-        '练度口径（用户定，不要自行放宽）：专精要求按 7 级技能代替；精二等级允许下浮 30 但不低于 60；模组原样交给 MAA 复验；练度不够就换作业，不要提示提升练度。' +
-        '不消耗理智。返回的 jobs[].file 就是 maa_copilot_run 的入参。',
+        '**练度优先级（用户定，不要自行改动）**：先找**完全达标**的作业（原要求照单核对）；' +
+        '只有当这一关**所有候选都做不到完全达标**时，才按容差口径放宽——专精要求按 7 级技能代替、精二等级下浮 30 但不低于 60、模组原样交给 MAA 复验。' +
+        '输出里的 `matchMode` 说明用了哪一档（`strict` 未放宽 / `relaxed` 已放宽），`relaxedBecause` 写明这条差在哪。' +
+        '练度不够就换作业，不要提示提升练度。不消耗理智。返回的 jobs[].file 就是 maa_copilot_run 的入参。',
       parameters: obj(
         {
           stage: str('关卡代号，如 1-7、PR-D-2（也可直接给内部 stageId 如 main_01-07）'),
@@ -220,7 +222,7 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
       name: 'maa_copilot_run',
       description:
         '用 MaaCore 直连跑一条作业（不经过 MAA GUI）。三选一给作业：file（maa_copilot_find 落盘的文件）/ stage（自动挑播放量最高的一条）/ id（作业站 id）。' +
-        '前置：模拟器在跑、游戏已登录、**停在目标关卡的详情页或编队页**（Copilot 不会自己导航）、**代理指挥要关**（否则队伍锁死选不上人）。' +
+        '前置：模拟器在跑、游戏已登录、**停在目标关卡的详情页或编队页**（Copilot 不会自己导航；到不了就用 maa_swipe 走过去）、**代理指挥要关**（否则队伍锁死选不上人）。' +
         'dryRun=true 只让 core 解析作业，不连模拟器、不消耗理智。跑完必看返回的 screenshot 判断是否三星：任务返回 done 不代表三星。' +
         '涉及真实理智消耗，动手前先跟用户确认。',
       parameters: obj(
@@ -314,7 +316,11 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
         'durationMs < 150 近似「甩」，有惯性会多翻一段；慢拖大约只移动 |dx|。地图翻页建议 180~260px / 120~180ms，抬起后 settleMs 至少 300。' +
         '抬起 + settle 后自动截一张图，**验收只看截图**（ok 只代表 adb 注入成功，不代表画面真的动了）。' +
         'backend 目前只有 adb-input 可用（实测 adb input 能拖动本机 Unity 游戏）；maatouch/minitouch 只留了拒绝理由。' +
-        'MAA 正在跑任务时会被拒绝（两路触摸会打架）：先 maa_stop 或等它跑完。',
+        'MAA 正在跑任务时会被拒绝（两路触摸会打架）：先 maa_stop 或等它跑完。' +
+        '**还没到关卡时的通用路径**：主线 = 终端 → 曲谱 → 乐章收录 → 章节选择列表（**上下滑动**挑章节，右下角 `EPxx` = 第 xx 章）→ 进章节后**在地图内左右滑动**找关卡 → 点关卡节点；' +
+        '往期活动也在同一个章节列表里、排在**所有主线章节下方**（封面用**艺术字**写活动名），点封面进活动后右下角通常有 2~3 个按钮切**普通关 / EX 关 / 特殊关**；' +
+        '当期活动是**终端页面左侧的海报**（同样艺术字标名，活动结束会显示「作战已结束」），其余逻辑与往期活动相同；' +
+        '部分主线关卡有**难度切换**：H 关（主线高难）要切到**最高难度**（如「磨难」）才会出现在**地图最右侧**，再用本工具滑到最右端。',
       parameters: obj(
         {
           from: point('1280×720 系起点（放在空白处：按下即触发）'),

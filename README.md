@@ -11,6 +11,8 @@
 
 **为什么三条通道**：MAA 的远程控制协议里**没有 Copilot 任务**（只有 `LinkStart*` / `CaptureImage` / `StopTask` / `HeartBeat` / `Toolbox-*` / `Settings-*`），抄作业只能直连 `MaaCore.dll`；而 Copilot 不做导航、MaaCore 也没有 swipe 导出接口，所以滑动走 adb `input swipe`。都是协议事实，不是实现偷懒。
 
+**给模型的通用引导**（首次使用也能找到关卡）：主线 = 终端 → 曲谱 → 乐章收录（章节列表上下滑，右下角 `EPxx` = 第 xx 章）；往期活动在同一个章节列表的最下方（艺术字封面 + 普通/EX/特殊关切换）；当期活动是终端页左侧海报（结束后显示「作战已结束」）；H 关要先切到最高难度才出现在地图最右侧。这段话同时写在 `skill/SKILL.md`（「怎么走到目标关卡」）和 `maa_swipe` 的工具描述里。
+
 ## 安装
 
 插件是一个 bundle 包（`package.json` 的 `dsh.bundle.patch` 指向 `cordis.patch.yml`）：

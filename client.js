@@ -31,6 +31,7 @@ window.__ModuleLoader__.load({
       rosterPath: { label: '干员练度文件路径', hint: '用户导出表（.md）或 {own_opers:[…]} 的 .json。留空=自动探测。换文件后作业筛选结果会立刻跟着变。' },
       maaInstallPath: { label: 'MAA 安装目录', hint: '含 MaaCore.dll 与 resource\\ 的目录。留空=自动探测。' },
       adbPath: { label: 'adb 路径', hint: '留空=自动（优先用 MAA 自己配置里记的）。' },
+      mumuManagerPath: { label: 'MuMuManager.exe 路径', hint: '模拟器自启用。留空=自动（MAA 配置的模拟器目录下 shell\\MuMuManager.exe）。' },
       adbAddress: { label: '模拟器 adb 地址', hint: '例如 127.0.0.1:16384。' },
       adbConfig: { label: 'MaaCore 连接配置名', hint: 'MuMu12 用 MuMuEmulator12。' },
       bridgePort: { label: '远程控制桥端口', hint: 'MAA 的「远程控制」两个端点要填同一端口。' },
@@ -40,6 +41,7 @@ window.__ModuleLoader__.load({
       nodePath: { label: 'node 可执行文件', hint: '跑 MaaCore 子进程用。留空=自动。' },
       connectExtras: { label: '连接 extras（JSON）', hint: '留空=按 adb/MAA 配置自动推导。' },
       popupGuard: { label: '开打后自动点掉「干员等级过低」弹窗', kind: 'boolean' },
+      autoStartEmulator: { label: '插件启动时自动拉起 MuMu 模拟器', kind: 'boolean', hint: '没开就启动，并等到 adb 能连上（约 10s~1min）。关掉就只探测不启动。' },
     };
 
     /* 只使用 Theme.listTokens 里真实存在的 token；每个 var() 都带 hex 兜底，

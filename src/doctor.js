@@ -14,6 +14,7 @@ import { loadHardAliases } from './stages-hard.js';
 import { resolveAdbPath, listDevices } from './adb.js';
 import { connectionExtras } from './copilot.js';
 import { detectInputBackend } from './input/backend.js';
+import { resolveMuMuManager, queryInstance, lastEmulatorRun } from './emulator.js';
 
 /** 能力表里视为「必需」的符号；缺一个就说明这个 MaaCore 用不了。 */
 const REQUIRED = ['AsstSetUserDir', 'AsstLoadResource', 'AsstCreateEx', 'AsstAppendTask', 'AsstStart', 'AsstConnected', 'AsstDestroy'];
@@ -81,6 +82,27 @@ export async function doctor({ cfg, bridge = null, bridgeError = null, pkgVersio
   } catch (e) {
     input = { backend: null, error: String(e?.message || e) };
     warnings.push(`滑动手势后端探测失败: ${e?.message || e}`);
+  }
+
+  /* 模拟器（MuMu）：插件启动时会自动拉起，这里只报状态，不启动 */
+  let emulator = null;
+  try {
+    const manager = resolveMuMuManager({ cfg });
+    const state = manager.ok
+      ? await queryInstance({ managerPath: manager.path, index: manager.instanceIndex })
+      : { ok: false, error: manager.error };
+    emulator = {
+      autoStart: cfg.autoStartEmulator !== false,
+      manager: manager.ok ? manager.path : null,
+      managerSource: manager.ok ? manager.source : null,
+      index: manager.instanceIndex ?? null,
+      name: state.ok ? state.name : null,
+      started: state.ok ? state.started : null,
+      error: state.ok ? null : (state.error ?? manager.error ?? null),
+      lastRun: lastEmulatorRun(),
+    };
+  } catch (e) {
+    emulator = { error: String(e?.message || e) };
   }
 
   /* MaaCore 子进程依赖 */
@@ -161,6 +183,7 @@ export async function doctor({ cfg, bridge = null, bridgeError = null, pkgVersio
       extras: connectionExtras(cfg, adb.path),
       instanceDir: adb.ok ? instanceDirFromAdb(adb.path) : null,
     },
+    emulator,
     input: input
       ? {
           backend: input.backend,

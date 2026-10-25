@@ -10,6 +10,7 @@ whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打�
 
 ## 每次动手前（顺序别跳）
 
+0. 模拟器：插件加载时**已自动**查过 MuMu 开没开，没开就拉起来并等到能连；工具仍报连不上/`adb devices` 没设备时再 `maa_emulator({action:"start"})`，**不要**自己拼 MuMuManager 命令。
 1. `maa_health`：`online=false` = MAA 没开或「远程控制」端点没配 → 如实告诉用户，**不要重试、不要换方案瞎试**。
 2. 第一次用 / 任何异常 → `maa_doctor`：看 `problems`（必修为空）、MAA 版本、能力表、练度解析（N 行 / 拥有 M）、adb 设备。
 3. 抄作业前：游戏必须停在**目标关卡的详情页或编队页**（Copilot 不会导航；到不了就用 `maa_swipe` 自己滑过去），**代理指挥必须关**（开着会锁死队伍）。
@@ -41,6 +42,7 @@ whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打�
 | 抄作业 | `maa_copilot_find(stage)` → `maa_copilot_run({file})` → 看截图验收 |
 | 点掉游戏弹窗 | `maa_click({x,y})`（**1280×720** 坐标，独立核心会话） |
 | 走到要滑动的关卡 / 列表翻页 | `maa_swipe({from,to})`（**1280×720**，起点选空白，不消耗理智） |
+| 模拟器没开 / 连不上模拟器 | `maa_emulator({action:"start"})`（会等到能连上；插件启动时已自动做一次） |
 | 停 | `maa_stop` → `maa_current` / 截图确认（无回执） |
 | 自检 / 路径不对 / 练度没解析出来 | `maa_doctor` |
 

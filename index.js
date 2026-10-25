@@ -3,8 +3,9 @@
  *
  * 一个 bundle 只有一行 Loader 插件（见 cordis.patch.yml）：
  *   - 启动远程控制桥（MAA 反向轮询的那一端，默认 127.0.0.1:18764）；
+ *   - **启动时先看 MuMu 模拟器开没开，没开就拉起来**（可在设置里关 `autoStartEmulator`）；
  *   - 注册设置页读写路由（/maa/api/config）；
- *   - 注册 13 个工具：远程控制 8 个、抄作业 3 个、自检 1 个、点击 1 个。
+ *   - 注册 15 个工具：远程控制 8 个、抄作业 3 个、自检 1 个、点击 1 个、滑动 1 个、模拟器 1 个。
  *
  * 稳定性红线（2026-10-25 崩溃事故的教训）：
  *   - **任何 Promise 都不许裸奔**：Node 24 里未捕获的 Promise 拒绝会直接退出进程，
@@ -19,6 +20,7 @@ import { createTools } from './src/tools.js';
 import { Bridge } from './src/remote/bridge.js';
 import { resolveConfig, Config } from './src/config.js';
 import { installConfigRoute } from './src/ui-config.js';
+import { ensureEmulator } from './src/emulator.js';
 
 const PKG_DIR = path.dirname(fileURLToPath(import.meta.url));
 
@@ -138,6 +140,29 @@ export function apply(ctx, config) {
 
   // 启动即尝试一次；失败不阻塞插件加载（设置页仍要能改端口）
   fireAndForget('startBridge(initial)', startBridge());
+
+  /* ── 模拟器自启：先看开没开，没开就拉起（设置里可关）──
+   * 为什么放在启动时：MAA 不会自己开模拟器，用户点一次工具前还要手动开模拟器太蠢。
+   * 语义：只探测 + 必要时 launch + 等 adb 能连上；不碰游戏、不消费理智。
+   * 失败只记日志（比如本机根本没装 MuMu），绝不影响插件加载与其他工具。 */
+  const ensureEmulatorOnStart = async () => {
+    let cfg;
+    try {
+      cfg = resolveConfig(currentConfig, PKG_DIR);
+    } catch (e) {
+      remember('resolveConfig(emulator) failed', String(e?.message || e));
+      return null;
+    }
+    if (!cfg.autoStartEmulator) {
+      remember('emulator auto-start disabled');
+      return { ok: false, skipped: true, reason: 'autoStartEmulator=false' };
+    }
+    const r = await ensureEmulator({ cfg });
+    remember('emulator ensure', JSON.stringify({ ok: r.ok, started: r.started ?? null, launched: r.launched ?? null, bootMs: r.bootMs ?? null, error: r.error ?? null }));
+    return r;
+  };
+  fireAndForget('ensureEmulator(initial)', ensureEmulatorOnStart());
+
   ctx.effect(() => () => {
     disposed = true;
     if (bridge) fireAndForget('bridge.stop(dispose)', bridge.stop());

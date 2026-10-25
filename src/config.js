@@ -33,6 +33,9 @@ const DEFAULTS = {
   connectExtras: '',
   popupGuard: false,
   copilotTimeoutSeconds: 900,
+  autoStartEmulator: true,
+  mumuManagerPath: '',
+  mumuInstanceIndex: 0,
 };
 
 export const Config = Schema.object({
@@ -48,6 +51,9 @@ export const Config = Schema.object({
   connectExtras: Schema.string().description('MaaCore 连接 extras（JSON）。留空按 adbPath 自动推导 MuMu 实例目录').default(''),
   popupGuard: Schema.boolean().description('抄作业开打后自动补点画面中央，绕过「干员等级过低」弹窗（人少作业才需要）').default(false),
   copilotTimeoutSeconds: Schema.natural().description('单次抄作业的最长等待时间（秒）').default(900),
+  autoStartEmulator: Schema.boolean().description('插件启动时先检查 MuMu 模拟器，没开就自动拉起（默认开）').default(true),
+  mumuManagerPath: Schema.string().description('MuMuManager.exe 路径。留空自动探测（MAA 配置的模拟器目录下 shell\\MuMuManager.exe）').default(''),
+  mumuInstanceIndex: Schema.natural().description('MuMu 多开时的实例序号（单开/每个游戏一个安装时是 0）').default(0),
 });
 
 /** 值可能是 Volatile 包装/别的类型：只接受标量，否则用默认值。 */
@@ -157,6 +163,10 @@ export function resolveConfig(raw = {}, pkgDir = process.cwd()) {
     connectExtras: asString(cfg.connectExtras, ''),
     popupGuard: asBool(cfg.popupGuard, false),
     copilotTimeoutSeconds: asNumber(cfg.copilotTimeoutSeconds, 900, 1),
+    autoStartEmulator: asBool(cfg.autoStartEmulator, true),
+    mumuManagerPath: asString(cfg.mumuManagerPath, ''),
+    // 实例序号只从行 config 读（设置页不暴露：绝大多数人只有一个安装/实例）
+    mumuInstanceIndex: asNumber(raw && typeof raw === 'object' ? raw.mumuInstanceIndex : undefined, 0),
     maaInstallSource: maaInstallPath ? 'config' : install.source,
     maaInstallProblems: [...(install.problems ?? []), ...problems],
     maaHint: hint,

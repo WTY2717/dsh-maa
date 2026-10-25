@@ -18,6 +18,7 @@ export const EDITABLE_FIELDS = [
   ['rosterPath', 'string'],
   ['maaInstallPath', 'string'],
   ['adbPath', 'string'],
+  ['mumuManagerPath', 'string'],
   ['adbAddress', 'string'],
   ['adbConfig', 'string'],
   ['bridgePort', 'number'],
@@ -27,6 +28,7 @@ export const EDITABLE_FIELDS = [
   ['nodePath', 'string'],
   ['connectExtras', 'string'],
   ['popupGuard', 'boolean'],
+  ['autoStartEmulator', 'boolean'],
 ];
 
 const TYPE = Object.fromEntries(EDITABLE_FIELDS);

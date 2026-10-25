@@ -1,5 +1,5 @@
 /**
- * 工具定义（14 个）：远程控制 8 个 + 抄作业 3 个 + 自检 1 个 + 点击 1 个 + 滑动 1 个。
+ * 工具定义（15 个）：远程控制 8 个 + 抄作业 3 个 + 自检 1 个 + 点击 1 个 + 滑动 1 个 + 模拟器 1 个。
  *
  * 这里是**唯一**把能力暴露给模型的地方；实现都在 src/ 下，工具只做参数校验与调度。
  * 描述里的口径与禁则是踩过坑的结论，改之前先读 docs/tools/maa*.md。
@@ -8,6 +8,7 @@ import { doctor } from './doctor.js';
 import { findJobs, runCopilot, verifyScreenshot, clickScreen } from './copilot.js';
 import { resolveConfig } from './config.js';
 import { swipe } from './input/index.js';
+import { ensureEmulator } from './emulator.js';
 
 /* ────────────────────── JSON Schema 小工具 ────────────────────── */
 
@@ -352,6 +353,29 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
         } catch (e) {
           return { ok: false, error: `滑动手势执行失败: ${e?.message || e}` };
         }
+      },
+    },
+    {
+      name: 'maa_emulator',
+      description:
+        'MuMu 模拟器：`status` 只查（开没开、实例名、MuMuManager 路径）；`start` 没开就拉起并**等到 adb 能连上**。' +
+        '插件启动时已经自动做过一次（设置 → 插件 → 「MAA 助手」里可关 `autoStartEmulator`），所以正常情况下不用手动调。' +
+        '什么时候用它：工具报 offline / 连不上模拟器 / `adb devices` 没设备 / 用户说「开一下模拟器」。' +
+        '实测：`control -v 0 launch` 命令 185ms 返回，快照恢复约 10 秒 `sys.boot_completed=1`；冷启动可能几十秒，别中途放弃。' +
+        '不消耗理智、不碰游戏。',
+      parameters: obj(
+        {
+          action: { type: 'string', enum: ['status', 'start'], description: 'status=只查状态；start=没开就开（默认）' },
+          timeoutSeconds: num('start 时等开机的上限秒数，默认 180，范围 10~600'),
+        },
+      ),
+      output: textOut('模拟器'),
+      async execute(args) {
+        const cfg = await cfgOf();
+        const action = args.action === 'status' ? 'status' : 'start';
+        const seconds = Math.min(Math.max(Number(args.timeoutSeconds) || 180, 10), 600);
+        const r = await ensureEmulator({ cfg, autoLaunch: action === 'start', timeoutMs: seconds * 1000 });
+        return { action, ...r };
       },
     },
   ];

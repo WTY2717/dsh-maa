@@ -39,6 +39,9 @@
       "dsh": ">=0.2.1-rc.3"
     }
   },
+  "scripts": {
+    "test": "node test/selftest.mjs && node test/hardening.test.mjs && node test/swipe.test.mjs && node test/match.test.mjs && node test/emulator.test.mjs && node test/copilot-runner.test.mjs && node test/wakeup.test.mjs"
+  },
   "dependencies": {
     "@deepseek-ai/cosmokit": "~1.8.6",
     "@deepseek-ai/schemastery": "^3.18.5",

@@ -26,9 +26,9 @@
 plugins\maa-plugin\
 ├─ package.json        # dsh.bundle.patch / dsh.client + 依赖（koffi / schemastery）
 ├─ cordis.patch.yml    # 唯一的 Loader 行：id=maa-plugin
-├─ index.js            # apply(ctx, config)：模拟器自启 + 起桥 + 设置页路由 + 注册 15 个工具
+├─ index.js            # apply(ctx, config)：模拟器自启 + 起桥 + 设置页路由 + 注册 18 个工具
 ├─ client.js           # Web 客户端半：设置页（settings.plugins.tab）
-├─ src\                # 实现：config / maa / pe / doctor / roster / stages / stages-hard / copilot / adb / emulator
+├─ src\                # 实现：config / maa / pe / doctor / roster / stages / stages-hard / copilot / adb / emulator / wakeup
 │  ├─ input\           #   滑动手势：coords（换算）/ adb-input（注入）/ backend（后端探测）
 │  ├─ prts\            #   作业站查询、练度容差匹配、严格优先的作业挑选
 │  ├─ remote\          #   远程控制桥（MAA 反向轮询）
@@ -37,7 +37,7 @@ plugins\maa-plugin\
 ├─ icon.svg
 ├─ skill\SKILL.md      # 模型侧技能（复制到 ~\.dsh\skills\ 后所有会话可见）
 ├─ scripts\recover.ps1 # 插件把 DSH 搞挂时的自救脚本
-└─ test\               # selftest / hardening / swipe / match / emulator
+└─ test\               # 7 份自测：selftest / hardening / swipe / match / emulator / copilot-runner / wakeup
 ```
 
 装进当前 profile（走插件管理器，不要手改 profile）：
@@ -63,15 +63,15 @@ DSH 的安装框直接吃 pnpm 的 spec，宿主 `parseInstallSpec` 支持四类
 
 所以「填包名 / GitHub 地址就能装」这件事，插件这边不需要改代码——**前提是这个包在 npm 上、或在 GitHub 上**。
 
-本仓库已发布在 GitHub（私有）：`https://github.com/WTY2717/dsh-maa`。安装框里填以下任一即可：
+本仓库已开源在 GitHub（**公开**，无需登录或授权）：`https://github.com/WTY2717/dsh-maa`。安装框里填以下任一即可：
 
 ```
 github:WTY2717/dsh-maa
 https://github.com/WTY2717/dsh-maa
-git+https://github.com/WTY2717/dsh-maa.git#v1.2.2     （钉 tag/commit）
+git+https://github.com/WTY2717/dsh-maa.git#v1.7.0     （钉 tag/commit）
 ```
 
-私有库的安装端需要有该仓库读权限（本机 Git Credential Manager 登录一次即可）。
+公开库不用任何凭证；只有装私有 fork 时，安装端才需要有该仓库读权限（本机 Git Credential Manager 登录一次即可）。
 
 发布到 npm 才有「只填包名」：改两行再 `npm publish`。
 
@@ -88,4 +88,31 @@ plugin_manager(action="remove_bundle", target="@local/dsh-maa")
 # 再用上面的地址装一次
 ```
 
-**git 安装的更新语义**：跟着分支走 → 重新安装即更新；要钉版本就在地址后加 `#v1.2.1`（tag）或 `#<commit>`。
+**git 安装的更新语义**：跟着分支走 → 重新安装即更新；要钉版本就在地址后加 `#v1.7.0`（tag）或 `#<commit>`。
+
+## 开发（改代码 / 跑测试 / 重载）
+
+本工作区里 `plugins\maa-plugin` 已经用 `link:` 装进 desktop profile，改完代码不用重装，重载即可。
+
+**跑自测**（7 份 / 114 项，全绿才算可发；除 `selftest` 外都不碰 MAA 和模拟器）：
+
+```powershell
+node test/selftest.mjs          # 需要本机装了 MAA（自动探测；只读文件、不连接、不消耗理智）
+node test/hardening.test.mjs
+node test/swipe.test.mjs
+node test/match.test.mjs
+node test/emulator.test.mjs
+node test/copilot-runner.test.mjs
+node test/wakeup.test.mjs
+# 有 npm 的机器也可以直接：npm test
+```
+
+**改了代码不会自动生效**（ESM 已缓存）：`plugin_manager(set_plugin, target="include:maa-plugin", enabled:false)` → 再 `enabled:true` → 调一次 `maa_doctor` 确认 `problems` 为空（新工具 / 新字段才会出现）。
+
+**改了 `skill/SKILL.md`**：插件目录里的副本不会自动同步到全局技能目录，要手动拷（两份必须逐字节一致）：
+
+```powershell
+Copy-Item skill\SKILL.md "$env:USERPROFILE\.dsh\skills\maa-arknights\SKILL.md"
+```
+
+**发版**：功能改动 → 改 `package.json` 版本 → 打包出 `dist\local-dsh-maa-<版本>.tgz`（`pnpm pack`，本机没有 pnpm 可用 `npm.cmd pack`）→ 打 tag `v<版本>` → 建 GitHub Release（标题「dsh-maa v<版本>」，正文只写用户能感知的新增/优化/修复，不写代码细节）；只改文档或规则 → 直接提交推送，不新发版本。

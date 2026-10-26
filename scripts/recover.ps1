@@ -1,4 +1,4 @@
-# 一键停用 MAA 插件（DSH 起不来时的自救脚本）
+﻿# 一键停用 MAA 插件（DSH 起不来时的自救脚本）
 #
 # 用法（在普通 PowerShell 窗口里跑，不需要 DSH）：
 #   powershell -ExecutionPolicy Bypass -File "plugins\maa-plugin\scripts\recover.ps1"

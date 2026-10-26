@@ -17,7 +17,7 @@
 
 **为什么三条通道**：MAA 的远程控制协议里**没有 Copilot 任务**（只有 `LinkStart*` / `CaptureImage` / `StopTask` / `HeartBeat` / `Toolbox-*` / `Settings-*`），抄作业只能直连 `MaaCore.dll`；而 Copilot 不做导航、MaaCore 也没有 swipe 导出接口，所以滑动走 adb `input swipe`。都是协议事实，不是实现偷懒。**账号切换同理**：远程控制没有独立的「切号」类型、`LinkStart-WakeUp` 也不接受参数，所以动态切号只能直连 MaaCore 下发 `StartUp + account_name`。
 
-**多用户 / 换号（v1.8.0）**：一台电脑多人用时，本地账号簿 `data\accounts.json` 记「手机号 ↔ 昵称」（只存本地、不联网、`list` 打码、验证码从不落盘）。老用户 `maa_account_switch({phone})` 动态切号（MaaCore 直连 `StartUp + account_name`；只支持官服/B服/繁中/韩服，且只能切本机登录记录里已有的号）；切不过去/登录过期 = 新用户，走手动登录：手机号+验证码 或 扫码（`maa_click` + `maa_input_text`，二维码截图发给用户、过期刷新）。流程与坐标见 `docs\tools\maa-accounts.md`，模型侧规则在 `skill/SKILL.md`「多用户：换号 / 新用户登录」。
+**多用户 / 换号（v2.0.0）**：一台电脑多人用时，本地账号簿 `data\accounts.json` 记「手机号 ↔ 昵称」（只存本地、不联网、`list` 打码、验证码从不落盘）。老用户 `maa_account_switch({phone})` 动态切号（MaaCore 直连 `StartUp + account_name`；只支持官服/B服/繁中/韩服，且只能切本机登录记录里已有的号）；切不过去/登录过期 = 新用户，走手动登录：手机号+验证码 或 扫码（`maa_click` + `maa_input_text`，二维码截图发给用户、过期刷新）。流程与坐标见 `docs\tools\maa-accounts.md`，模型侧规则在 `skill/SKILL.md`「多用户：换号 / 新用户登录」。
 
 **给模型的通用引导**（首次使用也能找到关卡）：主线 = 终端 → 曲谱 → 乐章收录（章节列表上下滑，右下角 `EPxx` = 第 xx 章）；往期活动在同一个章节列表的最下方（艺术字封面 + 普通/EX/特殊关切换）；当期活动是终端页左侧海报（结束后显示「作战已结束」）；H 关要先切到最高难度才出现在地图最右侧。这段话同时写在 `skill/SKILL.md`（「怎么走到目标关卡」）和 `maa_swipe` 的工具描述里。
 
@@ -71,7 +71,7 @@ DSH 的安装框直接吃 pnpm 的 spec，宿主 `parseInstallSpec` 支持四类
 ```
 github:WTY2717/dsh-maa
 https://github.com/WTY2717/dsh-maa
-git+https://github.com/WTY2717/dsh-maa.git#v1.8.0     （钉 tag/commit）
+git+https://github.com/WTY2717/dsh-maa.git#v2.0.0     （钉 tag/commit）
 ```
 
 公开库不用任何凭证；只有装私有 fork 时，安装端才需要有该仓库读权限（本机 Git Credential Manager 登录一次即可）。
@@ -91,7 +91,7 @@ plugin_manager(action="remove_bundle", target="@local/dsh-maa")
 # 再用上面的地址装一次
 ```
 
-**git 安装的更新语义**：跟着分支走 → 重新安装即更新；要钉版本就在地址后加 `#v1.8.0`（tag）或 `#<commit>`。
+**git 安装的更新语义**：跟着分支走 → 重新安装即更新；要钉版本就在地址后加 `#v2.0.0`（tag）或 `#<commit>`。
 
 ## 开发（改代码 / 跑测试 / 重载）
 

@@ -1,11 +1,13 @@
 /**
- * 后台跑作业（+ 中途可观测/可打断）。
+ * 后台任务 runner：抄作业（+ 中途可观测/可打断）以及账号切换等其它 MaaCore 任务。
  *
- * 为什么要后台模式：抄作业的**危险窗口在战斗中途**——目标生命值掉了就必须立刻退出关卡
+ * 为什么要后台模式（抄作业）：**危险窗口在战斗中途**——目标生命值掉了就必须立刻退出关卡
  * （结束前退出会返还全部理智；结算完再退就白花理智、还拿不满奖励）。
  * 阻塞式调用期间模型什么都做不了，只能等结算，等于放弃了这个窗口。
  * 所以：`background:true` 起跑 → 模型每隔 ~10s `maa_copilot_status` + `maa_screenshot` 看画面
  * → 发现掉血就 `maa_copilot_stop` 停掉 MAA 任务，再自己点「暂停 → 退出行动」。
+ *
+ * 账号切换也用同一套：切换/登录流程要能「随时取消」，后台跑 + status/stop 才做得到。
  *
  * 进程安全：每个后台 run 都是一个 MaaCore 子进程；插件卸载/重载时必须全部收掉（dispose）。
  */
@@ -26,6 +28,7 @@ export function createCopilotRunner({ log = () => {}, run = runCopilot } = {}) {
     const now = Date.now();
     return {
       runId: entry.id,
+      label: entry.label,
       state: entry.state, // starting | running | done | error
       taskId: entry.taskId ?? null,
       jobFile: entry.jobFile,
@@ -37,13 +40,18 @@ export function createCopilotRunner({ log = () => {}, run = runCopilot } = {}) {
   };
 
   /**
-   * 起跑（不等待结束）。
-   * @returns {{ok:true, runId:string, state:string, jobFile:string, hint:string}}
+   * 起一条后台任务（不等待结束）。
+   * @param {object} args
+   * @param {string} args.label 给模型看的任务类型（copilot / account-switch / …）
+   * @param {string|null} [args.jobFile] 抄作业时的作业文件（其它任务为 null）
+   * @param {(hooks:{onEvent:Function,onReady:Function}) => Promise<any>} args.execute 真正跑任务的函数
+   * @param {string|((id:string)=>string)} [args.hint]
    */
-  const start = ({ jobFile, cfg, options = {} } = {}) => {
+  const begin = ({ label = 'job', jobFile = null, execute, hint = '' } = {}) => {
     const id = `run-${++seq}`;
     const entry = {
       id,
+      label,
       jobFile,
       startedAt: Date.now(),
       finishedAt: null,
@@ -58,30 +66,27 @@ export function createCopilotRunner({ log = () => {}, run = runCopilot } = {}) {
 
     entry.promise = (async () => {
       try {
-        const r = await run({
-          jobFile,
-          cfg,
-          ...options,
+        const r = await execute({
           onEvent: (ev) => {
             if (ev?.event === 'cb') entry.lastCallbackAt = Date.now();
           },
           onReady: (ctl) => {
             entry.ctl = ctl;
-            entry.taskId = ctl.taskId ?? null;
+            entry.taskId = ctl?.taskId ?? null;
             entry.state = 'running';
-            log('copilot background run ready', JSON.stringify({ id, taskId: entry.taskId }));
+            log('background run ready', JSON.stringify({ id, label: entry.label, taskId: entry.taskId }));
           },
         });
         entry.result = r;
         entry.state = 'done';
         entry.finishedAt = Date.now();
-        if (!r?.ok) log('copilot background run failed', JSON.stringify({ id, status: r?.status ?? null }));
+        if (!r?.ok) log('background run failed', JSON.stringify({ id, label: entry.label, status: r?.status ?? null }));
         return r;
       } catch (e) {
         entry.error = String(e?.message || e);
         entry.state = 'error';
         entry.finishedAt = Date.now();
-        log('copilot background run threw', entry.error);
+        log('background run threw', entry.error);
         return null;
       } finally {
         const finished = [...runs.values()]
@@ -94,13 +99,40 @@ export function createCopilotRunner({ log = () => {}, run = runCopilot } = {}) {
     return {
       ok: true,
       runId: id,
+      label,
       state: entry.state,
-      jobFile,
-      hint:
-        '后台已起跑。之后每隔约 10 秒做一次：`maa_copilot_status({runId})` 看进度 + `maa_screenshot` 后 read_image 看画面。' +
-        '重点看**目标生命值**：一旦掉血，立刻 `maa_copilot_stop({runId})`，再点「暂停 → 退出行动」把理智退回来。',
+      jobFile: entry.jobFile,
+      hint: typeof hint === 'function' ? hint(id) : hint,
     };
   };
+
+  /**
+   * 起一条抄作业（不等待结束）。
+   * @returns {{ok:true, runId:string, state:string, jobFile:string, hint:string}}
+   */
+  const start = ({ jobFile, cfg, options = {} } = {}) => begin({
+    label: 'copilot',
+    jobFile,
+    execute: (hooks) => run({ jobFile, cfg, ...options, ...hooks }),
+    hint:
+      '后台已起跑。之后每隔约 10 秒做一次：`maa_copilot_status({runId})` 看进度 + `maa_screenshot` 后 read_image 看画面。' +
+      '重点看**目标生命值**：一旦掉血，立刻 `maa_copilot_stop({runId})`，再点「暂停 → 退出行动」把理智退回来。',
+  });
+
+  /**
+   * 起一条通用后台任务（账号切换等）。execute 拿 {onEvent,onReady}，返回任务结果。
+   * stop/status 与抄作业共用同一套工具：用 runId 指定即可。
+   */
+  const startJob = ({ label = 'job', run: execute, hint = '' } = {}) => begin({
+    label,
+    execute,
+    hint:
+      typeof hint === 'function'
+        ? hint
+        : (id) =>
+            `后台任务已起跑（runId=${id}）。用 \`maa_copilot_status({runId:"${id}"})\` 看进度、\`maa_copilot_stop({runId:"${id}"})\` 随时取消；` +
+            '中途用 maa_screenshot + read_image 看画面。',
+  });
 
   /** 查一条（不给 runId 就查最近一条）。 */
   const status = (runId) => {
@@ -108,7 +140,9 @@ export function createCopilotRunner({ log = () => {}, run = runCopilot } = {}) {
     if (!entry) {
       return {
         ok: false,
-        error: runId ? `没有这个 runId: ${runId}` : '当前没有作业在跑（也没留下记录）；用 maa_copilot_run({background:true}) 起一条',
+        error: runId
+          ? `没有这个 runId: ${runId}`
+          : '当前没有后台任务在跑（也没留下记录）；抄作业用 maa_copilot_run({background:true})、账号切换用 maa_account_switch({background:true}) 起一条',
       };
     }
     let progressTail = entry.result?.progress ?? null;
@@ -124,7 +158,7 @@ export function createCopilotRunner({ log = () => {}, run = runCopilot } = {}) {
     };
   };
 
-  /** 停掉正在跑的那条（AsstStopTask）。停在「游戏还在战斗」是正常的：退出关卡要模型自己点。 */
+  /** 停掉正在跑的那条（AsstStopTask）。 */
   const stop = async (runId) => {
     const entry = runId ? runs.get(runId) : newest();
     if (!entry) return { ok: false, error: `没有这个 runId: ${runId ?? '(最近一条)'}` };
@@ -145,13 +179,15 @@ export function createCopilotRunner({ log = () => {}, run = runCopilot } = {}) {
     while (Date.now() < deadline && (entry.state === 'running' || entry.state === 'starting')) {
       await new Promise((r) => setTimeout(r, 250));
     }
+    const isCopilot = entry.label === 'copilot';
     return {
       ok: true,
       stopped: true,
       run: summary(entry),
-      hint:
-        'MAA 任务已停（它不再注入触摸）。**游戏还在战斗里**：用 maa_screenshot 看画面 → 点「暂停」→ 点「退出行动」→ 确认；' +
-        '结算前退出会返还全部理智。退出后再换作业重来。',
+      hint: isCopilot
+        ? 'MAA 任务已停（它不再注入触摸）。**游戏还在战斗里**：用 maa_screenshot 看画面 → 点「暂停」→ 点「退出行动」→ 确认；' +
+          '结算前退出会返还全部理智。退出后再换作业重来。'
+        : '后台任务已停（MaaCore 任务链停止）。用 maa_screenshot 看画面确认停在哪一屏，再决定下一步（别在登录/切换中途重复下发）。',
     };
   };
 
@@ -164,5 +200,5 @@ export function createCopilotRunner({ log = () => {}, run = runCopilot } = {}) {
     runs.clear();
   };
 
-  return { start, status, stop, dispose, list: () => [...runs.values()].map(summary) };
+  return { start, startJob, status, stop, dispose, list: () => [...runs.values()].map(summary) };
 }

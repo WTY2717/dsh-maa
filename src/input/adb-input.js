@@ -157,3 +157,56 @@ async function motioneventGesture({ run, sleep, base, adbPath, p1, p2, durationM
 }
 
 export { validateGamePoint };
+
+/* ────────────────────── 文本输入（登录用：手机号 / 验证码）────────────────────── */
+
+/**
+ * 允许输入的字符集：游戏登录框只要数字，验证码通常也是数字（偶尔带字母）。
+ * adb `input text` 对中文/空格/引号不可靠，直接在这里拒绝并让用户手动输入，别制造假的「成功」。
+ */
+const TEXT_ALLOWED = /^[A-Za-z0-9@._+-]+$/;
+const TEXT_MAX = 64;
+
+/** 校验要输入的内容。 */
+export function validateTypeText(text) {
+  if (typeof text !== 'string') return { ok: false, error: 'text 必须是字符串' };
+  if (!text.length) return { ok: false, error: 'text 不能为空' };
+  if (text.length > TEXT_MAX) return { ok: false, error: `text 太长（${text.length} 字符，最多 ${TEXT_MAX}）` };
+  if (!TEXT_ALLOWED.test(text)) {
+    const bad = [...text].find((ch) => !/[A-Za-z0-9@._+-]/.test(ch));
+    return {
+      ok: false,
+      error: `只能输入数字 / 英文字母和 @ . _ + -（收到 ${JSON.stringify(bad)}）：手机号和验证码够用；中文/空格请让用户自己输入`,
+    };
+  }
+  return { ok: true, text };
+}
+
+/**
+ * 往**当前已聚焦的输入框**里打字。
+ * 注意：本函数不负责点输入框——先 maa_click 聚焦，再调它（见 skill「新用户登录」）。
+ * @param {object} args
+ * @param {string} args.adbPath
+ * @param {string} [args.address]
+ * @param {string} args.text
+ * @param {boolean} [args.enter] 打完是否按一次回车（keyevent 66）
+ * @param {object} [args.deps] 单测注入 { run }
+ */
+export async function typeTextAdbInput({ adbPath, address, text, enter = false, deps = {} } = {}) {
+  const run = deps.run ?? adbRun;
+  if (!adbPath) return { ok: false, error: '未定位到 adb' };
+  const v = validateTypeText(text);
+  if (!v.ok) return { ok: false, error: v.error };
+  const base = address ? ['-s', address] : [];
+  const r = await run(adbPath, [...base, 'shell', 'input', 'text', v.text], { timeoutMs: 15000 });
+  if (!r.ok) {
+    return { ok: false, via: 'input text', error: `adb input text 失败：${(r.stderr || r.error || '').trim() || '未知原因'}` };
+  }
+  let enterResult = null;
+  if (enter) {
+    const e = await run(adbPath, [...base, 'shell', 'input', 'keyevent', '66'], { timeoutMs: 15000 });
+    enterResult = { ok: Boolean(e.ok), error: e.ok ? null : (e.stderr || e.error || '未知原因') };
+  }
+  return { ok: true, via: 'input text', chars: v.text.length, enter: enterResult };
+}
+

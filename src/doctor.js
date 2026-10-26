@@ -15,6 +15,7 @@ import { resolveAdbPath, listDevices } from './adb.js';
 import { connectionExtras } from './copilot.js';
 import { detectInputBackend } from './input/backend.js';
 import { resolveMuMuManager, queryInstance, lastEmulatorRun } from './emulator.js';
+import { accountBookFile, readBook, listAccounts } from './account-book.js';
 
 /** 能力表里视为「必需」的符号；缺一个就说明这个 MaaCore 用不了。 */
 const REQUIRED = ['AsstSetUserDir', 'AsstLoadResource', 'AsstCreateEx', 'AsstAppendTask', 'AsstStart', 'AsstConnected', 'AsstDestroy'];
@@ -122,6 +123,26 @@ export async function doctor({ cfg, bridge = null, bridgeError = null, pkgVersio
     problems.push(`找不到运行 MaaCore 子进程的 node: ${e.message}`);
   }
 
+  /* 本地账号簿（多用户换号用；坏了只降级为 warning，不影响其它工具） */
+  let accountBook = null;
+  try {
+    const file = accountBookFile(cfg.dataRoot);
+    const st = readBook(file);
+    accountBook = {
+      path: file,
+      ok: st.ok,
+      missing: st.missing,
+      count: st.book.accounts.length,
+      accounts: listAccounts(st.book),
+      problems: st.problems,
+      note: '手机号↔昵称只存本地；验证码不落盘；list 一律打码',
+    };
+    if (!st.ok) warnings.push(`账号簿读不了（换号/新用户登录会受影响）: ${st.problems.join('；') || '未知原因'}`);
+  } catch (e) {
+    accountBook = { path: null, ok: false, error: String(e?.message || e) };
+    warnings.push(`账号簿读取失败: ${e?.message || e}`);
+  }
+
   /* 桥 */
   const bridgeInfo = bridge
     ? bridge.health()
@@ -184,6 +205,7 @@ export async function doctor({ cfg, bridge = null, bridgeError = null, pkgVersio
       instanceDir: adb.ok ? instanceDirFromAdb(adb.path) : null,
     },
     emulator,
+    accountBook,
     input: input
       ? {
           backend: input.backend,
@@ -216,7 +238,10 @@ export async function doctor({ cfg, bridge = null, bridgeError = null, pkgVersio
     warnings,
     nextSteps: problems.length
       ? ['按 problems 逐条修：MAA 路径 / 练度文件 / adb / node', '改完设置直接重跑 maa_doctor，不需要重启']
-      : ['练度与作业站都通了就可以 maa_copilot_find(关卡)，再 maa_copilot_run 作业文件'],
+      : [
+          '练度与作业站都通了就可以 maa_copilot_find(关卡)，再 maa_copilot_run 作业文件',
+          '换人/换号：先 maa_account_book({action:"find"})，已登记就 maa_account_switch（逻辑2），没登记就走新用户登录流程（逻辑1，见 skill）',
+        ],
     logDir: cfg.logDir,
   };
 }

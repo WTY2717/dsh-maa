@@ -1,6 +1,6 @@
 # @local/dsh-maa —— MAA 插件（DSH）
 
-把 MAA（MaaAssistantArknights）接到 DSH 里的**正式插件**：18 个原生工具，三条通道并存；**启动时先检查 MuMu 模拟器，没开就自动拉起**；`maa_wakeup` 复用 MAA「开始唤醒」直接进主界面（实测可单独调用，不用自己点登录）；抄作业带**中途生命值守则**（掉血立刻停、退出关卡返还理智）。
+把 MAA（MaaAssistantArknights）接到 DSH 里的**正式插件**：21 个原生工具，三条通道并存；**启动时先检查 MuMu 模拟器，没开就自动拉起**；`maa_wakeup` 复用 MAA「开始唤醒」直接进主界面（实测可单独调用，不用自己点登录）；抄作业带**中途生命值守则**（掉血立刻停、退出关卡返还理智）；**多用户换号 / 新用户登录**（本地账号簿 + 动态账号切换 + 手机号验证码 / 扫码登录）。
 
 | 能力 | 后端 | 工具 |
 |---|---|---|
@@ -10,11 +10,14 @@
 | 抄作业中途盯防（后台跑 / 看进度 / 掉血止损） | 同上（后台子进程 + adb 截图） | `maa_copilot_status` `maa_copilot_stop` |
 | 导航（拖地图 / 翻关卡列表，不消耗理智） | **adb `input`**（1280×720 换算成设备坐标） | `maa_swipe` |
 | 模拟器自启（查状态 / 没开就拉起并等到能连） | `MuMuManager.exe` | `maa_emulator` |
+| 多用户换号 / 新用户登录（本地账号簿、动态切号、输入手机号/验证码） | adb `input text` + MaaCore `StartUp` | `maa_account_book` `maa_input_text` `maa_account_switch` |
 | 自检 | 纯读本地文件 + PE 导出表 | `maa_doctor` |
 
 **防非三星（v1.6.0）**：三星要求**目标生命值不掉**。正式抄作业用 `background:true` 起跑，每 ~10 秒 `maa_copilot_status` + 截图盯生命值；一旦掉血 → `maa_copilot_stop` → 点「暂停 → 退出行动」（结算前退出**返还全部理智**）。所有作业都掉血就如实告诉用户「没有能三星通关的作业」。
 
-**为什么三条通道**：MAA 的远程控制协议里**没有 Copilot 任务**（只有 `LinkStart*` / `CaptureImage` / `StopTask` / `HeartBeat` / `Toolbox-*` / `Settings-*`），抄作业只能直连 `MaaCore.dll`；而 Copilot 不做导航、MaaCore 也没有 swipe 导出接口，所以滑动走 adb `input swipe`。都是协议事实，不是实现偷懒。
+**为什么三条通道**：MAA 的远程控制协议里**没有 Copilot 任务**（只有 `LinkStart*` / `CaptureImage` / `StopTask` / `HeartBeat` / `Toolbox-*` / `Settings-*`），抄作业只能直连 `MaaCore.dll`；而 Copilot 不做导航、MaaCore 也没有 swipe 导出接口，所以滑动走 adb `input swipe`。都是协议事实，不是实现偷懒。**账号切换同理**：远程控制没有独立的「切号」类型、`LinkStart-WakeUp` 也不接受参数，所以动态切号只能直连 MaaCore 下发 `StartUp + account_name`。
+
+**多用户 / 换号（v1.8.0）**：一台电脑多人用时，本地账号簿 `data\accounts.json` 记「手机号 ↔ 昵称」（只存本地、不联网、`list` 打码、验证码从不落盘）。老用户 `maa_account_switch({phone})` 动态切号（MaaCore 直连 `StartUp + account_name`；只支持官服/B服/繁中/韩服，且只能切本机登录记录里已有的号）；切不过去/登录过期 = 新用户，走手动登录：手机号+验证码 或 扫码（`maa_click` + `maa_input_text`，二维码截图发给用户、过期刷新）。流程与坐标见 `docs\tools\maa-accounts.md`，模型侧规则在 `skill/SKILL.md`「多用户：换号 / 新用户登录」。
 
 **给模型的通用引导**（首次使用也能找到关卡）：主线 = 终端 → 曲谱 → 乐章收录（章节列表上下滑，右下角 `EPxx` = 第 xx 章）；往期活动在同一个章节列表的最下方（艺术字封面 + 普通/EX/特殊关切换）；当期活动是终端页左侧海报（结束后显示「作战已结束」）；H 关要先切到最高难度才出现在地图最右侧。这段话同时写在 `skill/SKILL.md`（「怎么走到目标关卡」）和 `maa_swipe` 的工具描述里。
 
@@ -26,9 +29,9 @@
 plugins\maa-plugin\
 ├─ package.json        # dsh.bundle.patch / dsh.client + 依赖（koffi / schemastery）
 ├─ cordis.patch.yml    # 唯一的 Loader 行：id=maa-plugin
-├─ index.js            # apply(ctx, config)：模拟器自启 + 起桥 + 设置页路由 + 注册 18 个工具
+├─ index.js            # apply(ctx, config)：模拟器自启 + 起桥 + 设置页路由 + 注册 21 个工具
 ├─ client.js           # Web 客户端半：设置页（settings.plugins.tab）
-├─ src\                # 实现：config / maa / pe / doctor / roster / stages / stages-hard / copilot / adb / emulator / wakeup
+├─ src\                # 实现：config / maa / pe / doctor / roster / stages / stages-hard / copilot / adb / emulator / wakeup / account-book / switch-account
 │  ├─ input\           #   滑动手势：coords（换算）/ adb-input（注入）/ backend（后端探测）
 │  ├─ prts\            #   作业站查询、练度容差匹配、严格优先的作业挑选
 │  ├─ remote\          #   远程控制桥（MAA 反向轮询）
@@ -37,7 +40,7 @@ plugins\maa-plugin\
 ├─ icon.svg
 ├─ skill\SKILL.md      # 模型侧技能（复制到 ~\.dsh\skills\ 后所有会话可见）
 ├─ scripts\recover.ps1 # 插件把 DSH 搞挂时的自救脚本
-└─ test\               # 7 份自测：selftest / hardening / swipe / match / emulator / copilot-runner / wakeup
+└─ test\               # 10 份自测：selftest / hardening / swipe / match / emulator / copilot-runner / wakeup / account-book / switch-account / input-text
 ```
 
 装进当前 profile（走插件管理器，不要手改 profile）：
@@ -68,7 +71,7 @@ DSH 的安装框直接吃 pnpm 的 spec，宿主 `parseInstallSpec` 支持四类
 ```
 github:WTY2717/dsh-maa
 https://github.com/WTY2717/dsh-maa
-git+https://github.com/WTY2717/dsh-maa.git#v1.7.0     （钉 tag/commit）
+git+https://github.com/WTY2717/dsh-maa.git#v1.8.0     （钉 tag/commit）
 ```
 
 公开库不用任何凭证；只有装私有 fork 时，安装端才需要有该仓库读权限（本机 Git Credential Manager 登录一次即可）。
@@ -88,13 +91,13 @@ plugin_manager(action="remove_bundle", target="@local/dsh-maa")
 # 再用上面的地址装一次
 ```
 
-**git 安装的更新语义**：跟着分支走 → 重新安装即更新；要钉版本就在地址后加 `#v1.7.0`（tag）或 `#<commit>`。
+**git 安装的更新语义**：跟着分支走 → 重新安装即更新；要钉版本就在地址后加 `#v1.8.0`（tag）或 `#<commit>`。
 
 ## 开发（改代码 / 跑测试 / 重载）
 
 本工作区里 `plugins\maa-plugin` 已经用 `link:` 装进 desktop profile，改完代码不用重装，重载即可。
 
-**跑自测**（7 份 / 114 项，全绿才算可发；除 `selftest` 外都不碰 MAA 和模拟器）：
+**跑自测**（10 份 / 165 项，全绿才算可发；除 `selftest` 外都不碰 MAA 和模拟器）：
 
 ```powershell
 node test/selftest.mjs          # 需要本机装了 MAA（自动探测；只读文件、不连接、不消耗理智）
@@ -104,6 +107,9 @@ node test/match.test.mjs
 node test/emulator.test.mjs
 node test/copilot-runner.test.mjs
 node test/wakeup.test.mjs
+node test/account-book.test.mjs  # 本地账号簿
+node test/switch-account.test.mjs # 动态切号（假 CoreWorker）
+node test/input-text.test.mjs    # 手机号/验证码输入
 # 有 npm 的机器也可以直接：npm test
 ```
 

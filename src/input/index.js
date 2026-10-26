@@ -14,7 +14,7 @@
 import path from 'node:path';
 import { resolveAdbPath, screencap } from '../adb.js';
 import { detectInputBackend } from './backend.js';
-import { swipeAdbInput } from './adb-input.js';
+import { swipeAdbInput, typeTextAdbInput, validateTypeText } from './adb-input.js';
 import { validateGamePoint } from './coords.js';
 
 const DEFAULTS = { durationMs: 200, steps: 8, holdMs: 0, settleMs: 400 };
@@ -173,6 +173,54 @@ export async function swipe({ cfg, bridge = null, from, to, durationMs, steps, h
   };
   if (!gesture.ok) result.error = gesture.error;
   else if (shot.via === 'none') result.note = '手势已注入，但没截到图：滑动本身是否生效要用别的办法确认（maa_screenshot）';
+  return result;
+}
+
+/**
+ * 往**当前已聚焦**的输入框打字（登录用：手机号 / 验证码）。
+ *
+ * 口径与滑动一致：MAA 跑任务时拒绝（两路触摸会打架）；打完截图验收（ok 只代表 adb 注入成功，
+ * 有没有真的进框里要看截图）。点位聚焦由调用方先 maa_click。
+ */
+export async function typeText({ cfg, bridge = null, text, enter = false, settleMs = 400, deps = {} } = {}) {
+  const startedAt = Date.now();
+  const v = validateTypeText(text);
+  if (!v.ok) return { ok: false, error: v.error };
+
+  const busy = maaBusy(bridge);
+  if (busy.known && ((busy.pending ?? 0) > 0 || (busy.running ?? []).length > 0)) {
+    const what = busy.running.length ? busy.running.join(', ') : busy.pendingTypes.join(', ');
+    return {
+      ok: false,
+      error: `MAA 正在跑任务（${what}），此时注入键盘会和它的触摸/点击打架：先 maa_stop 或等它跑完，再输入`,
+      maa: busy,
+    };
+  }
+
+  const resolve = deps.resolveAdbPath ?? resolveAdbPath;
+  const resolved = resolve({ configured: cfg.adbPath, hintPath: cfg.maaHint?.adbPath });
+  if (!resolved.ok) return { ok: false, error: resolved.error };
+
+  const typed = await typeTextAdbInput({
+    adbPath: resolved.path,
+    address: cfg.adbAddress,
+    text: v.text,
+    enter: Boolean(enter),
+    deps,
+  });
+  const shot = await capture({ cfg, bridge, adbPath: resolved.path, settleMs, deps });
+
+  const result = {
+    ok: Boolean(typed.ok),
+    backend: 'adb-input',
+    chars: v.text.length,
+    entered: Boolean(enter),
+    maa: busy,
+    screenshot: shot,
+    elapsedMs: Date.now() - startedAt,
+  };
+  if (!typed.ok) result.error = typed.error;
+  else if (shot.via === 'none') result.note = '文字已注入，但没截到图：用 maa_screenshot 确认是否真的进了输入框';
   return result;
 }
 

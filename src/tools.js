@@ -1,5 +1,6 @@
 /**
- * 工具定义（17 个）：远程控制 8 个 + 抄作业 3 个（+ 后台 2 个） + 自检 1 个 + 点击 1 个 + 滑动 1 个 + 模拟器 1 个。
+ * 工具定义（21 个）：远程控制 8 个 + 抄作业 3 个（+ 后台 2 个） + 自检 1 个 + 点击 1 个 + 滑动 1 个 + 模拟器 1 个
+ * + 账号 3 个（账号簿 / 输入文字 / 账号切换）。
  *
  * 这里是**唯一**把能力暴露给模型的地方；实现都在 src/ 下，工具只做参数校验与调度。
  * 描述里的口径与禁则是踩过坑的结论，改之前先读 docs/tools/maa*.md。
@@ -7,9 +8,21 @@
 import { doctor } from './doctor.js';
 import { findJobs, runCopilot, verifyScreenshot, clickScreen } from './copilot.js';
 import { resolveConfig } from './config.js';
-import { swipe } from './input/index.js';
+import { swipe, typeText } from './input/index.js';
 import { ensureEmulator } from './emulator.js';
 import { wakeupGame } from './wakeup.js';
+import {
+  accountBookFile,
+  readBook,
+  saveBook,
+  findAccounts,
+  upsertAccount,
+  touchAccount,
+  removeAccount,
+  listAccounts,
+  maskPhone,
+} from './account-book.js';
+import { switchAccount, clientTypeFromCfg, buildStartUpParams } from './switch-account.js';
 
 /* ────────────────────── JSON Schema 小工具 ────────────────────── */
 
@@ -81,6 +94,19 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
     if (!shot.ok) return { via: 'adb', ok: false, error: shot.error, hint: '先用 maa_doctor 看 adb 与设备状态' };
     return { via: 'adb', file: shot.file, bytes: shot.bytes };
   };
+
+  /** 账号簿一行：find/register 给完整手机号（模型要用来输入/切号），list 用打码版。 */
+  const accountRow = (a) => ({
+    phone: a.phone,
+    phoneMasked: maskPhone(a.phone),
+    nickname: a.nickname,
+    server: a.server,
+    loginMethods: a.loginMethods,
+    createdAt: a.createdAt,
+    lastLoginAt: a.lastLoginAt,
+    lastLoginMethod: a.lastLoginMethod,
+    note: a.note || null,
+  });
 
   return [
     /* ───────────── 自检 ───────────── */
@@ -332,8 +358,8 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
     {
       name: 'maa_copilot_status',
       description:
-        '查后台作业（`maa_copilot_run({background:true})` 起的）的进度：state / 已跑多久 / 最近的回调 / 结束后的完整结果。不给 runId 就查最近一条。' +
-        '配 `maa_screenshot` + `read_image` 一起用：看画面里的**目标生命值**有没有掉。',
+        '查后台任务（抄作业 / 账号切换）的进度：state / 已跑多久 / 最近的回调 / 结束后的完整结果。不给 runId 就查最近一条。' +
+        '配 `maa_screenshot` + `read_image` 一起用：抄作业时看画面里的**目标生命值**有没有掉。',
       parameters: obj({ runId: str('maa_copilot_run 返回的 runId；不填=最近一条') }),
       output: textOut('后台作业状态'),
       async execute(args) {
@@ -344,8 +370,8 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
     {
       name: 'maa_copilot_stop',
       description:
-        '停掉后台作业的 MAA 任务（AsstStopTask）——**发现目标生命值掉了就立刻调它**，然后自己去点「暂停 → 退出行动」把理智退回来。' +
-        '停的只是 MaaCore 的任务链，游戏仍停在战斗里；退出关卡的动作必须自己点（MAA 的任务表里没有「中途退出」）。' +
+        '停掉后台任务（AsstStopTask）——抄作业时**发现目标生命值掉了就立刻调它**，然后自己去点「暂停 → 退出行动」把理智退回来；' +
+        '账号切换时用它「随时取消」登录/切换流程。停的只是 MaaCore 的任务链，游戏还停在当时的画面（抄作业时退出关卡的动作必须自己点）。' +
         '不给 runId 就停最近一条。',
       parameters: obj({ runId: str('maa_copilot_run 返回的 runId；不填=最近一条') }),
       output: textOut('已停止后台作业'),
@@ -447,6 +473,163 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
         const seconds = Math.min(Math.max(Number(args.timeoutSeconds) || 180, 10), 600);
         const r = await ensureEmulator({ cfg, autoLaunch: action === 'start', timeoutMs: seconds * 1000 });
         return { action, ...r };
+      },
+    },
+
+    /* ───────────── 账号 / 登录（后端 C：adb 点击&输入 + MaaCore StartUp）───────────── */
+    {
+      name: 'maa_account_book',
+      description:
+        '本地账号簿（手机号 ↔ 明日方舟昵称）：多用户共用这台电脑时，查「谁该切到哪个号」、登记新用户、记一次成功登录。' +
+        '**只存本地** `data/accounts.json`（不进仓库、不联网）；**验证码绝不落盘**；`list` 的手机号一律打码。' +
+        '新用户流程：先问用户手机号+昵称 → `find` 确认没登记 → 确认要注册后 `register` → 再问登录方式（手机号+验证码 / 扫码）。' +
+        '老用户：`find` 命中后走逻辑2 `maa_account_switch({phone})`；切换失败/登录过期 = 当新用户走登录流程。' +
+        '成功进游戏后 `touch` 记一次登录。**不要把别人的手机号告诉其他用户**。',
+      parameters: obj(
+        {
+          action: {
+            type: 'string',
+            enum: ['list', 'find', 'register', 'touch', 'remove'],
+            description: 'list=列出（打码）；find=按手机号/昵称查；register=登记/更新；touch=记一次成功登录；remove=删除',
+          },
+          phone: str('手机号（官服 11 位；B服/繁中/韩服填登录名）'),
+          nickname: str('明日方舟昵称（主界面左上角医生名）'),
+          loginMethod: { type: 'string', enum: ['code', 'qr', 'switch', 'unknown'], description: '登录方式：code=手机号+验证码 / qr=扫码 / switch=MAA 账号切换 / unknown' },
+          server: str('客户端：Official / Bilibili / txwy / YoStarKR，默认 Official'),
+          note: str('备注（可选）'),
+          overwrite: bool('昵称已被别的手机号占用时，确认是同一人换号才加 true'),
+        },
+        ['action'],
+      ),
+      output: textOut('账号簿'),
+      async execute(args) {
+        const cfg = await cfgOf();
+        const file = accountBookFile(cfg.dataRoot);
+        const loaded = readBook(file);
+        const book = loaded.book;
+        const base = { path: file, count: book.accounts.length };
+        if (loaded.problems.length) base.problems = loaded.problems;
+        const action = String(args.action || '');
+
+        if (action === 'list') {
+          return { ok: true, ...base, masked: true, accounts: listAccounts(book) };
+        }
+        if (action === 'find') {
+          const found = findAccounts(book, { phone: args.phone, nickname: args.nickname });
+          const rows = [];
+          const push = (a) => { if (a && !rows.some((r) => r.phone === a.phone)) rows.push(accountRow(a)); };
+          push(found.phone);
+          push(found.exactNickname);
+          for (const a of found.nicknameMatches ?? []) push(a);
+          const registered = Boolean(found.phone || found.exactNickname);
+          return {
+            ok: true,
+            ...base,
+            registered,
+            matches: rows,
+            phoneError: found.phoneError ?? null,
+            hint: registered
+              ? '已登记：先按逻辑2 用 maa_account_switch({phone}) 切号；切换失败/登录过期 = 当新用户走逻辑1。'
+              : '没登记：先问用户是否注册（手机号+昵称）→ maa_account_book({action:"register"}) → 再问登录方式（手机号+验证码 / 扫码）→ 走登录流程（见 skill）。',
+          };
+        }
+        if (action === 'register') {
+          const r = upsertAccount(book, {
+            phone: args.phone,
+            nickname: args.nickname,
+            loginMethod: args.loginMethod ?? 'unknown',
+            server: args.server ?? 'Official',
+            note: args.note ?? '',
+            overwrite: Boolean(args.overwrite),
+          });
+          if (!r.ok) return { ok: false, ...base, error: r.error, code: r.code ?? null, conflict: r.conflict ?? null };
+          const saved = saveBook(file, book);
+          if (!saved.ok) return { ok: false, ...base, error: saved.error };
+          return {
+            ok: true,
+            ...base,
+            count: saved.count,
+            action: r.action,
+            account: accountRow(r.account),
+            previousNickname: r.previousNickname ?? null,
+            note: '只存本地 data/accounts.json；验证码从来没有落盘',
+          };
+        }
+        if (action === 'touch') {
+          const r = touchAccount(book, { phone: args.phone, loginMethod: args.loginMethod ?? 'switch' });
+          if (!r.ok) return { ok: false, ...base, error: r.error, code: r.code ?? null };
+          const saved = saveBook(file, book);
+          if (!saved.ok) return { ok: false, ...base, error: saved.error };
+          return { ok: true, ...base, account: accountRow(r.account) };
+        }
+        if (action === 'remove') {
+          const r = removeAccount(book, { phone: args.phone, nickname: args.nickname });
+          if (!r.ok) return { ok: false, ...base, error: r.error, code: r.code ?? null };
+          const saved = saveBook(file, book);
+          if (!saved.ok) return { ok: false, ...base, error: saved.error };
+          return { ok: true, ...base, count: saved.count, removed: r.removed };
+        }
+        throw new Error(`action 不认识: ${action}（可选 list/find/register/touch/remove）`);
+      },
+    },
+    {
+      name: 'maa_input_text',
+      description:
+        '往**当前已聚焦的输入框**里打字（登录用：手机号 / 验证码）。**先用 maa_click 点中输入框**，再调它。' +
+        '只接受数字 / 英文字母和 @ . _ + -（adb `input text` 对中文和空格不可靠，中文请让用户自己输）；打完会截图，用 read_image 确认真的进框了。' +
+        'MAA 正在跑任务时会拒绝（两路输入会打架）。',
+      parameters: obj(
+        {
+          text: str('要输入的内容（数字/字母；手机号、验证码）'),
+          enter: bool('打完是否按一次回车（默认 false）'),
+        },
+        ['text'],
+      ),
+      output: textOut('文字输入'),
+      async execute(args) {
+        const cfg = await cfgOf();
+        const bridge = await getBridge().catch(() => null);
+        return typeText({ cfg, bridge, text: String(args.text ?? ''), enter: Boolean(args.enter) });
+      },
+    },
+    {
+      name: 'maa_account_switch',
+      description:
+        '用 MAA 的「账号切换」把游戏切到指定账号（登录名/手机号）并进主界面：MaaCore 直连下发 **StartUp 任务 + account_name**，账号名可以动态传（远程控制的 LinkStart-WakeUp 做不到——它只读 MAA 配置）。' +
+        '支持官服 / B服 / 繁中服 / 韩服；**PC 端直连、EN/JP 不支持**。' +
+        '**只能切到本机登录记录里已有的账号**：登录过期或从没在这台电脑登录过会失败——失败时按新用户登录流程（逻辑1：手机号+验证码 / 扫码）处理，不要重试到死。' +
+        '前置：模拟器在跑、游戏已开或允许 startGame 自动拉起；MAA GUI 正在跑任务时会拒绝（先等它跑完，别打断）。' +
+        '**background:true 推荐**：立刻返回 runId，用 maa_copilot_status 看进度、maa_copilot_stop 随时取消。' +
+        '成功后截图确认主界面左上角医生名是目标账号，再 maa_account_book({action:"touch"}) 记一次登录。',
+      parameters: obj(
+        {
+          phone: str('目标账号登录名（官服=手机号）'),
+          clientType: str('客户端类型，默认取 MAA 配置（Official / Bilibili / txwy / YoStarKR）'),
+          startGame: bool('游戏没开时让 MAA 拉起（默认 true）'),
+          timeoutSeconds: num('最长等待秒数，默认 240，范围 60~300'),
+          background: bool('后台跑，立刻返回 runId（推荐；可随时 maa_copilot_stop 取消）'),
+        },
+        ['phone'],
+      ),
+      output: textOut('账号切换'),
+      async execute(args) {
+        const cfg = await cfgOf();
+        const bridge = await getBridge().catch(() => null);
+        const phone = String(args.phone ?? '');
+        const startGame = args.startGame === undefined ? true : Boolean(args.startGame);
+        const clientType = args.clientType ? String(args.clientType) : clientTypeFromCfg(cfg);
+        const pre = buildStartUpParams({ phone, clientType, startGame });
+        if (!pre.ok) return { ok: false, status: 'invalid', error: pre.error };
+        const timeoutSeconds = Number(args.timeoutSeconds) || 240;
+        if (args.background) {
+          if (!copilotRunner) return { ok: false, error: '后台模式不可用：runner 未注入（用 background:false 或重载插件）' };
+          return copilotRunner.startJob({
+            label: 'account-switch',
+            run: ({ onEvent, onReady }) =>
+              switchAccount({ cfg, bridge, phone, clientType, startGame, timeoutSeconds, onEvent, onReady }),
+          });
+        }
+        return switchAccount({ cfg, bridge, phone, clientType, startGame, timeoutSeconds });
       },
     },
   ];

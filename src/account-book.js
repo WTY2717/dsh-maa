@@ -8,8 +8,13 @@
  * 三条硬约束（多用户共用一台电脑）：
  *  1. **只存本地**：`<dataRoot>/accounts.json` —— data/ 已 gitignore，不进仓库、不上传。
  *  2. **验证码绝不落盘**：本模块只认手机号/昵称/登录方式，没有任何存验证码的字段。
- *  3. **列表一律打码**：`list` 只回 `138****8000` 这种；完整手机号只在 `find` / `register`
- *     的结果里给模型（用来输入、切号），不要把别人的手机号念给其他用户。
+ *  3. **列表一律打码**：`list` 只回 `138****8000` 这种；完整手机号只在登录流程里向用户要，
+ *     不要把别人的手机号念给其他用户。
+ *
+ * 第四条（2026-10-27 与 QQ 侧排队一起定）：
+ *  4. **入库只存 MAA 规范形态的掩码登录名**（11 位手机号 → `173****8245`）：MAA 的账号切换
+ *     是按游戏登录页显示的名字做 OCR 模糊匹配，完整手机号匹配不上；顺带满足「本地不留完整号」。
+ *     旧数据里的完整号在读取/写入时都会自动转成掩码（`toMaskedLoginName`）。
  *
  * 读写都容错：文件坏了不抛异常（坏文件备份成 `.bad-<时间戳>`，下次注册覆盖），
  * 写盘用「临时文件 + rename」保证不会写出半个 JSON。
@@ -74,9 +79,10 @@ export function normalizePhone(value) {
   };
 }
 
-/** 打码：13800138000 → 138****8000；邮箱/昵称 → 前 2 后 2。 */
+/** 打码：13800138000 → 138****8000；邮箱/昵称 → 前 2 后 2；已经是掩码的原样返回。 */
 export function maskPhone(phone) {
   const s = String(phone ?? '');
+  if (s.includes('*')) return s; // 账号簿里存的就是掩码登录名，不要二次打码成 17***45
   if (/^\d+$/.test(s)) {
     if (s.length >= 8) return `${s.slice(0, 3)}****${s.slice(-4)}`;
     if (s.length >= 4) return `****${s.slice(-4)}`;
@@ -84,6 +90,29 @@ export function maskPhone(phone) {
   }
   if (s.length >= 4) return `${s.slice(0, 2)}***${s.slice(-2)}`;
   return '****';
+}
+
+/**
+ * 转成 MAA「账号切换」能匹配的掩码登录名：11 位手机号 → 前 3 + `****` + 后 4。
+ *
+ * 为什么要转：MAA 的 account_name 是拿**游戏登录页显示的登录名**做 OCR 模糊匹配的，
+ * 游戏里只显示 `173****8245` 这种掩码，**完整手机号匹配不上**（MAA 手册明确可填
+ * `123****8901` / `123` / `8901` / `3****8`）。所以账号簿只存掩码形态：既符合 MAA 口径，
+ * 又顺带满足「不在本地留完整手机号」的隐私要求。
+ *
+ * 规则：去空格/横线/括号、去 +86/00 前缀；11 位纯数字才打码；已是掩码或非纯数字原样返回。
+ */
+export function toMaskedLoginName(value) {
+  const raw = typeof value === 'string' || typeof value === 'number' ? String(value).trim() : '';
+  if (!raw) return '';
+  if (raw.includes('*')) return raw;
+  let d = raw.replace(/[\s\-()（）]/g, '');
+  if (!/^\+?\d+$/.test(d)) return raw;
+  if (d.startsWith('+')) d = d.slice(1);
+  if (d.startsWith('00')) d = d.slice(2);
+  if (d.startsWith('86') && d.length === 13) d = d.slice(2);
+  if (/^\d{11}$/.test(d)) return `${d.slice(0, 3)}****${d.slice(-4)}`;
+  return raw;
 }
 
 /** 昵称归一化：去控制字符、压长度；空昵称拒绝（主界面左上角医生名 / 登录页显示名都行）。 */
@@ -106,7 +135,7 @@ function cleanRecord(raw) {
   const nickname = clip(raw?.nickname, 40);
   const p = normalizePhone(phoneRaw);
   if (!p.ok || !nickname) return null;
-  const phone = p.phone;
+  const phone = toMaskedLoginName(p.phone);
   const loginMethods = Array.isArray(raw?.loginMethods)
     ? uniq(raw.loginMethods.map(normalizeLoginMethod).filter((m) => m !== 'unknown'))
     : [];
@@ -181,14 +210,16 @@ export function saveBook(file, book) {
   }
 }
 
-/** 按手机号/昵称找账号（不写盘）。 */
+/** 按登录名/昵称找账号（不写盘）。传入完整手机号会先转掩码再比，兼容旧数据。 */
 export function findAccounts(book, { phone, nickname } = {}) {
   const accounts = book?.accounts ?? [];
   const out = { phone: null, nicknameMatches: [], exactNickname: null };
   if (phone !== undefined && phone !== null && String(phone).trim() !== '') {
     const p = normalizePhone(phone);
-    if (p.ok) out.phone = accounts.find((a) => a.phone === p.phone) ?? null;
-    else out.phoneError = p.error;
+    if (p.ok) {
+      const loginName = toMaskedLoginName(p.phone);
+      out.phone = accounts.find((a) => a.phone === loginName) ?? null;
+    } else out.phoneError = p.error;
   }
   const n = typeof nickname === 'string' ? nickname.trim().toLowerCase() : '';
   if (n) {
@@ -205,12 +236,13 @@ export function findAccounts(book, { phone, nickname } = {}) {
 export function upsertAccount(book, { phone, nickname, loginMethod = 'unknown', server = 'Official', note = '', overwrite = false } = {}) {
   const p = normalizePhone(phone);
   if (!p.ok) return { ok: false, error: p.error };
+  const loginName = toMaskedLoginName(p.phone);
   const n = normalizeNickname(nickname);
   if (!n.ok) return { ok: false, error: n.error };
   const accounts = book.accounts;
-  const existing = accounts.find((a) => a.phone === p.phone) ?? null;
+  const existing = accounts.find((a) => a.phone === loginName) ?? null;
   const conflict = accounts.find(
-    (a) => a.phone !== p.phone && a.nickname.toLowerCase() === n.nickname.toLowerCase(),
+    (a) => a.phone !== loginName && a.nickname.toLowerCase() === n.nickname.toLowerCase(),
   );
   if (conflict && !overwrite) {
     return {
@@ -234,7 +266,7 @@ export function upsertAccount(book, { phone, nickname, loginMethod = 'unknown', 
     return { ok: true, action: 'updated', account: { ...existing }, previousNickname };
   }
   const account = {
-    phone: p.phone,
+    phone: loginName,
     nickname: n.nickname,
     server: clip(server, 16) || 'Official',
     loginMethods: method === 'unknown' ? [] : [method],
@@ -249,13 +281,14 @@ export function upsertAccount(book, { phone, nickname, loginMethod = 'unknown', 
   return { ok: true, action: 'created', account: { ...account } };
 }
 
-/** 记一次成功登录/切换（更新 lastLoginAt / lastLoginMethod）。 */
+/** 记一次成功登录/切换（更新 lastLoginAt / lastLoginMethod）。传完整手机号也会转掩码再找。 */
 export function touchAccount(book, { phone, loginMethod = 'unknown' } = {}) {
   const p = normalizePhone(phone);
   if (!p.ok) return { ok: false, error: p.error };
-  const account = book.accounts.find((a) => a.phone === p.phone) ?? null;
+  const loginName = toMaskedLoginName(p.phone);
+  const account = book.accounts.find((a) => a.phone === loginName) ?? null;
   if (!account) {
-    return { ok: false, code: 'not-found', error: `账号簿里没有 ${maskPhone(p.phone)}（先用 register 登记手机号+昵称）` };
+    return { ok: false, code: 'not-found', error: `账号簿里没有 ${maskPhone(loginName)}（先用 register 登记登录名+昵称）` };
   }
   const method = normalizeLoginMethod(loginMethod);
   account.lastLoginAt = nowIso();
@@ -273,7 +306,8 @@ export function removeAccount(book, { phone, nickname } = {}) {
   if (phone !== undefined && phone !== null && String(phone).trim() !== '') {
     const p = normalizePhone(phone);
     if (!p.ok) return { ok: false, error: p.error };
-    target = book.accounts.find((a) => a.phone === p.phone) ?? null;
+    const loginName = toMaskedLoginName(p.phone);
+    target = book.accounts.find((a) => a.phone === loginName) ?? null;
   } else if (typeof nickname === 'string' && nickname.trim()) {
     const n = nickname.trim().toLowerCase();
     const hits = book.accounts.filter((a) => a.nickname.toLowerCase() === n);

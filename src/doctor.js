@@ -27,7 +27,7 @@ const REQUIRED = ['AsstSetUserDir', 'AsstLoadResource', 'AsstCreateEx', 'AsstApp
  * @param {string} [args.bridgeError] 桥启动失败的原因（可空）
  * @param {string} [args.pkgVersion] 插件版本
  */
-export async function doctor({ cfg, bridge = null, bridgeError = null, pkgVersion = '0.0.0', ui = null }) {
+export async function doctor({ cfg, bridge = null, bridgeError = null, pkgVersion = '0.0.0', ui = null, taskState = null }) {
   const problems = [];
   const warnings = [];
 
@@ -143,6 +143,47 @@ export async function doctor({ cfg, bridge = null, bridgeError = null, pkgVersio
     warnings.push(`账号簿读取失败: ${e?.message || e}`);
   }
 
+  /* 任务状态文件（给外部排队用，如 QQ 机器人的 /liw；MAA 写、外部只读） */
+  let taskStateInfo = null;
+  try {
+    if (taskState?.snapshot) {
+      const snap = taskState.snapshot();
+      const dir = path.dirname(String(snap.stateFile || ''));
+      let writable = false;
+      const writeError = taskState.writeError ?? null;
+      try {
+        fs.mkdirSync(dir, { recursive: true });
+        fs.accessSync(dir, fs.constants.W_OK);
+        writable = true;
+      } catch (e) {
+        problems.push(`任务状态文件目录不可写: ${dir}（${e.message}）`);
+      }
+      if (writeError) problems.push(`任务状态文件最近一次写盘失败: ${writeError}`);
+      const iso = (ms) => (ms ? new Date(ms).toISOString() : null);
+      taskStateInfo = {
+        file: snap.stateFile,
+        writable: writable && !writeError,
+        epoch: snap.epoch,
+        version: snap.version,
+        pluginVersion: snap.pluginVersion,
+        coverage: snap.coverage,
+        running: snap.running,
+        taskType: snap.taskType,
+        active: snap.active,
+        sequence: snap.sequence,
+        lastFinishedSeq: snap.lastFinishedSeq,
+        lastFinished: snap.lastFinished ? { ...snap.lastFinished, atIso: iso(snap.lastFinished.at) } : null,
+        updatedAt: iso(snap.updatedAt),
+        heartbeatAt: iso(snap.heartbeatAt),
+        note: '外部排队（QQ /liw）按这个文件判断「MAA 是否空闲」；只覆盖插件下发的任务，MAA 界面里手点的看不到',
+      };
+    } else {
+      warnings.push('任务状态模块未初始化：外部排队（QQ /liw）拿不到 MAA 状态');
+    }
+  } catch (e) {
+    warnings.push(`任务状态读取失败: ${e?.message || e}`);
+  }
+
   /* 桥 */
   const bridgeInfo = bridge
     ? bridge.health()
@@ -206,6 +247,7 @@ export async function doctor({ cfg, bridge = null, bridgeError = null, pkgVersio
     },
     emulator,
     accountBook,
+    taskState: taskStateInfo,
     input: input
       ? {
           backend: input.backend,
@@ -236,11 +278,12 @@ export async function doctor({ cfg, bridge = null, bridgeError = null, pkgVersio
     dirs: dirState,
     problems,
     warnings,
-    nextSteps: problems.length
+        nextSteps: problems.length
       ? ['按 problems 逐条修：MAA 路径 / 练度文件 / adb / node', '改完设置直接重跑 maa_doctor，不需要重启']
       : [
           '练度与作业站都通了就可以 maa_copilot_find(关卡)，再 maa_copilot_run 作业文件',
           '换人/换号：先 maa_account_book({action:"find"})，已登记就 maa_account_switch（逻辑2），没登记就走新用户登录流程（逻辑1，见 skill）',
+          '外部排队（QQ /liw）看 taskState.file：running=false 且心跳新鲜才代表 MAA 空闲',
         ],
     logDir: cfg.logDir,
   };

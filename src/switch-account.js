@@ -16,7 +16,7 @@ import { CoreWorker } from './core/driver.js';
 import { classify, summarize } from './core/callbacks.js';
 import { resolveAdbPath, screencap } from './adb.js';
 import { connectionExtras } from './copilot.js';
-import { normalizePhone, maskPhone } from './account-book.js';
+import { normalizePhone, maskPhone, toMaskedLoginName } from './account-book.js';
 import { maaBusy } from './input/index.js';
 
 /** MAA 的账号切换只支持这几个客户端（AccountSwitchTask.cpp 的 SupportedClientType）。 */
@@ -49,7 +49,8 @@ export function buildStartUpParams({ phone, clientType = 'Official', startGame =
     params: {
       client_type: ct,
       start_game_enabled: Boolean(startGame),
-      account_name: p.phone,
+      // MAA 是拿游戏登录页显示的登录名做 OCR 模糊匹配的：完整手机号匹配不上，必须传掩码形态（前三后四）
+      account_name: toMaskedLoginName(p.phone),
     },
   };
 }
@@ -77,6 +78,19 @@ export function switchAdvice({ ok, connectionFailed = false, failed = false, tim
       message:
         '没看到账号切换的动作（大概率是这个账号不在本机登录记录里 / 登录已过期 / 当前界面无法登出）。' +
         '把该用户当新用户：走逻辑1（手机号+验证码，或扫码登录）。',
+    };
+  }
+  if (failed && sawAccountSwitch) {
+    // 实测（2026-10-27，QQ 排队联调）：Callback 里已经出现 AccountSwitch 且切到了目标账号，
+    // 但 StartUp 任务链切完后会继续「开始唤醒」并触发 ExceededLimit → 任务链报 FAILED。
+    // 只凭 FAILED 就让人重新登录会把已经切好的号踢下线，所以这里给「可能已成功，先截图核对」。
+    return {
+      verdict: 'switch-probably-succeeded',
+      message:
+        '任务链最后没正常收尾，但回调里**看到了账号切换动作**（目标账号）：实测这种情况下号往往已经切成功' +
+        '（MAA 切完会继续跑唤醒，触发 ExceededLimit 之类的收尾错误，不代表没切到）。' +
+        '先 maa_screenshot + read_image 看主界面左上角医生名：是目标账号就 maa_account_book({action:"touch",loginMethod:"switch"}) ' +
+        '记一次登录并继续；不是目标账号才按新用户登录流程（逻辑1）处理。不要仅凭 FAILED 就让人重新登录。',
     };
   }
   return {
@@ -207,6 +221,8 @@ export async function switchAccount({
     const sawCompletion = Boolean(result.sawCompletion);
     const ok = sawCompletion && !result.failed;
     const status = ok ? 'switched' : result.timedOut ? 'timeout' : 'failed';
+    const advice = ok ? null : switchAdvice({ ok, failed: result.failed, timedOut: result.timedOut, sawAccountSwitch: accountSwitch.seen });
+    const probablySwitched = !ok && Boolean(accountSwitch.seen) && !result.timedOut;
     return {
       ok,
       status,
@@ -214,6 +230,7 @@ export async function switchAccount({
       failed: Boolean(result.failed),
       timedOut: Boolean(result.timedOut),
       idleExit: Boolean(result.idleExit),
+      probablySwitched,
       taskId: appended.taskId,
       target: { phoneMasked: maskPhone(phone), nickname: null },
       clientType: ct,
@@ -223,10 +240,12 @@ export async function switchAccount({
       progress: progressLines(),
       screenshot: shot.ok ? { file: shot.file, bytes: shot.bytes } : { error: shot.error },
       logFile: worker.logFile,
-      advice: ok ? null : switchAdvice({ ok, failed: result.failed, timedOut: result.timedOut, sawAccountSwitch: accountSwitch.seen }),
+      advice,
       hint: ok
         ? '切换任务链已结束：用 read_image 看截图确认停在主界面、左上角医生名是目标账号；确认后再 maa_account_book({action:"touch"}) 记一次登录。'
-        : '任务链没成功：看 advice 与截图决定重试 / 走新用户登录流程（逻辑1）。',
+        : probablySwitched
+          ? '任务链报失败，但回调里看到了账号切换且切完后继续唤醒超限（ExceededLimit）：**大概率已经切成功**。先看截图核对主界面医生名——是目标账号就按成功处理（touch 记录、继续办事），不要让人重新登录。'
+          : '任务链没成功：看 advice 与截图决定重试 / 走新用户登录流程（逻辑1）。',
     };
   } catch (e) {
     return {

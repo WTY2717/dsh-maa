@@ -1,6 +1,6 @@
 /**
- * 工具定义（21 个）：远程控制 8 个 + 抄作业 3 个（+ 后台 2 个） + 自检 1 个 + 点击 1 个 + 滑动 1 个 + 模拟器 1 个
- * + 账号 3 个（账号簿 / 输入文字 / 账号切换）。
+ * 工具定义（22 个）：远程控制 8 个 + 抄作业 3 个（+ 后台 2 个） + 自检 1 个 + 点击 1 个 + 滑动 1 个 + 模拟器 1 个
+ * + 账号 3 个（账号簿 / 输入文字 / 账号切换）+ 任务状态 1 个（给外部排队用，见 src/task-state.js）。
  *
  * 这里是**唯一**把能力暴露给模型的地方；实现都在 src/ 下，工具只做参数校验与调度。
  * 描述里的口径与禁则是踩过坑的结论，改之前先读 docs/tools/maa*.md。
@@ -62,7 +62,7 @@ const clampSec = (v, def, max) => Math.min(Math.max(Number(v) || def, 1), max);
  * @param {() => Promise<object|null>} deps.getBridge 取（必要时启动）bridge 实例
  * @param {string} deps.pkgVersion 插件版本
  */
-export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiState = () => null, copilotRunner = null }) {
+export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiState = () => null, copilotRunner = null, taskState = null }) {
   /** 每次调用都重新解析配置：路径、端口、开关都立即生效。 */
   const cfgOf = async () => resolveConfig(getConfig() ?? {}, pkgDir);
 
@@ -95,7 +95,7 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
     return { via: 'adb', file: shot.file, bytes: shot.bytes };
   };
 
-  /** 账号簿一行：find/register 给完整手机号（模型要用来输入/切号），list 用打码版。 */
+  /** 账号簿一行：`phone` 就是掩码登录名（MAA 账号切换只认这种形态，完整手机号匹配不上）。 */
   const accountRow = (a) => ({
     phone: a.phone,
     phoneMasked: maskPhone(a.phone),
@@ -122,7 +122,7 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
         let bridge = null;
         let bridgeError = null;
         try { bridge = await getBridge(); } catch (e) { bridgeError = String(e?.message || e); }
-        return doctor({ cfg, bridge, bridgeError, pkgVersion, ui: getUiState() });
+        return doctor({ cfg, bridge, bridgeError, pkgVersion, ui: getUiState(), taskState });
       },
     },
 
@@ -260,6 +260,27 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
       },
     },
 
+    /* ───────────── 任务状态（给外部排队用）───────────── */
+    {
+      name: 'maa_task_state',
+      description:
+        '只读的任务状态快照（**不会打断正在跑的任务**）：running / taskType / sequence / lastFinished / active 等，' +
+        '同时原子写到 `data/task-state.json`（外部程序只读，**不要写它**）。' +
+        '用途：给外部程序判断「MAA 现在忙不忙」（例如 QQ 机器人的 `/liw` 登录排队——MAA 任务一结束就轮下一位）。' +
+        '`waitMs` 可以长轮询到下一次状态变化（最多 55 秒），比反复调用省事。' +
+        '口径：只覆盖**经本插件下发的任务**（LinkStart* / 抄作业 / 账号切换 / 唤醒）；**MAA 界面里手点的任务看不到**。' +
+        '`AccountSwitch` 和 `LinkStart-WakeUp` 是交接任务，它们的结束不代表用户的服务任务结束。',
+      parameters: obj({ waitMs: num('等下一次状态变化的最长毫秒数（0~55000，默认 0 = 立刻返回）') }),
+      output: textOut('MAA 任务状态'),
+      async execute(args) {
+        if (!taskState) return { ok: false, error: '任务状态模块未初始化（重载插件后再试）' };
+        const waitMs = Math.min(Math.max(Number(args.waitMs) || 0, 0), 59_000);
+        let change = { changed: false, waitedMs: 0 };
+        if (waitMs > 0) change = await taskState.waitForChange(waitMs);
+        return { ok: true, changed: Boolean(change.changed), waitedMs: change.waitedMs ?? 0, ...taskState.snapshot() };
+      },
+    },
+
     /* ───────────── 抄作业（后端 B：MaaCore 直连）───────────── */
     {
       name: 'maa_copilot_find',
@@ -351,7 +372,13 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
           const started = copilotRunner.start({ jobFile: file, cfg, options });
           return picked ? { ...started, pickedFromFind: picked } : started;
         }
-        const result = await runCopilot({ jobFile: file, cfg, ...options, onEvent: () => {} });
+        const token = options.dryRun ? null : taskState?.beginTask({ type: 'Copilot', source: 'core' });
+        let result;
+        try {
+          result = await runCopilot({ jobFile: file, cfg, ...options, onEvent: () => {} });
+        } finally {
+          if (token) taskState?.endTask({ token, status: result?.ok ? 'SUCCESS' : 'FAILED' });
+        }
         return picked ? { ...result, pickedFromFind: picked } : result;
       },
     },
@@ -480,19 +507,21 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
     {
       name: 'maa_account_book',
       description:
-        '本地账号簿（手机号 ↔ 明日方舟昵称）：多用户共用这台电脑时，查「谁该切到哪个号」、登记新用户、记一次成功登录。' +
-        '**只存本地** `data/accounts.json`（不进仓库、不联网）；**验证码绝不落盘**；`list` 的手机号一律打码。' +
-        '新用户流程：先问用户手机号+昵称 → `find` 确认没登记 → 确认要注册后 `register` → 再问登录方式（手机号+验证码 / 扫码）。' +
-        '老用户：`find` 命中后走逻辑2 `maa_account_switch({phone})`；切换失败/登录过期 = 当新用户走登录流程。' +
-        '成功进游戏后 `touch` 记一次登录。**不要把别人的手机号告诉其他用户**。',
+        '本地账号簿（登录名 ↔ 明日方舟昵称）：多用户共用这台电脑时，查「谁该切到哪个号」、登记新用户、记一次成功登录。' +
+        '**只存本地** `data/accounts.json`（不进仓库、不联网）；**验证码绝不落盘**；`list` 一律打码。' +
+        '**入库只存 MAA 能匹配的掩码登录名**（官服 11 位手机号 → 前三后四位 `173****8245`），本地不留完整手机号；' +
+        '要发验证码登录时向用户要完整手机号，**不要从账号簿取完整号**（取不到）。' +
+        '新用户流程：先问用户手机号+昵称 → `find` 确认没登记 → 确认要注册后 `register`（传完整号会自动转掩码）→ 再问登录方式（手机号+验证码 / 扫码）。' +
+        '老用户：`find` 命中后走逻辑2 `maa_account_switch({phone:"<掩码登录名>"})`；切换失败/登录过期 = 当新用户走登录流程。' +
+        '成功进游戏后 `touch` 记一次登录。**不要把别人的账号信息告诉其他用户**。',
       parameters: obj(
         {
           action: {
             type: 'string',
             enum: ['list', 'find', 'register', 'touch', 'remove'],
-            description: 'list=列出（打码）；find=按手机号/昵称查；register=登记/更新；touch=记一次成功登录；remove=删除',
+            description: 'list=列出（打码）；find=按登录名/昵称查；register=登记/更新；touch=记一次成功登录；remove=删除',
           },
-          phone: str('手机号（官服 11 位；B服/繁中/韩服填登录名）'),
+          phone: str('登录名：官服传 11 位手机号（自动转掩码存储），B服/繁中/韩服传登录名；也可以直接传掩码 173****8245'),
           nickname: str('明日方舟昵称（主界面左上角医生名）'),
           loginMethod: { type: 'string', enum: ['code', 'qr', 'switch', 'unknown'], description: '登录方式：code=手机号+验证码 / qr=扫码 / switch=MAA 账号切换 / unknown' },
           server: str('客户端：Official / Bilibili / txwy / YoStarKR，默认 Official'),
@@ -595,7 +624,8 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
     {
       name: 'maa_account_switch',
       description:
-        '用 MAA 的「账号切换」把游戏切到指定账号（登录名/手机号）并进主界面：MaaCore 直连下发 **StartUp 任务 + account_name**，账号名可以动态传（远程控制的 LinkStart-WakeUp 做不到——它只读 MAA 配置）。' +
+        '用 MAA 的「账号切换」把游戏切到指定账号（**掩码登录名**）并进主界面：MaaCore 直连下发 **StartUp 任务 + account_name**，账号名可以动态传（远程控制的 LinkStart-WakeUp 做不到——它只读 MAA 配置）。' +
+        '**account_name 必须是游戏登录页显示的登录名形态**（官服 = 前三后四位，如 `173****8245`）：完整手机号匹配不上（游戏里只显示掩码）。账号簿里存的就是这个形态，直接拿来传。' +
         '支持官服 / B服 / 繁中服 / 韩服；**PC 端直连、EN/JP 不支持**。' +
         '**只能切到本机登录记录里已有的账号**：登录过期或从没在这台电脑登录过会失败——失败时按新用户登录流程（逻辑1：手机号+验证码 / 扫码）处理，不要重试到死。' +
         '前置：模拟器在跑、游戏已开或允许 startGame 自动拉起；MAA GUI 正在跑任务时会拒绝（先等它跑完，别打断）。' +
@@ -603,7 +633,7 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
         '成功后截图确认主界面左上角医生名是目标账号，再 maa_account_book({action:"touch"}) 记一次登录。',
       parameters: obj(
         {
-          phone: str('目标账号登录名（官服=手机号）'),
+          phone: str('目标账号的掩码登录名（官服传完整手机号也行，会被转成 173****8245；**完整号形态本身匹配不上游戏登录页**）'),
           clientType: str('客户端类型，默认取 MAA 配置（Official / Bilibili / txwy / YoStarKR）'),
           startGame: bool('游戏没开时让 MAA 拉起（默认 true）'),
           timeoutSeconds: num('最长等待秒数，默认 240，范围 60~300'),
@@ -629,7 +659,14 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
               switchAccount({ cfg, bridge, phone, clientType, startGame, timeoutSeconds, onEvent, onReady }),
           });
         }
-        return switchAccount({ cfg, bridge, phone, clientType, startGame, timeoutSeconds });
+        const token = taskState?.beginTask({ type: 'AccountSwitch', source: 'core' });
+        let result;
+        try {
+          result = await switchAccount({ cfg, bridge, phone, clientType, startGame, timeoutSeconds });
+        } finally {
+          if (token) taskState?.endTask({ token, status: result?.ok ? 'SUCCESS' : 'FAILED' });
+        }
+        return result;
       },
     },
   ];

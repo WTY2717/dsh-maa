@@ -7,6 +7,9 @@
  *  2. 同手机号 = 更新；昵称被别的手机号占用 = 冲突（除非 overwrite）。
  *  3. 坏文件不抛异常：problems + 备份 .bad-*，下次注册覆盖。
  *  4. list 一律打码，find 才给完整手机号。
+ *
+ * 2026-10-27 起（QQ 侧登录排队）：账号簿**只存掩码登录名**（前三后四，MAA 账号切换只认这个形态），
+ * 旧数据里的完整号在读取/保存时自动转换。
  */
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -15,6 +18,7 @@ import path from 'node:path';
 import {
   normalizePhone,
   maskPhone,
+  toMaskedLoginName,
   normalizeNickname,
   normalizeLoginMethod,
   accountBookFile,
@@ -70,10 +74,25 @@ await test('非法：纯数字太短 / 含空白 / 空', () => {
   assert.equal(normalizePhone('').ok, false);
   assert.equal(normalizePhone(null).ok, false);
 });
-await test('打码：13800138000 → 138****8000', () => {
+await test('打码：13800138000 → 138****8000；已掩码不二次打码', () => {
   assert.equal(maskPhone('13800138000'), '138****8000');
   assert.equal(maskPhone('123456'), '****3456');
   assert.equal(maskPhone(''), '****');
+  assert.equal(maskPhone('173****8245'), '173****8245');
+});
+
+section('1b. 掩码登录名（MAA 账号切换只认前三后四）');
+await test('11 位手机号 → 前 3 + **** + 后 4（幂等）', () => {
+  assert.equal(toMaskedLoginName('13800138000'), '138****8000');
+  assert.equal(toMaskedLoginName('138****8000'), '138****8000');
+  assert.equal(toMaskedLoginName('138 0013 8000'), '138****8000');
+  assert.equal(toMaskedLoginName('+8613800138000'), '138****8000');
+});
+await test('非 11 位数字 / 登录名原样返回（B服、繁中、韩服）', () => {
+  assert.equal(toMaskedLoginName('abc12345'), 'abc12345');
+  assert.equal(toMaskedLoginName('ab@gmail.com'), 'ab@gmail.com');
+  assert.equal(toMaskedLoginName('12345'), '12345');
+  assert.equal(toMaskedLoginName(''), '');
 });
 
 section('2. 昵称归一化');
@@ -180,7 +199,7 @@ await test('按昵称模糊查（含精确匹配）', () => {
   upsertAccount(book, { phone: '13800138000', nickname: '博士A' });
   upsertAccount(book, { phone: '13900139000', nickname: '博士AB' });
   const found = findAccounts(book, { nickname: '博士A' });
-  assert.equal(found.exactNickname.phone, '13800138000');
+  assert.equal(found.exactNickname.phone, '138****8000');
   assert.equal(found.nicknameMatches.length, 2);
 });
 await test('按手机号查不到 = phone null', () => {
@@ -208,13 +227,43 @@ await test('remove 按手机号 / 按唯一昵称；重名要求用手机号', (
   assert.equal(removeAccount(book, { phone: '13900139000' }).ok, true);
   assert.equal(book.accounts.length, 0);
 });
-await test('list 打码，find 给完整手机号', () => {
+await test('list 打码；库里本身就是掩码（不存完整号）', () => {
   const book = emptyBook();
   upsertAccount(book, { phone: '13800138000', nickname: '博士A' });
   const listed = listAccounts(book);
   assert.equal(listed[0].phone, '138****8000');
-  assert.equal(listAccounts(book, { masked: false })[0].phone, '13800138000');
-  assert.equal(findAccounts(book, { phone: '13800138000' }).phone.phone, '13800138000');
+  assert.equal(listAccounts(book, { masked: false })[0].phone, '138****8000');
+  assert.equal(findAccounts(book, { phone: '13800138000' }).phone.phone, '138****8000');
+});
+
+await test('入库即掩码：完整手机号只存在入参里，落盘/查询都是前三后四', () => {
+  const book = emptyBook();
+  upsertAccount(book, { phone: '13800138000', nickname: '博士A' });
+  assert.equal(book.accounts[0].phone, '138****8000');
+  const listed = listAccounts(book);
+  assert.equal(listed[0].phone, '138****8000');
+  // 已掩码的记录，用完整手机号也能查到（旧数据/用户口述都兼容）
+  assert.equal(findAccounts(book, { phone: '13800138000' }).phone.nickname, '博士A');
+  assert.equal(findAccounts(book, { phone: '138****8000' }).phone.nickname, '博士A');
+});
+await test('旧数据（完整号）读取时自动转掩码，保存后文件里不再有完整号', () => {
+  const dir = tmpDir();
+  const file = accountBookFile(dir);
+  fs.writeFileSync(file, JSON.stringify({
+    version: 1,
+    updatedAt: '2026-10-26T00:00:00.000Z',
+    accounts: [{ phone: '17307958245', nickname: '梧桐月', server: 'Official', loginMethods: ['qr'], createdAt: '2026-10-26T00:00:00.000Z' }],
+  }));
+  const st = readBook(file);
+  assert.equal(st.book.accounts[0].phone, '173****8245');
+  assert.equal(st.book.accounts[0].nickname, '梧桐月');
+  assert.equal(saveBook(file, st.book).ok, true);
+  const raw = fs.readFileSync(file, 'utf8');
+  assert.equal(raw.includes('17307958245'), false, '文件里不能留完整手机号');
+  assert.equal(raw.includes('173****8245'), true);
+  const again = readBook(file);
+  assert.equal(again.book.accounts.length, 1);
+  assert.equal(again.book.accounts[0].phone, '173****8245');
 });
 
 console.log('');

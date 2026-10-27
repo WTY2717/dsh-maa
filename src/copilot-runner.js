@@ -10,13 +10,21 @@
  * 账号切换也用同一套：切换/登录流程要能「随时取消」，后台跑 + status/stop 才做得到。
  *
  * 进程安全：每个后台 run 都是一个 MaaCore 子进程；插件卸载/重载时必须全部收掉（dispose）。
+ *
+ * 生命周期钩子（`onBegin` / `onFinish`）：给任务状态文件（task-state.js）用——
+ * 后台任务在 bridge 列表里看不到，只能由 runner 自己在开始/结束时通知一声。
  */
 import { runCopilot } from './copilot.js';
 
 /** 内存里最多留几条已结束的记录（给 status 回看）。 */
 const MAX_KEEP_FINISHED = 5;
 
-export function createCopilotRunner({ log = () => {}, run = runCopilot } = {}) {
+export function createCopilotRunner({ log = () => {}, run = runCopilot, onBegin = null, onFinish = null } = {}) {
+  const fireHook = (name, hook, entry) => {
+    if (typeof hook !== 'function') return;
+    try { hook(entry); } catch (e) { log(`runner ${name} hook failed`, String(e?.message || e)); }
+  };
+
   /** @type {Map<string, object>} */
   const runs = new Map();
   let seq = 0;
@@ -63,6 +71,7 @@ export function createCopilotRunner({ log = () => {}, run = runCopilot } = {}) {
       lastCallbackAt: null,
     };
     runs.set(id, entry);
+    fireHook('onBegin', onBegin, entry);
 
     entry.promise = (async () => {
       try {
@@ -89,6 +98,7 @@ export function createCopilotRunner({ log = () => {}, run = runCopilot } = {}) {
         log('background run threw', entry.error);
         return null;
       } finally {
+        fireHook('onFinish', onFinish, entry);
         const finished = [...runs.values()]
           .filter((x) => x.state === 'done' || x.state === 'error')
           .sort((a, b) => a.startedAt - b.startedAt);
@@ -196,6 +206,13 @@ export function createCopilotRunner({ log = () => {}, run = runCopilot } = {}) {
     for (const entry of runs.values()) {
       try { if (entry.ctl?.stopTask) await entry.ctl.stopTask(); } catch { /* 已结束 */ }
       try { if (entry.ctl?.worker?.close) await entry.ctl.worker.close({ graceMs: 1000 }); } catch { /* 已退出 */ }
+      if (entry.state === 'running' || entry.state === 'starting') {
+        // 被卸载打断的任务也要收尾（否则任务状态文件会永远 running）
+        entry.state = 'error';
+        entry.error = entry.error ?? '插件卸载/重载，后台任务被中止';
+        entry.finishedAt = entry.finishedAt ?? Date.now();
+        fireHook('onFinish', onFinish, entry);
+      }
     }
     runs.clear();
   };

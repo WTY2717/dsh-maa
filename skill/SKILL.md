@@ -20,9 +20,11 @@ whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打�
 4. 滑动前确认没有 MAA 任务在跑（有任务时 `maa_swipe` 会拒绝）；滑动起点必须落在空白处，压在按钮上会真的点进去。
 5. **换人/新用户**：先确认现在登录的是不是**请求者本人**的号（`maa_screenshot` 看主界面左上角医生名）。对不上就按下面「多用户：换号 / 新用户登录」处理——**动任何登录/切号动作前先跟用户说「我已经在做了」**。
 
-## 多用户：换号 / 新用户登录（v2.0.0）
+## 多用户：换号 / 新用户登录（v2.1.0）
 
 一台电脑可能被多个用户用。当前登录的不是请求者的号时，**先换号再干活**；对方从没在这台电脑登过明日方舟（或登录过期）就走新用户登录。
+
+**账号簿只存「掩码登录名」**（官服 = 前三后四位，如 `173****8245`）：MAA 的账号切换是按游戏登录页显示的名字做 OCR 匹配的，**完整手机号匹配不上**；传完整 11 位号给 `register` 会自动转成掩码，本地不留完整号。要发验证码登录时**向用户要完整手机号**（账号簿里取不到）。
 
 **开场**：动登录/切号前先回用户一句「**我已经在做了**」，再开始。**任务随时可取消**：用户说停就停；后台切换用 `maa_copilot_stop(runId)` 停，然后截图告诉用户停在哪一屏。
 
@@ -31,9 +33,9 @@ whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打�
 1. 问用户：**账号绑定的手机号** + **明日方舟账号昵称**（主界面左上角医生名）。
 2. `maa_account_book({action:"find", phone, nickname})`：
    - `registered:true` → 老用户，走**逻辑2**；
-   - `registered:false` → 先问「要不要把这个号注册到本地账号簿」；同意后 `maa_account_book({action:"register", phone, nickname})`（只存本地 `data/accounts.json`）。
+   - `registered:false` → 先问「要不要把这个号注册到本地账号簿」；同意后 `maa_account_book({action:"register", phone, nickname})`（只存本地 `data/accounts.json`，入库自动转掩码登录名）。
 3. 再问**登录方式**：手机号 + 验证码，还是扫码。
-4. **占用检查**：`maa_current()`——`running` 非空说明别人正在用 → **请请求者稍等，不要 maa_stop 别人的任务**；空闲才继续。
+4. **占用检查**：`maa_current()`——`running` 非空说明别人正在用 → **请请求者稍等，不要 maa_stop 别人的任务**；空闲才继续。要更细的「闲不闲/连续状态」用 `maa_task_state()`（只读，含 `running/taskType/sequence`；**MAA 界面里手点的任务看不到**）。
 5. 模拟器：`maa_emulator({action:"status"})`。没开 → `maa_emulator({action:"start"})`，然后按**逻辑1**；已经开着 → 先试**逻辑2**。
 
 ### 逻辑2：切换到登录过的账号（MAA 账号切换）
@@ -41,9 +43,9 @@ whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打�
 1. 游戏在线时，先做**账号退出逻辑**，把游戏退到「开始唤醒」界面：
    - 不在首页：点**左上角从左往右第二个控件** → 弹出跳转面板 → 点「**首页**」回首页。
    - 已在首页：点**左上角齿轮**（参考 1280 系 ≈ `(47,40)`）→ 设置页左下角「**账号登出**」（参考 ≈ `(73,647)`）→ 点右边**红底白字的确认勾**（以截图为准）→ 回到「开始唤醒」界面。
-2. `maa_account_switch({phone, background:true})` → 拿 `runId`；`maa_copilot_status(runId)` 盯进度 + `maa_screenshot` 看画面。
-3. 截图确认**主界面左上角医生名 = 目标昵称** → `maa_account_book({action:"touch", phone, loginMethod:"switch"})` → 告诉用户当前账号昵称 → 问这次要做什么。
-4. **失败/登录过期**（`advice.verdict` = `switch-unavailable` / `switch-failed` / `timeout`）→ 当新用户走**逻辑1**；最多重试一次，不要重试到死。
+2. `maa_account_switch({phone:"<掩码登录名>", background:true})` → 拿 `runId`；`maa_copilot_status(runId)` 盯进度 + `maa_screenshot` 看画面。
+3. 截图确认**主界面左上角医生名 = 目标昵称** → `maa_account_book({action:"touch", phone:"<掩码>", loginMethod:"switch"})` → 告诉用户当前账号昵称 → 问这次要做什么。
+4. **失败/登录过期**（`advice.verdict` = `switch-unavailable` / `switch-failed` / `timeout`）→ 当新用户走**逻辑1**；最多重试一次，不要重试到死。若是 **`switch-probably-succeeded`**（回调里看到账号切换、但任务链最后报 FAILED，实测 MAA 切完会继续唤醒触发 ExceededLimit）：**先截图核对医生名**——是目标账号就按成功处理（touch 记录、继续办事），不要让人重新登录。
 
 ### 逻辑1：新用户登录（没有登录记录 / 登录过期）
 
@@ -58,7 +60,7 @@ whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打�
 
 ### 隐私与安全（不是建议，是规矩）
 
-- 验证码只在当轮用：**不落盘、不写日志、不发到任何外部服务**；手机号/昵称只存本地账号簿（`list` 会打码）。**不要把别人的手机号/账号情况告诉其他用户**。
+- 验证码只在当轮用：**不落盘、不写日志、不发到任何外部服务**；账号簿只存**掩码登录名**（前三后四位），本地不留完整手机号，`list` 一律打码。**不要把别人的账号情况告诉其他用户**。
 - 二维码截图只发给当前请求者本人（展示在会话里），不要转发。
 - 登录/切换中途别 `maa_run` 起别的任务；失败先截图找原因，再决定重试还是转逻辑1。
 
@@ -91,7 +93,8 @@ whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打�
 | 走到要滑动的关卡 / 列表翻页 | `maa_swipe({from,to})`（**1280×720**，起点选空白，不消耗理智） |
 | 模拟器没开 / 连不上模拟器 | `maa_emulator({action:"start"})`（会等到能连上；插件启动时已自动做一次） |
 | 登录到主界面 / 模拟器刚启动完 | `maa_wakeup()`（复用 MAA「开始唤醒」，单独可调，约 60~110s 到主界面） |
-| 换人 / 登录别人的号 | `maa_account_book`（查/登记）→ 逻辑2 `maa_account_switch({phone})`；逻辑1 按上面「多用户」一节走 |
+| 换人 / 登录别人的号 | `maa_account_book`（查/登记）→ 逻辑2 `maa_account_switch({phone:"<掩码>"})`；逻辑1 按上面「多用户」一节走 |
+| 查 MAA 现在忙不忙 / 等它跑完 | `maa_task_state()`（只读；`waitMs` 可等下一次状态变化，最多 55s；只覆盖插件下发的任务） |
 | 输入手机号 / 验证码 | `maa_input_text({text})`（先用 `maa_click` 点中输入框） |
 | 停 | `maa_stop` → `maa_current` / 截图确认（无回执） |
 | 自检 / 路径不对 / 练度没解析出来 | `maa_doctor` |

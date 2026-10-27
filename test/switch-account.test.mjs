@@ -80,10 +80,12 @@ const deps = (overrides = {}) => ({
 });
 
 section('1. 下发参数');
-await test('官服手机号 → StartUp + account_name', () => {
+await test('官服手机号 → StartUp + account_name（自动转掩码：完整号匹配不上游戏登录页）', () => {
   const r = buildStartUpParams({ phone: '13800138000', clientType: 'Official', startGame: true });
   assert.equal(r.ok, true);
-  assert.deepEqual(r.params, { client_type: 'Official', start_game_enabled: true, account_name: '13800138000' });
+  assert.deepEqual(r.params, { client_type: 'Official', start_game_enabled: true, account_name: '138****8000' });
+  const masked = buildStartUpParams({ phone: '138****8000' });
+  assert.equal(masked.params.account_name, '138****8000');
 });
 await test('startGame=false 时不下发自动启动', () => {
   const r = buildStartUpParams({ phone: '13800138000', startGame: false });
@@ -119,8 +121,14 @@ await test('失败且没看到切换动作 → switch-unavailable（当新用户
   assert.equal(a.verdict, 'switch-unavailable');
   assert.match(a.message, /新用户/);
 });
-await test('失败但确实切过 → switch-failed', () => {
-  assert.equal(switchAdvice({ ok: false, failed: true, sawAccountSwitch: true }).verdict, 'switch-failed');
+await test('失败但看到账号切换动作 → switch-probably-succeeded（先截图核对，别让人重登）', () => {
+  const a = switchAdvice({ ok: false, failed: true, sawAccountSwitch: true });
+  assert.equal(a.verdict, 'switch-probably-succeeded');
+  assert.match(a.message, /read_image/);
+  assert.match(a.message, /不要仅凭 FAILED/);
+});
+await test('超时优先于「看到切换动作」→ 仍按 timeout 处理', () => {
+  assert.equal(switchAdvice({ ok: false, timedOut: true, sawAccountSwitch: true }).verdict, 'timeout');
 });
 
 section('3. 编排（假 worker）');
@@ -132,7 +140,7 @@ await test('成功路径：StartUp 下发、截图、close', async () => {
   assert.equal(r.taskId, 7);
   const w = FakeWorker.last;
   assert.equal(w.appended.type, 'StartUp');
-  assert.equal(w.appended.params.account_name, '13800138000');
+  assert.equal(w.appended.params.account_name, '138****8000');
   assert.equal(w.appended.params.client_type, 'Official');
   assert.equal(w.closed, true);
   assert.equal(r.screenshot.file, 'tmp/shots/switch.png');
@@ -147,7 +155,7 @@ await test('看到 AccountSwitch 回调 → accountSwitch.seen / target', async 
     this.opts.onEvent?.({
       event: 'cb',
       id: 20003,
-      text: JSON.stringify({ what: 'AccountSwitch', details: { account_name: '13800138000' } }),
+      text: JSON.stringify({ what: 'AccountSwitch', details: { account_name: '138****8000' } }),
     });
     return { sawCompletion: true, failed: false, callbacks: 3 };
   };
@@ -155,7 +163,7 @@ await test('看到 AccountSwitch 回调 → accountSwitch.seen / target', async 
     const r = await switchAccount({ cfg, phone: '13800138000', deps: deps() });
     assert.equal(r.ok, true);
     assert.equal(r.accountSwitch.seen, true);
-    assert.equal(r.accountSwitch.target, '13800138000');
+    assert.equal(r.accountSwitch.target, '138****8000');
   } finally {
     R.prototype.wait = origWait;
   }
@@ -173,6 +181,29 @@ await test('失败路径：没看到切换动作 → switch-unavailable', async 
     assert.equal(r.status, 'failed');
     assert.equal(r.advice.verdict, 'switch-unavailable');
     assert.equal(R.last.closed, true);
+  } finally {
+    R.prototype.wait = origWait;
+  }
+});
+await test('实机同款：回调看到账号切换但任务链 FAILED → probablySwitched + 截图核对口径', async () => {
+  const R = FakeWorker;
+  const origWait = R.prototype.wait;
+  R.prototype.wait = async function wait(ms) {
+    this.waitedMs = ms;
+    this.opts.onEvent?.({
+      event: 'cb',
+      id: 20003,
+      text: JSON.stringify({ what: 'AccountSwitch', details: { account_name: '138****8000' } }),
+    });
+    return { sawCompletion: false, failed: true, idleExit: true, callbacks: 2 }; // ← 2026-10-27 真机同款
+  };
+  try {
+    const r = await switchAccount({ cfg, phone: '13800138000', deps: deps() });
+    assert.equal(r.ok, false);
+    assert.equal(r.status, 'failed');
+    assert.equal(r.probablySwitched, true);
+    assert.equal(r.advice.verdict, 'switch-probably-succeeded');
+    assert.match(r.hint, /大概率已经切成功/);
   } finally {
     R.prototype.wait = origWait;
   }

@@ -225,6 +225,7 @@ export async function recognizeOperBox({ cfg, timeoutSeconds, limit, ownedOnly =
     dumpFile: dump.ok ? dump.file : null,
     dumpError: dump.ok ? null : dump.error,
     ...pickRunMeta(base),
+    ...(partialScanWarning({ action: 'operbox', callbacks: base.callbacks }) ?? {}),
     note: `完整 ${parsed.total} 条在 dumpFile（JSON：all_opers，含日/韩/繁中名）；chars 只返回${ownedOnly ? '已拥有的 ' : ''}前 ${lim} 条。`,
   };
 }
@@ -238,6 +239,21 @@ function pickRunMeta(base) {
     progress: base.progress ?? [],
     timedOut: Boolean(base.timedOut),
     failure: base.failure ?? null,
+  };
+}
+
+/**
+ * 识别完整性粗判（不是硬判据）：扫完整列表会有几十上百条回调，只扫第一屏时条数很少。
+ * 2026-10-28 实测：从主界面跑 OperBox 有 81 条回调/177 个拥有；从干员页直接跑只有 24 条/13 个。
+ * 回调数明显偏少时给模型一句 warning，别把不完整的识别结果当准数。
+ */
+function partialScanWarning({ action, callbacks = 0 } = {}) {
+  const threshold = action === 'depot' ? 30 : 40;
+  const n = Number(callbacks) || 0;
+  if (n >= threshold) return null;
+  return {
+    warning: `识别只收到 ${n} 条回调（正常应 ≥${threshold}）：很可能只扫了第一屏，结果不完整。请先把游戏切回**主界面**（左上角返回键退到主界面）再重跑一次。`,
+    advice: '回主界面后重试；若回调仍明显偏少，用 maa_screenshot 看是不是卡在登录页/公告/弹窗。',
   };
 }
 
@@ -305,6 +321,7 @@ export async function recognizeDepot({ cfg, timeoutSeconds, limit, onEvent, onRe
     dumpFile: dump.ok ? dump.file : null,
     dumpError: dump.ok ? null : dump.error,
     ...pickRunMeta(base),
+    ...(partialScanWarning({ action: 'depot', callbacks: base.callbacks }) ?? {}),
     note: `完整 ${parsed.totalTypes} 种物品在 dumpFile；items 按数量倒序返回前 ${lim} 条（物品 id 由 MAA 判定，名称来自 MAA resource/item_index.json）。`,
   };
 }

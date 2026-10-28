@@ -320,13 +320,18 @@ async function guardClick({ cfg, adbPath, extras, delayMs = 12000, shouldRun = (
 /**
  * 连接 extras：插件设置优先；否则用 MAA gui.new.json 里记的模拟器目录；
  * 再否则从 adb 路径推导（`…\shell\adb.exe` → `…`）。
+ *
+ * 注意：**不要显式写 `touch: false`**（2026-10-28 踩坑）。MAA 的慢速滑动类任务
+ * （干员识别 `OperBox`、仓库识别 `Depot` 的 SlowlySwipeToTheRight）在触控被禁用时
+ * 滑动无效，识别只扫第一屏就结束（表现为「只认出十几个干员」）。省略该字段走
+ * MAA 默认触控模式即可；我们自己的 `maa_swipe` 走 adb，与此无关。
  */
 export function connectionExtras(cfg, adbPath) {
   if (cfg.connectExtras) return cfg.connectExtras;
   const inst = cfg.maaHint?.emulatorPath
     ?? (adbPath && /[\\/]shell[\\/]adb(\.exe)?$/i.test(adbPath) ? path.dirname(path.dirname(adbPath)) : null);
   const clientType = cfg.maaHint?.clientType || 'Official';
-  return JSON.stringify({ ...(inst ? { path: inst } : {}), touch: false, client_type: clientType });
+  return JSON.stringify({ ...(inst ? { path: inst } : {}), client_type: clientType });
 }
 
 /** 截图验收（不跑作业，只出图）。 */

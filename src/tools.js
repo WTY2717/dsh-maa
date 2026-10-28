@@ -749,7 +749,8 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
         '`action="depot"` 仓库识别（**不消耗理智**；返回 totalTypes / totalCount + 按数量倒序前 limit 条 items（带物品名）+ dumpFile）；' +
         '`action="video"` 视频识别（file=本地游戏战斗录像，转成 Copilot 作业 JSON，复制到 jobsDir 返回 jobFile；**纯本地识别，不需要模拟器在线**；**成功路径未真机验证**）；' +
         '`action="gacha"` 抽卡糖（times=1 或 10，**消耗游戏内抽卡资源（合成玉/寻访凭证）——先问用户**；走远程控制桥，MAA 必须在线，返回截图路径用 read_image 看）。' +
-        '识别类要求游戏已登录（工具会自己从主界面导航到干员/仓库页，但登录页/公告会挡住）；超时默认 operbox/depot 600s、video 900s，可调 30~1800。' +
+        '识别类要求游戏已登录、且**停在主界面**（左上角返回键退到主界面）：从干员页/仓库页直接跑，MAA 只会扫第一屏、结果不完整（回调数偏少时结果里会给 warning，回主界面重跑即可）；登录页/公告会挡住。' +
+        '超时默认 operbox/depot 600s、video 900s，可调 30~1800。' +
         '结果里 dumpFile 是完整数据（干员含 name_jp/name_kr/name_tw），工具结果只返回前 N 条避免撑爆上下文。',
       parameters: obj(
         {

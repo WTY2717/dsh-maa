@@ -1,7 +1,7 @@
 ---
 name: maa-arknights
-description: 用 maa_* 工具驱动本机 MAA（明日方舟）——日常/刷关/基建/公招/信用商店/肉鸽/生息演算/抽卡/截图，自定义任务链（只刷几把、只跑基建+公招），干员/仓库/视频识别，多用户换号与新用户登录（手机号+验证码 / 扫码），以及到作业站找作业并自动抄（Copilot）。用户提到明日方舟、MAA、抄作业、刷本、看游戏画面、换号、登录时加载。
-whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打某关 / 基建换班 / 公招 / 信用商店 / 肉鸽 / 生息演算 / 牛牛抽卡 / 抄作业 / 只刷几次 / 自定义任务链 / 干员识别 / 仓库识别 / 视频识别 / 看看现在什么画面 / 理智还剩多少 / 换号 / 登录 / 新用户 / 扫码 时。
+description: 用 maa_* 工具驱动本机 MAA（明日方舟）——日常/刷关/基建/公招/信用商店/肉鸽/生息演算/抽卡/截图，自定义任务链（只刷几把、只跑基建+公招），牛杂页 9 个条目（黑流树海刷钱/隐秘战线/活动商店/绿票商店/黄票商店/生息演算商店/自动提升潜能/缺口材料合成/刷傀影皇冠）与通用牛杂动作（干员培养/库存保持/更新数据/换主题），干员/仓库/视频识别，多用户换号与新用户登录（手机号+验证码 / 扫码），以及到作业站找作业并自动抄（Copilot）。用户提到明日方舟、MAA、抄作业、刷本、看游戏画面、换号、登录时加载。
+whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打某关 / 基建换班 / 公招 / 信用商店 / 肉鸽 / 生息演算 / 牛牛抽卡 / 牛杂 / 黑流树海刷钱 / 绿票商店 / 黄票商店 / 生息演算商店 / 自动提升潜能 / 缺口材料合成 / 刷傀影皇冠 / 活动商店 / 隐秘战线 / 干员培养 / 库存保持 / 更新数据 / 换主题 / 抄作业 / 只刷几次 / 自定义任务链 / 干员识别 / 仓库识别 / 视频识别 / 看看现在什么画面 / 理智还剩多少 / 换号 / 登录 / 新用户 / 扫码 时。
 ---
 
 # MAA 明日方舟（`maa_*` 工具）
@@ -85,6 +85,7 @@ whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打�
 | 刷某关 | `maa_set(name="Stage1", value="1-7")` → `maa_run(type="LinkStart-Combat")` |
 | 自定义任务链（只刷几把 / 只跑基建+公招 / 领奖+刷关） | `maa_chain({tasks:[...], dryRun?:true, background?:true})`（MaaCore 直连；Fight 先问用户） |
 | 干员 / 仓库 / 视频识别、抽卡 | `maa_toolbox`：`action` 取 `operbox` / `depot` / `video` / `gacha`（识别不消耗理智；抽卡先问用户） |
+| 牛杂页 9 条目（黑流树海刷钱 / 隐秘战线 / 活动商店 / 绿票商店 / 黄票商店 / 生息演算商店 / 自动提升潜能 / 缺口材料合成 / 刷傀影皇冠）+ 生息演算 / 干员培养 / 库存保持 / 更新数据 / 换主题 | `maa_niuzza({action, ..., dryRun?:false})`（**默认 dryRun=true**；每个 action 自带 `prereq` 前置界面；真跑前先问用户） |
 | 基建 / 公招 / 领奖 / 信用商店 | `LinkStart-Base` / `-Recruiting` / `-Mission` / `-Mall` |
 | 肉鸽 / 生息演算 | `LinkStart-AutoRoguelike` / `-Reclamation`（需 MAA 里已有配置） |
 | 牛牛抽卡 | `Toolbox-GachaOnce` / `GachaTenTimes`（**先问用户**） |
@@ -108,6 +109,25 @@ whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打�
 3. **长链后台跑**：`background:true` 拿 runId → `maa_copilot_status/stop` 盯/停；Fight 掉血立刻 stop，再自己点「暂停 → 退出行动」（结算前退全退理智）。
 4. **识别**：干员 `maa_toolbox({action:"operbox"})`（实测约 30s；`total/ownedCount` + 前 50 条，完整在 `dumpFile`）；仓库 `depot`；视频 `video` + `file`（纯本地、不用模拟器；产出 `jobFile` 可直接抄）；抽卡 `gacha` + `times`（**先问用户**）。
 5. **别手改 `gui.new.json`**：临时编排用 `maa_chain`；永久改 MAA 一键长草队列/关卡在 MAA GUI 里改（MAA 运行时会覆盖手改）。
+
+## 牛杂（v2.3.0，`maa_niuzza`；**默认 dryRun，真跑前先问用户**）
+
+1. **`dryRun` 默认 `true`**：只 append 校验参数（不连接、不 startTask、零消耗）。先跑一遍看 `appended` 是否都拿到 `taskId`，再把 `plan`（含 `prereq` 前置界面）和「真跑会花什么」告诉用户，得到同意后**显式** `dryRun:false`。
+2. **界面 9 个条目一个 action 一个**（都对 `Custom` 短任务名，工具不导航，先按 `prereq` 把游戏停到位）：
+   - `blackflow-money`（黑流树海刷钱；前置：肉鸽**右下角有「开始探索」**；长时间挂机、要特勤分队+结构性原理跳节点）
+   - `secret-front({ending:"C", event:"游侠"})`（隐秘战线；前置：「选小队」界面）
+   - `event-shop({blacklist:["家具零件"]})`（活动商店；前置：活动商店页面；花活动代币）
+   - `green-shop`（绿票=资质凭证：1 层全买、2 层买寻访凭证与招聘许可）
+   - `yellow-shop`（黄票=高级凭证：买单抽/十连，建议 ≥258 张）
+   - `reclamation-shop`（生息演算商店；前置：生息演算商店页面；花生息演算代币）
+   - `auto-raise-potential({useNormalToken:false})`（自动提升潜能；前置：**干员列表界面**；消耗信物改养成）
+   - `material-synthesis`（缺口材料合成；前置：**加工站合成页**，从培养页缺材料弹窗进）
+   - `phantom-crown`（刷傀影维多利亚皇冠；前置：傀影肉鸽主菜单**「探索」可见**；反复开局→查收藏品→放弃重来）
+3. 通用动作：`reclamation({theme:"Tales", mode:1})` 或 `{theme:"RelaunchAnchor", mode:"RA-1"}`（真玩、改存档）、`oper-progress({plans:[{role:"Sniper",name:"能天使",elite:2,skillLevel:7,skillMastery:[3,0,0]}]})`（花材料）、`depot-maintain({plans:[{stage:"1-7",dropId:"30011",dropCount:10}]})`（消耗理智）、`user-data-update()`（= 更新数据，跑 OperBox+Depot 识别刷新缓存，**不花资源**）、`switch-theme({themes:["夜间"]})`、`custom({taskNames:[...]})`（9 个条目名可直接当别名）。
+4. **生息演算不要手动删 `toolsToCraft`**：MaaCore 6.20.1 在 `Tales` + `mode:1` 缺 `tools_to_craft` 时会直接崩（整个 core 子进程退出）；工具已默认补齐 `["荧光棒"]`。`theme:"Fire"`（沙中之火）已下线，core 会拒绝。
+5. 真跑可 `background:true`（task-state 里记成 `Custom`），用 `maa_copilot_status` / `maa_copilot_stop` 盯和停；`timeoutSeconds` 默认 900（生息演算/隐秘战线/黑流刷钱可给到 7200）。
+6. **这些动作都不是 core 的独立任务类型**：9 条目 + 活动商店/隐秘战线走 `Custom` 短任务名，更新数据 = `OperBox`+`Depot`，库存保持 = `Depot`+`Fight`——所以不要用 `maa_chain` 直接 append `EventShop`/`SecretFront`/`UserDataUpdate`/`DepotMaintain`（会被 core 拒绝）。
+7. **黑流刷钱的任务名只在 MAA 热更资源里**（`cache\resource`）：worker 已按 GUI 顺序额外加载它；新版自动肉鸽的「刷源石锭」是另一条路（`roguelike({theme:"BlackFlow", mode:1})`），别和 `blackflow-money` 混。
 
 ## 长任务节奏
 
@@ -138,6 +158,7 @@ whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打�
 ## 禁则
 
 - 抽卡 / 碎石 / 吃药 / `StopTask` 打断正在跑的长草 → **先征得用户同意**。
+- `maa_niuzza` **默认 dryRun**；`blackflow-money`（长时间挂机打肉鸽）/ `event-shop`（花活动代币）/ `green-shop`·`yellow-shop`（花资质/高级凭证）/ `reclamation-shop`（花生息演算代币）/ `auto-raise-potential`（消耗信物改养成）/ `material-synthesis`（花材料/龙门币）/ `phantom-crown`（反复开局放弃肉鸽）/ `depot-maintain`（花理智）/ `oper-progress`（花材料）/ `secret-front` / `reclamation` / `roguelike` / `custom`（真玩小游戏、改存档或抽卡）→ 真跑前**必须**先问用户，跑后必须截图验收。
 - `maa_chain` 里的 Fight / StartUp / CloseDown 有真实代价（理智 / 切号 / 关游戏）→ **先问用户**；链失败/超时不要自动重发 Fight。
 - 一次只排一个长任务；**同一个 `LinkStart` 绝不重发**（会抢占、从头重开）。
 - 任务跑着时 `maa_set` 会排在它后面，别以为立刻生效。

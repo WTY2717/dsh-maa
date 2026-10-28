@@ -1,7 +1,8 @@
 /**
- * 工具定义（24 个）：远程控制 8 个 + 抄作业 3 个（+ 后台 2 个） + 自检 1 个 + 点击 1 个 + 滑动 1 个 + 模拟器 1 个
+ * 工具定义（25 个）：远程控制 8 个 + 抄作业 3 个（+ 后台 2 个） + 自检 1 个 + 点击 1 个 + 滑动 1 个 + 模拟器 1 个
  * + 账号 3 个（账号簿 / 输入文字 / 账号切换）+ 任务状态 1 个（给外部排队用，见 src/task-state.js）
- * + 可编程任务链 1 个（maa_chain）+ 小工具 1 个（maa_toolbox：干员/仓库/视频识别、抽卡糖）。
+ * + 可编程任务链 1 个（maa_chain）+ 小工具 1 个（maa_toolbox：干员/仓库/视频识别、抽卡糖）
+ * + 牛杂 1 个（maa_niuzza：牛杂页 9 个条目全覆盖 + 自定任务/单步/更新数据/主题/干员培养/库存保持/生息演算/肉鸽，默认 dryRun）。
  *
  * 这里是**唯一**把能力暴露给模型的地方；实现都在 src/ 下，工具只做参数校验与调度。
  * 描述里的口径与禁则是踩过坑的结论，改之前先读 docs/tools/maa*.md。
@@ -14,6 +15,7 @@ import { ensureEmulator } from './emulator.js';
 import { wakeupGame } from './wakeup.js';
 import { runChain, validateChainTasks, chainHint, CORE_TASK_TYPES, CHAIN_TIMEOUT_RANGE } from './chain.js';
 import { recognizeOperBox, recognizeDepot, recognizeVideo, runGacha, TOOLBOX_ACTIONS } from './toolbox.js';
+import { runNiuzza, buildNiuzzaPlan, niuzzaHint, NIUZZA_ACTIONS, NIUZZA_TIMEOUT, ROGUELIKE_THEMES, RECLAMATION_THEMES } from './niuzza.js';
 import {
   accountBookFile,
   readBook,
@@ -47,6 +49,9 @@ const point = (description) => ({
   required: ['x', 'y'],
   additionalProperties: false,
 });
+
+const strArr = (description) => ({ type: 'array', description, items: { type: 'string' } });
+const objArr = (description) => ({ type: 'array', description, items: { type: 'object', additionalProperties: true } });
 
 /** 输出统一成「一段可读 JSON」，卡片不折腾。 */
 const textOut = (title) => ({
@@ -679,7 +684,8 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
       name: 'maa_chain',
       description:
         '可编程 MaaCore 任务链（**不经过 MAA GUI 的队列**）：按顺序把 tasks 里每条 append 到同一个会话，再 startTask，等整条链结束。' +
-        '可用 type：StartUp / CloseDown / Fight / Recruit / Infrast / Mall / Award / Roguelike / Copilot / SSSCopilot / Depot / OperBox / VideoRecognition / Reclamation / Custom / SingleStep。' +
+        '可用 type：StartUp / CloseDown / Fight / Recruit / Infrast / Mall / Award / Roguelike / Copilot / SSSCopilot / Depot / OperBox / VideoRecognition / Reclamation / Custom / SingleStep / SwitchTheme / OperProgress。' +
+        '（GUI 的「更新数据 / 库存保持 / 活动商店 / 隐秘战线」**不是** core 类型，用 `maa_niuzza` 的动作；直接 append 会被 core 拒绝。）' +
         '典型用法：只刷 1-7 三次不吃药 = `[{"type":"Fight","params":{"stage":"1-7","times":3,"medicine":0,"stone":0}}]`；只跑基建+公招 = `[{"type":"Infrast","params":{}},{"type":"Recruit","params":{"times":4}}]`；领奖后再刷关 = Award → Fight。' +
         '**危险任务（真实消耗/改变游戏状态，动手前必须先问用户）**：Fight 会刷关**消耗理智**（吃药/碎石按 params）；StartUp 会启动/唤醒游戏、带 account_name 会**切换账号（登出当前账号）**；CloseDown 会**关闭游戏**。不要擅自跑 Fight / Copilot。' +
         'dryRun=true 只 append 校验 core 能不能接受（不连接模拟器、不 startTask、绝不执行），适合先验证参数。' +
@@ -737,6 +743,134 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
           if (token) taskState?.endTask({ token, status: result?.ok ? 'SUCCESS' : 'FAILED' });
         }
         return dangers ? { ...result, dangers } : result;
+      },
+    },
+
+    /* ───────────── 牛杂（MAA 小工具页 / 活动商店 / 生息演算…）───────────── */
+    {
+      name: 'maa_niuzza',
+      description:
+        '牛杂（MAA GUI「小工具 / 牛杂」页的 MaaCore 直连版）：把牛杂页 9 个条目（黑流树海刷钱、隐秘战线、活动商店、绿票商店、黄票商店、生息演算商店、自动提升潜能、缺口材料合成、刷傀影维多利亚皇冠）与通用动作（自定任务、单步战斗、更新数据、更换主题、干员培养、库存保持、生息演算、自动肉鸽）做成一个可调动作。' +
+        '**dryRun 默认 true**：只 append 校验参数（不连接模拟器、不 startTask、绝不执行）。' +
+        '**真实执行前必须先跟用户确认**：`blackflow-money` 长时间打肉鸽、`event-shop`/`green-shop`/`yellow-shop`/`reclamation-shop` 花代币/凭证、`depot-maintain` 消耗理智、`oper-progress` 花材料/龙门币、`auto-raise-potential` 消耗信物改养成、`material-synthesis` 花材料、`phantom-crown` 反复开局放弃傀影肉鸽、`secret-front`/`reclamation`/`roguelike`/`custom` 会真的玩小游戏或打关并改游戏进度，`user-data-update` 会刷新 MAA 本地干员/仓库缓存。' +
+        '**这些条目都不会自己导航**：必须先按 `prereq`/hint 里的前置界面把游戏停在对应页面（例如黑流刷钱要停在肉鸽右下角有「开始探索」处），界面不对 core 会卡住或走错分支。' +
+        '动作：`blackflow-money`（= 牛杂当期活动「黑流树海刷钱」，Custom 任务名 BlackFlowTemporary@Begin）；' +
+        '`secret-front`（ending A~E + 可选 event 支援作战平台/游侠/诡影迷踪）；' +
+        '`event-shop`（blacklist = 不买的商品关键词，其余全买）；' +
+        '`green-shop`（绿票=资质凭证：1 层全买、2 层买寻访凭证与招聘许可）；' +
+        '`yellow-shop`（黄票=高级凭证：买单抽/十连寻访凭证，建议 ≥258 张）；' +
+        '`reclamation-shop`（生息演算商店，花生息演算代币）；' +
+        '`auto-raise-potential`（自动提升潜能，可选 useNormalToken）；' +
+        '`material-synthesis`（缺口材料合成，递归补下级）；' +
+        '`phantom-crown`（刷傀影维多利亚皇冠，反复开局→检查收藏品→放弃重来）；' +
+        '`custom`（task_names 组合，短任务名可用上面 9 个条目的 action 名或 event-shop/material-synthesis/auto-raise-potential/pixel-paint/gacha-once/gacha-ten 别名）；' +
+        '`single-step`（单步自动战斗：stage 设关卡 / start 开始 / action 逐步执行）；' +
+        '`user-data-update`（= GUI 更新数据，跑 OperBox/Depot 识别刷新缓存，不花资源）；' +
+        '`switch-theme`（themes 数组，游戏内主题名，多个随机选一个）；' +
+        '`oper-progress`（plans 或 file：role/name/elite/skill_level/skill_mastery）；' +
+        '`depot-maintain`（plans：stage/dropId/dropCount，先 Depot 识别再每计划一条 Fight，drops 达量即停）；' +
+        '`reclamation`（theme Tales/RelaunchAnchor、mode 0/1 或 RA-1/RA-4/RA-15、toolsToCraft/numCraftBatches）；' +
+        '`roguelike`（theme/mode/startsCount/investmentsCount/squad/roles/coreChar 等；黑流树海新版「刷源石锭」走这里，不是 blackflow-money）。' +
+        '**生息演算参数已按 core 防崩要求补齐 `tools_to_craft`**（MaaCore 6.20.1 在 Tales/mode=1 缺该字段时会直接崩溃，别自己删）。' +
+        '`background:true` 走后台（用 maa_copilot_status 看进度、maa_copilot_stop 随时取消）；`timeoutSeconds` 默认 900，范围 30~7200。' +
+        '**流程：先 dryRun 看 appended 是否都拿到 taskId → 跟用户确认代价 → 再 dryRun:false。**',
+      parameters: obj(
+        {
+          action: { type: 'string', enum: [...NIUZZA_ACTIONS], description: '动作，见描述' },
+          dryRun: bool('**默认 true**：只 append 校验，不连接、不 startTask、绝不执行。要真跑必须显式 false（并先问用户）'),
+          background: bool('真实执行时后台跑：立刻返回 runId，用 maa_copilot_status / maa_copilot_stop 盯和停。默认 false'),
+          timeoutSeconds: num(`最长等待秒数，默认 ${NIUZZA_TIMEOUT.default}，范围 ${NIUZZA_TIMEOUT.min}~${NIUZZA_TIMEOUT.max}`),
+          // custom
+          taskNames: strArr('custom：tasks.json 任务名数组（或别名 blackflow-money / secret-front / green-shop / yellow-shop / reclamation-shop / phantom-crown / material-synthesis / auto-raise-potential / pixel-paint / gacha-once / gacha-ten）'),
+          params: { type: 'object', description: 'custom/roguelike：附加参数对象（原样透传给 core；custom 的会放在 params 字段）', additionalProperties: true },
+          // auto-raise-potential
+          useNormalToken: bool('auto-raise-potential：中坚信物不足时是否消耗**普通信物**继续提升（默认 false = 点 × 跳过；true 会用掉普通信物，不可撤销）'),
+          // single-step
+          subtype: { type: 'string', enum: ['stage', 'start', 'action'], description: 'single-step：stage=设关卡名 / start=点开始行动 / action=按 details.actions 逐步执行' },
+          stageName: str('single-step(stage)：关卡名，如 1-7'),
+          details: { type: 'object', description: 'single-step：details 对象（stage 用 stage_name；action 用自动战斗协议的 actions）', additionalProperties: true },
+          // user-data-update
+          updateOperBox: bool('user-data-update：是否更新干员数据（默认 true）'),
+          updateDepot: bool('user-data-update / depot-maintain：是否先更新仓库数据（默认 true）'),
+          // switch-theme
+          themes: strArr('switch-theme：候选主题名数组，需与游戏内主题列表一致（如 ["夜间","银凇"]；多个随机选一个）'),
+          // oper-progress / depot-maintain
+          plans: objArr('oper-progress：[{role,name,elite,skillLevel,skillMastery}]；depot-maintain：[{stage,dropId,dropCount,medicineCount?,stoneCount?}]'),
+          file: str('oper-progress：计划 JSON 文件路径（{plans:[...]} 或直接数组），给了就不用 plans'),
+          // event-shop
+          blacklist: strArr('event-shop：**不买**的商品名关键词数组（其余全买；空数组=不注册兑换插件，等于不买）'),
+          // secret-front
+          ending: str('secret-front：结局 A~E（默认 E = 资源里的默认入口）'),
+          event: str('secret-front：事件名（支援作战平台 / 游侠 / 诡影迷踪），可空'),
+          // reclamation
+          theme: { type: 'string', description: `reclamation：${RECLAMATION_THEMES.join(' / ')}（沙洲遗闻 / 重启锚点）；roguelike：${ROGUELIKE_THEMES.join(' / ')}` },
+          mode: num('reclamation：Tales 0/1，RelaunchAnchor 16(RA-1)/48(RA-4)/32(RA-15)；roguelike：0/1/4/5/6/7/10001/20001/30001/30003'),
+          difficulty: num('reclamation：0 休养 / 1 标准 / 2 挑战；roguelike：指定难度等级（-1 不指定）'),
+          clearStore: bool('reclamation(Tales mode=0)：刷完点数后是否买商店，默认 false'),
+          toolsToCraft: strArr('reclamation：要组装的支援道具名数组（默认 ["荧光棒"]；**不要省略**，缺了会让 core 崩）'),
+          numCraftBatches: num('reclamation：组装批次数（每批 99 个），默认 16'),
+          incrementMode: { type: 'number', enum: [0, 1], description: 'reclamation：0 连点 / 1 长按，默认 0' },
+          // roguelike
+          startsCount: num('roguelike：开始探索次数（达到即停）'),
+          investmentsCount: num('roguelike：投资源石锭次数（达到即停）'),
+          investmentEnabled: bool('roguelike：是否投资源石锭（默认 true）'),
+          stopWhenInvestmentFull: bool('roguelike：投资满了是否自动停'),
+          squad: str('roguelike：开局分队名，如 指挥分队'),
+          roles: str('roguelike：开局职业组，如 取长补短'),
+          coreChar: str('roguelike：开局干员中文名（留空按练度自动选）'),
+          useSupport: bool('roguelike：开局干员是否借助战'),
+          stopAtFinalBoss: bool('roguelike：第 5 层险路恶敌前停（Phantom 以外有效）'),
+          stopAtMaxLevel: bool('roguelike：肉鸽等级刷满后停'),
+          startWithEliteTwo: bool('roguelike(mode=4)：凹开局时同时凹精二直升'),
+        },
+        ['action'],
+      ),
+      output: textOut('牛杂'),
+      async execute(args) {
+        const cfg = await cfgOf();
+        const action = String(args.action || '');
+        // 默认 dryRun=true：只有显式 false 才真跑（多数动作花资源/改存档）
+        const dryRun = args.dryRun === undefined ? true : Boolean(args.dryRun);
+        const { action: _a, dryRun: _d, background: _b, timeoutSeconds: _t, ...call } = args;
+        const built = buildNiuzzaPlan({ action, call, cfg });
+        if (!built.ok) {
+          return { ok: false, action, status: 'invalid', error: built.error, advice: built.advice ?? null, available: [...NIUZZA_ACTIONS] };
+        }
+        const timeoutSeconds = Math.min(
+          Math.max(Number(args.timeoutSeconds) || NIUZZA_TIMEOUT.default, NIUZZA_TIMEOUT.min),
+          NIUZZA_TIMEOUT.max,
+        );
+        const taskTypes = built.tasks.map((t) => t.type).join(' + ');
+        const plan = { ...built.plan, tasks: taskTypes };
+        const warnings = built.warnings ?? [];
+        // 后台：runner 的 onBegin/onFinish 钩子用 label 记账（runnerLabelToTaskType 把 niuzza → Custom），
+        // 工具层**不再重复** beginTask，否则同一任务会被算成两条。
+        if (args.background && !dryRun) {
+          if (!copilotRunner) return { ok: false, action, status: 'invalid', error: '后台模式不可用：runner 未注入（用 background:false 或重载插件）' };
+          const started = copilotRunner.startJob({
+            label: 'niuzza',
+            hint: niuzzaHint({ action, plan, dryRun: false, background: true, dangers: built.dangers, warnings }),
+            run: ({ onEvent, onReady }) => runNiuzza({ action, call, cfg, dryRun: false, timeoutSeconds, onEvent, onReady, deps }),
+          });
+          return {
+            ...started,
+            action,
+            dryRun: false,
+            plan,
+            tasks: built.tasks,
+            dangers: built.dangers.length ? built.dangers : null,
+            ...(warnings.length ? { warnings } : {}),
+            timeoutSeconds,
+          };
+        }
+        const token = dryRun ? null : taskState?.beginTask({ type: 'Custom', source: 'core' });
+        let result;
+        try {
+          result = await runNiuzza({ action, call, cfg, dryRun, timeoutSeconds, deps });
+        } finally {
+          if (token) taskState?.endTask({ token, status: result?.ok ? 'SUCCESS' : 'FAILED' });
+        }
+        return result;
       },
     },
 

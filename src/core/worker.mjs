@@ -16,7 +16,7 @@
  */
 import readline from 'node:readline';
 import path from 'node:path';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { classify } from './callbacks.js';
 
@@ -124,13 +124,29 @@ function need(name) {
 
 /* ────────────────────── 操作 ────────────────────── */
 
-function open({ installDir, userDir, extras }) {
+function open({ installDir, userDir, extras, loadCache = true }) {
   if (!installDir) throw new Error('未指定 MAA 安装目录');
   ensureLib(installDir);
   mkdirSync(userDir, { recursive: true });
   if (!need('AsstSetUserDir')(userDir)) log(`AsstSetUserDir 返回 false: ${userDir}`);
   if (!need('AsstLoadResource')(installDir)) {
     throw new Error(`AsstLoadResource 失败：${installDir}（要传安装目录，core 自己拼 resource；确认 resource\\stages.json 存在）`);
+  }
+  // MAA GUI 的 LoadResource 会**先读 resource、再读 cache/resource**（AsstProxy.LoadResource）。
+  // 热更资源只落在 cache 里：例如「牛杂 → 黑流树海刷钱」的 BlackFlowTemporary@* 只在
+  // <安装目录>\cache\resource\tasks\tasks.json，少加载这一步，Custom 会因「任务名找不到」append 返回 0。
+  // 先加载 resource 再叠加 cache（TaskData::lazy_parse 按任务名合并），顺序不能反。
+  // cache 里只有增量任务、没有模板/关卡文件，加载失败不算致命（只是热更任务名用不了）。
+  let cacheLoaded = null;
+  const cacheRoot = path.join(installDir, 'cache');
+  if (loadCache !== false && existsSync(path.join(cacheRoot, 'resource', 'tasks'))) {
+    try {
+      cacheLoaded = Boolean(need('AsstLoadResource')(cacheRoot));
+      log(`AsstLoadResource(cache) -> ${cacheLoaded} : ${cacheRoot}`);
+    } catch (e) {
+      cacheLoaded = false;
+      log(`AsstLoadResource(cache) 失败（忽略）: ${e?.message || e}`);
+    }
   }
   if (!handle) {
     const k = loadKoffi();
@@ -141,7 +157,7 @@ function open({ installDir, userDir, extras }) {
   if (extras && typeof fns.AsstSetConnectionExtras === 'function') {
     try { fns.AsstSetConnectionExtras(String(extras.config), String(extras.json)); } catch (e) { log('SetConnectionExtras 失败', e.message); }
   }
-  return { loaded: true, connected, callbacks: cbCount };
+  return { loaded: true, cacheLoaded, connected, callbacks: cbCount };
 }
 
 async function connect({ adbPath, address, config, extras, timeoutMs = 45000 }) {

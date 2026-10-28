@@ -1,12 +1,13 @@
 # @local/dsh-maa —— MAA 插件（DSH）
 
-把 MAA（MaaAssistantArknights）接到 DSH 里的**正式插件**：24 个原生工具，三条通道并存；**启动时先检查 MuMu 模拟器，没开就自动拉起**；`maa_wakeup` 复用 MAA「开始唤醒」直接进主界面（实测可单独调用，不用自己点登录）；抄作业带**中途生命值守则**（掉血立刻停、退出关卡返还理智）；**多用户换号 / 新用户登录**（本地账号簿 + 动态账号切换 + 手机号验证码 / 扫码登录）；**任务状态文件**（给外部排队用，QQ 机器人 `/liw` 联动）；**可编程任务链**（自己编排「只刷 1-7 三次不吃药」「只跑基建+公招」）与**小工具**（干员识别 / 仓库识别 / 视频识别 / 抽卡糖）。
+把 MAA（MaaAssistantArknights）接到 DSH 里的**正式插件**：25 个原生工具，三条通道并存；**启动时先检查 MuMu 模拟器，没开就自动拉起**；`maa_wakeup` 复用 MAA「开始唤醒」直接进主界面（实测可单独调用，不用自己点登录）；抄作业带**中途生命值守则**（掉血立刻停、退出关卡返还理智）；**多用户换号 / 新用户登录**（本地账号簿 + 动态账号切换 + 手机号验证码 / 扫码登录）；**任务状态文件**（给外部排队用，QQ 机器人 `/liw` 联动）；**可编程任务链**（自己编排「只刷 1-7 三次不吃药」「只跑基建+公招」）与**小工具**（干员识别 / 仓库识别 / 视频识别 / 抽卡糖）；**牛杂**（牛杂页 9 个条目全覆盖：黑流树海刷钱 / 隐秘战线 / 活动商店 / 绿票商店 / 黄票商店 / 生息演算商店 / 自动提升潜能 / 缺口材料合成 / 刷傀影皇冠，另有自定任务 / 单步 / 更新数据 / 换主题 / 干员培养 / 库存保持 / 生息演算 / 自动肉鸽，**dryRun 默认 true**）。
 
 | 能力 | 后端 | 工具 |
 |---|---|---|
 | 日常 / 刷关 / 基建 / 公招 / 截图 / 改配置 | **远程控制协议**（MAA 主动轮询本机桥） | `maa_health` `maa_run` `maa_tasks` `maa_wait` `maa_screenshot` `maa_current` `maa_stop` `maa_set` |
 | 可编程任务链（只刷几把 / 只跑基建+公招 / 领奖+刷关） | **MaaCore 直连**（同一会话多条 `AsstAppendTask`） | `maa_chain` |
 | 小工具：干员识别 / 仓库识别 / 视频识别 / 抽卡糖 | MaaCore 直连 + 远程控制桥 | `maa_toolbox` |
+| 牛杂（9 个界面条目 + 通用动作：自定任务 / 单步战斗 / 更新数据 / 换主题 / 干员培养 / 库存保持 / 生息演算 / 自动肉鸽） | **MaaCore 直连**（`Custom` 短任务名 + 原生任务类型） | `maa_niuzza`（**默认 dryRun**） |
 | 唤醒到主界面（= MAA「开始唤醒」，可单独调用） | 远程控制协议 | `maa_wakeup` |
 | 到作业站找作业并自动抄（含练度容差） | **MaaCore 直连**（koffi + 子进程） | `maa_copilot_find` `maa_copilot_run` `maa_copilot_verify` `maa_click` |
 | 抄作业中途盯防（后台跑 / 看进度 / 掉血止损） | 同上（后台子进程 + adb 截图） | `maa_copilot_status` `maa_copilot_stop` |
@@ -35,6 +36,18 @@ maa_chain({ tasks: [{ type: "Infrast", params: {} }, { type: "Recruit", params: 
 
 **小工具（v2.2.0，`maa_toolbox`）**：`action="operbox"` 干员识别（**不消耗理智**，全量 400+ 条、本机实测约 30s；返回 `total/ownedCount/summary` + 前 50 条 `chars`，完整 JSON 落 `data\logs\toolbox-operbox-*.json`）；`action="depot"` 仓库识别（物品 id→数量，带 `item_index.json` 中文名，按数量倒序返回前 50 条 + `dumpFile`）；`action="video"` 视频识别（本地游戏战斗录像 → Copilot 作业 JSON，复制到 `data\jobs\` 返回 `jobFile`，**纯本地识别、不需要模拟器**，**成功路径未真机验证**）；`action="gacha"` 抽卡糖（`Toolbox-GachaOnce` / `GachaTenTimes`，**消耗抽卡资源、先问用户**，回执截图用 `read_image` 看）。
 
+**牛杂（v2.3.0，`maa_niuzza`）**：MAA GUI「小工具 / 牛杂」页的直连版，**17 个动作，界面 9 个条目一个不漏**：`blackflow-money`（黑流树海刷钱 = `Custom{BlackFlowTemporary@Begin}`）、`secret-front`（隐秘战线 = `Custom` 任务名 `MiniGame@SecretFront@Begin@EndingX@事件`）、`event-shop`（活动商店 = `Custom` + `SS@Store@Begin` + `params.event_shop.blacklist`）、`green-shop`（绿票 = `GreenTicket@Store@Begin`）、`yellow-shop`（黄票 = `YellowTicket@Store@Begin`）、`reclamation-shop`（生息演算商店 = `RA@Store@Begin`）、`auto-raise-potential`（`MiniGame@AutoRaisePotential@Begin` + `params.auto_raise_potential.use_normal_token`）、`material-synthesis`（`MiniGame@MaterialSynthesis@Begin`）、`phantom-crown`（刷傀影皇冠 = `MiniGame@CursedRelic@Begin`）；通用动作 `custom`（task_names 组合，9 个条目名都可当别名）、`single-step`（单步自动战斗）、`user-data-update`（更新数据 = `OperBox`+`Depot` 识别，不花资源）、`switch-theme`（`SwitchTheme{themes}`）、`oper-progress`（干员培养 `OperProgress{plans}`）、`depot-maintain`（库存保持 = `Depot` + 每计划一条 `Fight{drops}`）、`reclamation`（生息演算）、`roguelike`（自动肉鸽）。
+
+口径（2026-10-28 真机 append 探针 + MaaCore / MaaWpfGui `dev-v2` 源码查证）：
+
+- **`dryRun` 默认 `true`**（与 `maa_chain` 相反）：只 append 校验任务名/参数，不连接、不 startTask、零消耗；要真跑必须显式 `dryRun:false`，且**先跟用户确认代价**（商店花代币/凭证、黑流刷钱长时间挂机、自动提升潜能消耗信物、材料合成花材料、刷皇冠反复开局、库存保持/肉鸽花理智、隐秘战线/生息演算改存档进度）。
+- **界面 9 条目全部是 `Custom` 短任务名**（GUI `AsstProxy.AsstMiniGame` 只发 Custom）；`EventShop` / `SecretFront` / `UserDataUpdate` / `DepotMaintain` **不是 MaaCore 任务类型**（直接 append 返回 0），`maa_chain` 白名单因此只新增了真正验证过的 `SwitchTheme` / `OperProgress`。
+- **热更资源必须一起加载**：`BlackFlowTemporary@Begin` 只在 `<MAA 安装目录>\cache\resource\tasks\tasks.json`；`src/core/worker.mjs` 的 `open()` 现在按 GUI 顺序「先 `resource` 再 `cache/resource`」两次 `AsstLoadResource`，否则黑流刷钱 append 返回 0（探针 `--no-cache` 实测）。
+- **票种商店是隐式前缀模板**：`GreenTicket@Store@Begin` / `YellowTicket@Store@Begin` 在 tasks.json 里没有同名条目，由 core 从 `Store@Begin` 按 `@` 前缀生成；`RA@Store@Begin` 在 `RA\plugin\base.json` 显式定义。拼错就 append 失败。
+- **生息演算有个 core 崩溃坑**：`theme=Tales` + `mode=1` 时缺 `tools_to_craft` 会让 MaaCore 6.20.1 在 `optional::value()` 上抛异常、**整个子进程退出**。工具总是补齐 `tools_to_craft`（默认 `["荧光棒"]`）/ `num_craft_batches` / `increment_mode`；`theme:"Fire"`（沙中之火）已下线，core 直接拒绝。
+- **工具不导航**：每个动作都有 `prereq`（前置界面），界面不对 core 会卡住或走错分支；真跑前先 `maa_screenshot`。
+- `background:true` 走后台 runner（`label=niuzza`，task-state 里记成 `Custom`），用 `maa_copilot_status` / `maa_copilot_stop` 盯和停；`timeoutSeconds` 默认 900，范围 30~7200。
+
 **给模型的通用引导**（首次使用也能找到关卡）：主线 = 终端 → 曲谱 → 乐章收录（章节列表上下滑，右下角 `EPxx` = 第 xx 章）；往期活动在同一个章节列表的最下方（艺术字封面 + 普通/EX/特殊关切换）；当期活动是终端页左侧海报（结束后显示「作战已结束」）；H 关要先切到最高难度才出现在地图最右侧。这段话同时写在 `skill/SKILL.md`（「怎么走到目标关卡」）和 `maa_swipe` 的工具描述里。
 
 ## 安装
@@ -45,9 +58,9 @@ maa_chain({ tasks: [{ type: "Infrast", params: {} }, { type: "Recruit", params: 
 plugins\maa-plugin\
 ├─ package.json        # dsh.bundle.patch / dsh.client + 依赖（koffi / schemastery）
 ├─ cordis.patch.yml    # 唯一的 Loader 行：id=maa-plugin
-├─ index.js            # apply(ctx, config)：模拟器自启 + 起桥 + 设置页路由 + 任务状态文件 + 注册 24 个工具
+├─ index.js            # apply(ctx, config)：模拟器自启 + 起桥 + 设置页路由 + 任务状态文件 + 注册 25 个工具
 ├─ client.js           # Web 客户端半：设置页（settings.plugins.tab）
-├─ src\                # 实现：config / maa / pe / doctor / roster / stages / stages-hard / copilot / chain / toolbox / adb / emulator / wakeup / account-book / switch-account / task-state
+├─ src\                # 实现：config / maa / pe / doctor / roster / stages / stages-hard / copilot / chain / toolbox / niuzza / adb / emulator / wakeup / account-book / switch-account / task-state
 │  ├─ input\           #   滑动手势：coords（换算）/ adb-input（注入）/ backend（后端探测）
 │  ├─ prts\            #   作业站查询、练度容差匹配、严格优先的作业挑选
 │  ├─ remote\          #   远程控制桥（MAA 反向轮询）
@@ -56,7 +69,7 @@ plugins\maa-plugin\
 ├─ icon.svg
 ├─ skill\SKILL.md      # 模型侧技能（复制到 ~\.dsh\skills\ 后所有会话可见）
 ├─ scripts\recover.ps1 # 插件把 DSH 搞挂时的自救脚本
-└─ test\               # 12 份自测：selftest / hardening / swipe / match / emulator / copilot-runner / wakeup / account-book / switch-account / input-text / task-state / toolbox
+└─ test\               # 13 份自测：selftest / hardening / swipe / match / emulator / copilot-runner / wakeup / account-book / switch-account / input-text / task-state / toolbox / niuzza
 ```
 
 装进当前 profile（走插件管理器，不要手改 profile）：
@@ -113,7 +126,7 @@ plugin_manager(action="remove_bundle", target="@local/dsh-maa")
 
 本工作区里 `plugins\maa-plugin` 已经用 `link:` 装进 desktop profile，改完代码不用重装，重载即可。
 
-**跑自测**（12 份 / 216 项，全绿才算可发；除 `selftest` 外都不碰 MAA 和模拟器）：
+**跑自测**（13 份 / 275 项，全绿才算可发；除 `selftest` 外都不碰 MAA 和模拟器）：
 
 ```powershell
 node test/selftest.mjs          # 需要本机装了 MAA（自动探测；只读文件、不连接、不消耗理智）
@@ -128,6 +141,7 @@ node test/switch-account.test.mjs # 动态切号（假 CoreWorker）
 node test/input-text.test.mjs    # 手机号/验证码输入
 node test/task-state.test.mjs    # 任务状态文件（跨插件契约 v1）
 node test/toolbox.test.mjs       # 可编程任务链 + 小工具（假 CoreWorker + 真实回调 fixture）
+node test/niuzza.test.mjs        # 牛杂 17 个动作（含 9 个界面条目）的参数映射 / 前置界面 / dryRun 默认 / runner / 任务状态埋点
 # 有 npm 的机器也可以直接：npm test
 ```
 

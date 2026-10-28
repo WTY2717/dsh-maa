@@ -41,7 +41,7 @@ export function isMeaningfulBridgeTask(type) {
   return BRIDGE_TASK_TYPE_RE.test(String(type ?? ''));
 }
 
-/** 后台 runner 的 label → 规范 taskType（Copilot / AccountSwitch / chain→Custom）。 */
+/** 后台 runner 的 label → 规范 taskType（Copilot / AccountSwitch / chain 与 niuzza→Custom）。 */
 export function runnerLabelToTaskType(label) {
   const s = String(label ?? '');
   if (s === 'copilot') return 'Copilot';
@@ -49,6 +49,9 @@ export function runnerLabelToTaskType(label) {
   // 可编程任务链（maa_chain background）在契约里归到 Custom：它可能是任意任务组合，
   // 没有更准确的原生类型；不要在外部契约里新增 'chain'（QQ 侧只认既有枚举）。
   if (s === 'chain') return 'Custom';
+  // 牛杂（maa_niuzza background）同样归到 Custom：它的动作最终都是 Custom / OperBox / Depot /
+  // Fight / SwitchTheme / OperProgress / Roguelike / Reclamation 的组合，契约里同样不新增 'niuzza'。
+  if (s === 'niuzza') return 'Custom';
   return s || 'Job';
 }
 

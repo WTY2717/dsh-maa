@@ -1,6 +1,6 @@
 {
   "name": "@local/dsh-maa",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "private": true,
   "type": "module",
   "description": "MAA (MaaAssistantArknights) remote-control bridge + MaaCore direct driver as native DSH tools: run MAA task types, programmable task chains, operator/depot/video recognition, screenshot, and auto-play PRTS copilot jobs matched against the local operator roster.",
@@ -40,7 +40,7 @@
     }
   },
   "scripts": {
-    "test": "node test/selftest.mjs && node test/hardening.test.mjs && node test/swipe.test.mjs && node test/match.test.mjs && node test/emulator.test.mjs && node test/copilot-runner.test.mjs && node test/wakeup.test.mjs && node test/account-book.test.mjs && node test/switch-account.test.mjs && node test/input-text.test.mjs && node test/task-state.test.mjs && node test/toolbox.test.mjs"
+    "test": "node test/selftest.mjs && node test/hardening.test.mjs && node test/swipe.test.mjs && node test/match.test.mjs && node test/emulator.test.mjs && node test/copilot-runner.test.mjs && node test/wakeup.test.mjs && node test/account-book.test.mjs && node test/switch-account.test.mjs && node test/input-text.test.mjs && node test/task-state.test.mjs && node test/toolbox.test.mjs && node test/niuzza.test.mjs"
   },
   "dependencies": {
     "@deepseek-ai/cosmokit": "~1.8.6",

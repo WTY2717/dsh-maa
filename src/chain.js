@@ -25,7 +25,15 @@ import { createEventCollector, parseOperBox, parseDepot, parseVideoResult } from
 import { resolveAdbPath } from './adb.js';
 import { connectionExtras } from './copilot.js';
 
-/** MaaCore 支持、且允许经 `maa_chain` 下发的任务类型（顺序同 dll 字符串）。 */
+/**
+ * MaaCore 支持、且允许经 `maa_chain` 下发的任务类型（顺序同 dll 字符串）。
+ *
+ * 2026-10-28 用 append 探针在 MaaCore 6.20.1 上逐个验证过（`scripts/probe-niuzza-tasks*.mjs`）：
+ * 这里列的就是 `AsstAppendTask` 真正注册的类型。**GUI 的「更新数据 / 库存保持 / 活动商店 /
+ * 隐秘战线」不是 core 类型**（append 返回 0），它们要么是 GUI 侧组合（OperBox+Depot、Depot+Fight），
+ * 要么走 `Custom` 的短任务名（`SS@Store@Begin`、`MiniGame@SecretFront@Begin@EndingX`）——
+ * 见 `src/niuzza.js` 与 docs/plans/maa-plugin-plan.md §25。
+ */
 export const CORE_TASK_TYPES = [
   'StartUp',
   'CloseDown',
@@ -43,6 +51,8 @@ export const CORE_TASK_TYPES = [
   'Reclamation',
   'Custom',
   'SingleStep',
+  'SwitchTheme',
+  'OperProgress',
 ];
 
 /** 有真实代价/会改变游戏状态的任务：描述与 hint 里必须写明。 */
@@ -151,17 +161,20 @@ export function chainHint({ tasks = [], dryRun = false, background = false, stat
  * @param {boolean} [args.dryRun] 只 append 不 startTask（也不 connect）
  * @param {object} args.cfg 已解析配置
  * @param {number} [args.timeoutSeconds] 默认 900，钳制 1~3600
+ * @param {number} [args.timeoutMaxSeconds] 覆盖上限（牛杂的长任务用；默认 3600）
  * @param {(ev:any)=>void} [args.onEvent] 回调观察者（后台 runner / 调试用）
  * @param {(ctl:object)=>void} [args.onReady] 后台模式拿 worker/taskIds/stopTask
  * @param {object} [args.deps] 单测注入 { CoreWorker, resolveAdbPath, connectionExtras }
  * @returns {Promise<object>} 永远 resolve；失败/超时都在对象里（不抛未捕获异常）
  */
-export async function runChain({ tasks, dryRun = false, cfg, timeoutSeconds, onEvent, onReady, deps = {} } = {}) {
+export async function runChain({ tasks, dryRun = false, cfg, timeoutSeconds, timeoutMaxSeconds, onEvent, onReady, deps = {} } = {}) {
   const checked = validateChainTasks(tasks);
   if (!checked.ok) return { ok: false, status: 'invalid', error: checked.error, available: checked.available, progress: [] };
   const normalized = checked.tasks;
   const dangers = checked.dangers;
-  const timeout = Math.min(Math.max(Number(timeoutSeconds) || DEFAULT_CHAIN_TIMEOUT_SECONDS, MIN_CHAIN_TIMEOUT_SECONDS), MAX_CHAIN_TIMEOUT_SECONDS);
+  // 上限默认 3600s（maa_chain 的公开契约）；牛杂的长任务（生息演算/隐秘战线）传更大的 timeoutMaxSeconds
+  const maxTimeout = Math.max(Number(timeoutMaxSeconds) || MAX_CHAIN_TIMEOUT_SECONDS, MIN_CHAIN_TIMEOUT_SECONDS);
+  const timeout = Math.min(Math.max(Number(timeoutSeconds) || DEFAULT_CHAIN_TIMEOUT_SECONDS, MIN_CHAIN_TIMEOUT_SECONDS), maxTimeout);
 
   // dryRun 不连模拟器，也就不需要 adb：先把 adb 解析放在需要连接的路径里
   let adb = null;

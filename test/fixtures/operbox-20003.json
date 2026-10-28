@@ -1,0 +1,4637 @@
+{
+ "class": "asst::OperBoxRecognitionTask",
+ "details": {
+  "all_opers": [
+   {
+    "id": "char_017_huang",
+    "name": "煌",
+    "name_en": "Blaze",
+    "name_jp": "ブレイズ",
+    "name_kr": "블레이즈",
+    "name_tw": "煌",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_1041_angel2",
+    "name": "新约能天使",
+    "name_en": "Exusiai the New Covenant",
+    "name_jp": "新約エクシア",
+    "name_kr": "엑시아 더 뉴 커버넌트",
+    "name_tw": "新約能天使",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_1030_noirc2",
+    "name": "火龙S黑角",
+    "name_en": "Rathalos S Noir Corne",
+    "name_jp": "レウスSノイルホーン",
+    "name_kr": "레우스S 느와르 코르네",
+    "name_tw": "火龍S黑角",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_002_amiya",
+    "name": "阿米娅",
+    "name_en": "Amiya",
+    "name_jp": "アーミヤ",
+    "name_kr": "아미야",
+    "name_tw": "阿米婭",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_193_frostl",
+    "name": "霜叶",
+    "name_en": "Frostleaf",
+    "name_jp": "フロストリーフ",
+    "name_kr": "프로스트리프",
+    "name_tw": "霜葉",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_010_chen",
+    "name": "陈",
+    "name_en": "Ch'en",
+    "name_jp": "チェン",
+    "name_kr": "첸",
+    "name_tw": "陳",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_009_12fce",
+    "name": "12F",
+    "name_en": "12F",
+    "name_jp": "12F",
+    "name_kr": "12F",
+    "name_tw": "12F",
+    "own": true,
+    "rarity": 2
+   },
+   {
+    "id": "char_4139_papyrs",
+    "name": "莎草",
+    "name_en": "Papyrus",
+    "name_jp": "パピルス",
+    "name_kr": "파피루스",
+    "name_tw": "莎草",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_1036_fang2",
+    "name": "历阵锐枪芬",
+    "name_en": "Fang the Fire-Sharpened",
+    "name_jp": "歴陣鋭槍フェン",
+    "name_kr": "팽 더 파이어 샤픈드",
+    "name_tw": "歷陣銳槍芬",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_003_kalts",
+    "name": "凯尔希",
+    "name_en": "Kal'tsit",
+    "name_jp": "ケルシー",
+    "name_kr": "켈시",
+    "name_tw": "凱爾希",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_107_liskam",
+    "name": "雷蛇",
+    "name_en": "Liskarm",
+    "name_jp": "リスカム",
+    "name_kr": "리스캄",
+    "name_tw": "雷蛇",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_1001_amiya2",
+    "name": "阿米娅",
+    "name_en": "Amiya",
+    "name_jp": "アーミヤ",
+    "name_kr": "아미야",
+    "name_tw": "阿米婭",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_103_angel",
+    "name": "能天使",
+    "name_en": "Exusiai",
+    "name_jp": "エクシア",
+    "name_kr": "엑시아",
+    "name_tw": "能天使",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_133_mm",
+    "name": "梅",
+    "name_en": "May",
+    "name_jp": "メイ",
+    "name_kr": "메이",
+    "name_tw": "梅",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_112_siege",
+    "name": "推进之王",
+    "name_en": "Siege",
+    "name_jp": "シージ",
+    "name_kr": "시즈",
+    "name_tw": "推進之王",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_1011_lava2",
+    "name": "炎狱炎熔",
+    "name_en": "Lava the Purgatory",
+    "name_jp": "炎獄ラヴァ",
+    "name_kr": "라바 더 퍼거토리",
+    "name_tw": "炎獄炎熔",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4165_ctrail",
+    "name": "云迹",
+    "name_en": "Contrail",
+    "name_jp": "コントレイル",
+    "name_kr": "콘트레일",
+    "name_tw": "雲跡",
+    "own": false,
+    "rarity": 4
+   },
+   {
+    "id": "char_2012_typhon",
+    "name": "提丰",
+    "name_en": "Typhon",
+    "name_jp": "ティフォン",
+    "name_kr": "티폰",
+    "name_tw": "提豐",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_301_cutter",
+    "name": "刻刀",
+    "name_en": "Cutter",
+    "name_jp": "カッター",
+    "name_kr": "커터",
+    "name_tw": "刻刀",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_1044_hsgma2",
+    "name": "斩业星熊",
+    "name_en": "Hoshiguma the Breacher",
+    "name_jp": "斬業ホシグマ",
+    "name_kr": "호시구마 더 브리처",
+    "name_tw": "斬業星熊",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_1023_ghost2",
+    "name": "归溟幽灵鲨",
+    "name_en": "Specter the Unchained",
+    "name_jp": "帰溟スペクター",
+    "name_kr": "스펙터 디 언체인드",
+    "name_tw": "歸溟幽靈鯊",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_1012_skadi2",
+    "name": "浊心斯卡蒂",
+    "name_en": "Skadi the Corrupting Heart",
+    "name_jp": "濁心スカジ",
+    "name_kr": "스카디 더 커럽팅 하트",
+    "name_tw": "濁心斯卡蒂",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_1013_chen2",
+    "name": "假日威龙陈",
+    "name_en": "Ch'en the Holungday",
+    "name_jp": "遊龍チェン",
+    "name_kr": "첸 더 홀룽데이",
+    "name_tw": "假日威龍陳",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_250_phatom",
+    "name": "傀影",
+    "name_en": "Phantom",
+    "name_jp": "ファントム",
+    "name_kr": "팬텀",
+    "name_tw": "傀影",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_1014_nearl2",
+    "name": "耀骑士临光",
+    "name_en": "Nearl the Radiant Knight",
+    "name_jp": "耀騎士ニアール",
+    "name_kr": "니어 더 래디언트 나이트",
+    "name_tw": "耀騎士臨光",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_474_glady",
+    "name": "歌蕾蒂娅",
+    "name_en": "Gladiia",
+    "name_jp": "グレイディーア",
+    "name_kr": "글래디아",
+    "name_tw": "歌蕾蒂婭",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_1015_aglna2",
+    "name": "予愿安洁莉娜",
+    "name_en": "予愿安洁莉娜",
+    "name_jp": "予愿安洁莉娜",
+    "name_kr": "予愿安洁莉娜",
+    "name_tw": "予愿安洁莉娜",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_196_sunbr",
+    "name": "古米",
+    "name_en": "Gummy",
+    "name_jp": "グム",
+    "name_kr": "굼",
+    "name_tw": "古米",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_1016_agoat2",
+    "name": "纯烬艾雅法拉",
+    "name_en": "Eyjafjalla the Hvít Aska",
+    "name_jp": "純燼エイヤフィヤトラ",
+    "name_kr": "에이야퍄들라 더 크비트 아스카",
+    "name_tw": "純燼艾雅法拉",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4179_monstr",
+    "name": "Mon3tr",
+    "name_en": "Mon3tr",
+    "name_jp": "Mon3tr",
+    "name_kr": "Mon3tr",
+    "name_tw": "Mon3tr",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_405_absin",
+    "name": "苦艾",
+    "name_en": "Absinthe",
+    "name_jp": "アブサント",
+    "name_kr": "압생트",
+    "name_tw": "苦艾",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_1047_halo2",
+    "name": "溯光星源",
+    "name_en": "Astgenne the Lightchaser",
+    "name_jp": "溯光アステジーニ",
+    "name_kr": "아스트젠 더 라이트체이서",
+    "name_tw": "溯光星源",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_1019_siege2",
+    "name": "维娜·维多利亚",
+    "name_en": "Vina Victoria",
+    "name_jp": "ヴィーナ・ヴィクトリア",
+    "name_kr": "비나 빅토리아",
+    "name_tw": "維娜·維多利亞",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_394_hadiya",
+    "name": "哈蒂娅",
+    "name_en": "Hadiya",
+    "name_jp": "ハディヤ",
+    "name_kr": "하디야",
+    "name_tw": "哈蒂婭",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_415_flint",
+    "name": "燧石",
+    "name_en": "Flint",
+    "name_jp": "フリント",
+    "name_kr": "플린트",
+    "name_tw": "燧石",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4025_aprot2",
+    "name": "暮落",
+    "name_en": "Shalem",
+    "name_jp": "シャレム",
+    "name_kr": "샬렘",
+    "name_tw": "暮落",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_101_sora",
+    "name": "空",
+    "name_en": "Sora",
+    "name_jp": "ソラ",
+    "name_kr": "소라",
+    "name_tw": "空",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4145_ulpia",
+    "name": "乌尔比安",
+    "name_en": "Ulpianus",
+    "name_jp": "ウルピアヌス",
+    "name_kr": "울피아누스",
+    "name_tw": "烏爾比安",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_1052_kalts2",
+    "name": "凯尔希·思衡托",
+    "name_en": "Kal'tsit Esperanta",
+    "name_jp": "ケルシー・エスペランタ",
+    "name_kr": "켈시 에스페란타",
+    "name_tw": "凯尔希·思衡托",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_141_nights",
+    "name": "夜烟",
+    "name_en": "Haze",
+    "name_jp": "ヘイズ",
+    "name_kr": "헤이즈",
+    "name_tw": "夜煙",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_1020_reed2",
+    "name": "焰影苇草",
+    "name_en": "Reed the Flame Shadow",
+    "name_jp": "焔影リード",
+    "name_kr": "리드 더 플레임 섀도우",
+    "name_tw": "焰影葦草",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_1026_gvial2",
+    "name": "百炼嘉维尔",
+    "name_en": "Gavial the Invincible",
+    "name_jp": "百錬ガヴィル",
+    "name_kr": "가비알 디 인빈서블",
+    "name_tw": "百煉嘉維爾",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_1021_kroos2",
+    "name": "寒芒克洛丝",
+    "name_en": "Kroos the Keen Glint",
+    "name_jp": "寒芒クルース",
+    "name_kr": "크루스 더 킨 글린트",
+    "name_tw": "寒芒克洛絲",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_210_stward",
+    "name": "史都华德",
+    "name_en": "Steward",
+    "name_jp": "スチュワード",
+    "name_kr": "스튜어드",
+    "name_tw": "史都華德",
+    "own": true,
+    "rarity": 3
+   },
+   {
+    "id": "char_1022_flwr2",
+    "name": "撷英调香师",
+    "name_en": "Perfumer the Distilled",
+    "name_jp": "萃香パフューマー",
+    "name_kr": "퍼퓨머 더 디스틸트",
+    "name_tw": "擷英調香師",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_1024_hbisc2",
+    "name": "濯尘芙蓉",
+    "name_en": "Hibiscus the Purifier",
+    "name_jp": "濯塵ハイビスカス",
+    "name_kr": "히비스커스 더 퓨리파이어",
+    "name_tw": "濯塵芙蓉",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_126_shotst",
+    "name": "流星",
+    "name_en": "Meteor",
+    "name_jp": "メテオ",
+    "name_kr": "메테오",
+    "name_tw": "流星",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_253_greyy",
+    "name": "格雷伊",
+    "name_en": "Greyy",
+    "name_jp": "グレイ",
+    "name_kr": "그레이",
+    "name_tw": "格雷伊",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_302_glaze",
+    "name": "安比尔",
+    "name_en": "Ambriel",
+    "name_jp": "アンブリエル",
+    "name_kr": "엠브리엘",
+    "name_tw": "安比爾",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_1034_jesca2",
+    "name": "涤火杰西卡",
+    "name_en": "Jessica the Liberated",
+    "name_jp": "滌火ジェシカ",
+    "name_kr": "제시카 더 리버레이티드",
+    "name_tw": "滌火潔西卡",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_604_ccast",
+    "name": "预备干员-术师",
+    "name_en": "Reserve Operator - Caster",
+    "name_jp": "予備隊員-術師",
+    "name_kr": "예비 오퍼레이터 - 캐스터",
+    "name_tw": "預備幹員-術師",
+    "own": false,
+    "rarity": 4
+   },
+   {
+    "id": "char_1027_greyy2",
+    "name": "承曦格雷伊",
+    "name_en": "Greyy the Lightningbearer",
+    "name_jp": "承曦グレイ",
+    "name_kr": "그레이 더 라이트닝베어러",
+    "name_tw": "承曦格雷伊",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_1028_texas2",
+    "name": "缄默德克萨斯",
+    "name_en": "Texas the Omertosa",
+    "name_jp": "血掟テキサス",
+    "name_kr": "텍사스 디 오메르토사",
+    "name_tw": "緘默德克薩斯",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_613_acmedc",
+    "name": "Touch",
+    "name_en": "Touch",
+    "name_jp": "Touch",
+    "name_kr": "터치",
+    "name_tw": "Touch",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_283_midn",
+    "name": "月见夜",
+    "name_en": "Midnight",
+    "name_jp": "ミッドナイト",
+    "name_kr": "미드나이트",
+    "name_tw": "月見夜",
+    "own": true,
+    "rarity": 3
+   },
+   {
+    "id": "char_1029_yato2",
+    "name": "麒麟R夜刀",
+    "name_en": "Kirin R Yato",
+    "name_jp": "キリンRヤトウ",
+    "name_kr": "키린R 야토",
+    "name_tw": "麒麟R夜刀",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_464_cement",
+    "name": "洋灰",
+    "name_en": "Cement",
+    "name_jp": "セメント",
+    "name_kr": "시멘트",
+    "name_tw": "洋灰",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4184_dolris",
+    "name": "三角初华",
+    "name_en": "Uika Misumi",
+    "name_jp": "三角初華",
+    "name_kr": "미스미 우이카",
+    "name_tw": "三角初華",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_102_texas",
+    "name": "德克萨斯",
+    "name_en": "Texas",
+    "name_jp": "テキサス",
+    "name_kr": "텍사스",
+    "name_tw": "德克薩斯",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4207_branch",
+    "name": "折桠",
+    "name_en": "Vetochki",
+    "name_jp": "ヴェトチキ",
+    "name_kr": "베토치키",
+    "name_tw": "折椏",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_1031_slent2",
+    "name": "淬羽赫默",
+    "name_en": "Silence the Paradigmatic",
+    "name_jp": "淬羽サイレンス",
+    "name_kr": "사일런스 더 패러디그매틱",
+    "name_tw": "淬羽赫默",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_1048_orchd2",
+    "name": "焰狐龙梓兰",
+    "name_en": "焰狐龙梓兰",
+    "name_jp": "焰狐龙梓兰",
+    "name_kr": "焰狐龙梓兰",
+    "name_tw": "焰狐龙梓兰",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_499_kaitou",
+    "name": "折光",
+    "name_en": "Diamante",
+    "name_jp": "ディアマンテ",
+    "name_kr": "디아만테",
+    "name_tw": "折光",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_124_kroos",
+    "name": "克洛丝",
+    "name_en": "Kroos",
+    "name_jp": "クルース",
+    "name_kr": "크루스",
+    "name_tw": "克洛絲",
+    "own": true,
+    "rarity": 3
+   },
+   {
+    "id": "char_158_milu",
+    "name": "守林人",
+    "name_en": "Firewatch",
+    "name_jp": "ファイヤーウォッチ",
+    "name_kr": "파이어워치",
+    "name_tw": "守林人",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_117_myrrh",
+    "name": "末药",
+    "name_en": "Myrrh",
+    "name_jp": "ミルラ",
+    "name_kr": "미르",
+    "name_tw": "末藥",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_348_ceylon",
+    "name": "锡兰",
+    "name_en": "Ceylon",
+    "name_jp": "セイロン",
+    "name_kr": "실론",
+    "name_tw": "錫蘭",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_1032_excu2",
+    "name": "圣约送葬人",
+    "name_en": "Executor the Ex Foedere",
+    "name_jp": "聖約イグゼキュター",
+    "name_kr": "이그제큐터 디 엑스 포에데레",
+    "name_tw": "聖約送葬人",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_122_beagle",
+    "name": "米格鲁",
+    "name_en": "Beagle",
+    "name_jp": "ビーグル",
+    "name_kr": "비글",
+    "name_tw": "米格魯",
+    "own": true,
+    "rarity": 3
+   },
+   {
+    "id": "char_1033_swire2",
+    "name": "琳琅诗怀雅",
+    "name_en": "Swire the Elegant Wit",
+    "name_jp": "琳琅スワイヤー",
+    "name_kr": "스와이어 디 엘리건트 위트",
+    "name_tw": "琳瑯詩懷雅",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_109_fmout",
+    "name": "远山",
+    "name_en": "Gitano",
+    "name_jp": "ギターノ",
+    "name_kr": "기타노",
+    "name_tw": "遠山",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_1035_wisdel",
+    "name": "维什戴尔",
+    "name_en": "Wiš'adel",
+    "name_jp": "ウィシャデル",
+    "name_kr": "위셔델",
+    "name_tw": "維什戴爾",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_195_glassb",
+    "name": "真理",
+    "name_en": "Istina",
+    "name_jp": "イースチナ",
+    "name_kr": "이스티나",
+    "name_tw": "真理",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4023_rfalcn",
+    "name": "红隼",
+    "name_en": "Kestrel",
+    "name_jp": "ケストレル",
+    "name_kr": "케스트럴",
+    "name_tw": "紅隼",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_1037_amiya3",
+    "name": "阿米娅",
+    "name_en": "Amiya",
+    "name_jp": "アーミヤ",
+    "name_kr": "아미야",
+    "name_tw": "阿米婭",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4191_tippi",
+    "name": "蒂比",
+    "name_en": "Tippi",
+    "name_jp": "ティッピ",
+    "name_kr": "티피",
+    "name_tw": "蒂比",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_1038_whitw2",
+    "name": "荒芜拉普兰德",
+    "name_en": "Lappland the Decadenza",
+    "name_jp": "荒蕪ラップランド",
+    "name_kr": "라플란드 더 데카덴차",
+    "name_tw": "荒蕪拉普蘭德",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_1039_thorn2",
+    "name": "引星棘刺",
+    "name_en": "Thorns the Lodestar",
+    "name_jp": "引星ソーンズ",
+    "name_kr": "쏜즈 더 로드스타",
+    "name_tw": "引星棘刺",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_1040_blaze2",
+    "name": "烛煌",
+    "name_en": "Blaze the Igniting Spark",
+    "name_jp": "熾炎ブレイズ",
+    "name_kr": "블레이즈 디 이그나이팅 스파크",
+    "name_tw": "燭煌",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_1051_headb2",
+    "name": "怒潮凛冬",
+    "name_en": "Zima the Raging Tide",
+    "name_jp": "怒潮ズィマー",
+    "name_kr": "지마 더 레이징 타이드",
+    "name_tw": "怒潮凜冬",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_1042_phatm2",
+    "name": "酒神",
+    "name_en": "Tragodia",
+    "name_jp": "トラゴーディア",
+    "name_kr": "트라고디아",
+    "name_tw": "酒神",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4027_heyak",
+    "name": "霍尔海雅",
+    "name_en": "Ho'olheyak",
+    "name_jp": "ホルハイヤ",
+    "name_kr": "오올헤약",
+    "name_tw": "霍爾海雅",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_240_wyvern",
+    "name": "香草",
+    "name_en": "Vanilla",
+    "name_jp": "バニラ",
+    "name_kr": "바닐라",
+    "name_tw": "香草",
+    "own": true,
+    "rarity": 3
+   },
+   {
+    "id": "char_252_bibeak",
+    "name": "柏喙",
+    "name_en": "Bibeak",
+    "name_jp": "バイビーク",
+    "name_kr": "바이비크",
+    "name_tw": "柏喙",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_1043_leizi2",
+    "name": "司霆惊蛰",
+    "name_en": "Leizi the Thunderbringer",
+    "name_jp": "司霆レイズ",
+    "name_kr": "레이즈 더 썬더브링어",
+    "name_tw": "司霆驚蟄",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_1045_svash2",
+    "name": "凛御银灰",
+    "name_en": "SilverAsh the Reignfrost",
+    "name_jp": "凛御シルバーアッシュ",
+    "name_kr": "실버애쉬 더 레인프로스트",
+    "name_tw": "凜御銀灰",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_110_deepcl",
+    "name": "深海色",
+    "name_en": "Deepcolor",
+    "name_jp": "ディピカ",
+    "name_kr": "딥컬러",
+    "name_tw": "深海色",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_237_gravel",
+    "name": "砾",
+    "name_en": "Gravel",
+    "name_jp": "グラベル",
+    "name_kr": "그라벨",
+    "name_tw": "礫",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_4147_mitm",
+    "name": "渡桥",
+    "name_en": "Mitm",
+    "name_jp": "ミトム",
+    "name_kr": "미틈",
+    "name_tw": "渡橋",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4004_pudd",
+    "name": "布丁",
+    "name_en": "Pudding",
+    "name_jp": "プリン",
+    "name_kr": "푸딩",
+    "name_tw": "布丁",
+    "own": false,
+    "rarity": 4
+   },
+   {
+    "id": "char_1046_sbell2",
+    "name": "圣聆初雪",
+    "name_en": "Pramanix the Prerita",
+    "name_jp": "聖聆プラマニクス",
+    "name_kr": "프라마닉스 더 프레리타",
+    "name_tw": "聖聆初雪",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_377_gdglow",
+    "name": "澄闪",
+    "name_en": "Goldenglow",
+    "name_jp": "ゴールデングロー",
+    "name_kr": "골든글로우",
+    "name_tw": "澄閃",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_220_grani",
+    "name": "格拉尼",
+    "name_en": "Grani",
+    "name_jp": "グラニ",
+    "name_kr": "그라니",
+    "name_tw": "格拉尼",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_1049_catap2",
+    "name": "雷狼龙S空爆",
+    "name_en": "雷狼龙S空爆",
+    "name_jp": "雷狼龙S空爆",
+    "name_kr": "雷狼龙S空爆",
+    "name_tw": "雷狼龙S空爆",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_494_vendla",
+    "name": "刺玫",
+    "name_en": "Vendela",
+    "name_jp": "ヴァンデラ",
+    "name_kr": "벤델라",
+    "name_tw": "刺玫",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_120_hibisc",
+    "name": "芙蓉",
+    "name_en": "Hibiscus",
+    "name_jp": "ハイビスカス",
+    "name_kr": "히비스커스",
+    "name_tw": "芙蓉",
+    "own": true,
+    "rarity": 3
+   },
+   {
+    "id": "char_308_swire",
+    "name": "诗怀雅",
+    "name_en": "Swire",
+    "name_jp": "スワイヤー",
+    "name_kr": "스와이어",
+    "name_tw": "詩懷雅",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_336_folivo",
+    "name": "稀音",
+    "name_en": "Scene",
+    "name_jp": "シーン",
+    "name_kr": "씬",
+    "name_tw": "稀音",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_1050_chen3",
+    "name": "赤刃明霄陈",
+    "name_en": "Ch'en the Dawnstreak",
+    "name_jp": "赤刃明霄チェン",
+    "name_kr": "첸 더 던스트릭",
+    "name_tw": "赤刃明霄陳",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_106_franka",
+    "name": "芙兰卡",
+    "name_en": "Franka",
+    "name_jp": "フランカ",
+    "name_kr": "프란카",
+    "name_tw": "芙蘭卡",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_492_quercu",
+    "name": "夏栎",
+    "name_en": "Quercus",
+    "name_jp": "クエルクス",
+    "name_kr": "퀘르쿠스",
+    "name_tw": "夏櫟",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_108_silent",
+    "name": "赫默",
+    "name_en": "Silence",
+    "name_jp": "サイレンス",
+    "name_kr": "사일런스",
+    "name_tw": "赫默",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_121_lava",
+    "name": "炎熔",
+    "name_en": "Lava",
+    "name_jp": "ラヴァ",
+    "name_kr": "라바",
+    "name_tw": "炎熔",
+    "own": true,
+    "rarity": 3
+   },
+   {
+    "id": "char_610_acfend",
+    "name": "Mechanist",
+    "name_en": "Mechanist",
+    "name_jp": "Mechanist",
+    "name_kr": "메커니스트",
+    "name_tw": "Mechanist",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_466_qanik",
+    "name": "雪绒",
+    "name_en": "Qanipalaat",
+    "name_jp": "カニパラート",
+    "name_kr": "카니팔라트",
+    "name_tw": "雪絨",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_113_cqbw",
+    "name": "W",
+    "name_en": "W",
+    "name_jp": "W",
+    "name_kr": "W",
+    "name_tw": "W",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_115_headbr",
+    "name": "凛冬",
+    "name_en": "Zima",
+    "name_jp": "ズィマー",
+    "name_kr": "지마",
+    "name_tw": "凜冬",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_118_yuki",
+    "name": "白雪",
+    "name_en": "Shirayuki",
+    "name_jp": "シラユキ",
+    "name_kr": "시라유키",
+    "name_tw": "白雪",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_123_fang",
+    "name": "芬",
+    "name_en": "Fang",
+    "name_jp": "フェン",
+    "name_kr": "팽",
+    "name_tw": "芬",
+    "own": true,
+    "rarity": 3
+   },
+   {
+    "id": "char_127_estell",
+    "name": "艾丝黛尔",
+    "name_en": "Estelle",
+    "name_jp": "エステル",
+    "name_kr": "에스텔",
+    "name_tw": "艾絲黛爾",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_128_plosis",
+    "name": "白面鸮",
+    "name_en": "Ptilopsis",
+    "name_jp": "フィリオプシス",
+    "name_kr": "프틸롭시스",
+    "name_tw": "白面鴞",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_289_gyuki",
+    "name": "缠丸",
+    "name_en": "Matoimaru",
+    "name_jp": "マトイマル",
+    "name_kr": "마토이마루",
+    "name_tw": "纏丸",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_129_bluep",
+    "name": "蓝毒",
+    "name_en": "Blue Poison",
+    "name_jp": "アズリウス",
+    "name_kr": "블루포이즌",
+    "name_tw": "藍毒",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_130_doberm",
+    "name": "杜宾",
+    "name_en": "Dobermann",
+    "name_jp": "ドーベルマン",
+    "name_kr": "도베르만",
+    "name_tw": "杜賓",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_249_mlyss",
+    "name": "缪尔赛思",
+    "name_en": "Muelsyse",
+    "name_jp": "ミュルジス",
+    "name_kr": "뮤엘시스",
+    "name_tw": "繆爾賽思",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_131_flameb",
+    "name": "炎客",
+    "name_en": "Flamebringer",
+    "name_jp": "エンカク",
+    "name_kr": "플레임브링어",
+    "name_tw": "炎客",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4015_spuria",
+    "name": "空构",
+    "name_en": "Spuria",
+    "name_jp": "スプリア",
+    "name_kr": "스푸리아",
+    "name_tw": "空構",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_134_ifrit",
+    "name": "伊芙利特",
+    "name_en": "Ifrit",
+    "name_jp": "イフリータ",
+    "name_kr": "이프리트",
+    "name_tw": "伊芙利特",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_260_durnar",
+    "name": "坚雷",
+    "name_en": "Dur-nar",
+    "name_jp": "ジュナー",
+    "name_kr": "듀나",
+    "name_tw": "堅雷",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_181_flower",
+    "name": "调香师",
+    "name_en": "Perfumer",
+    "name_jp": "パフューマー",
+    "name_kr": "퍼퓨머",
+    "name_tw": "調香師",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_135_halo",
+    "name": "星源",
+    "name_en": "Astgenne",
+    "name_jp": "アステジーニ",
+    "name_kr": "아스트젠",
+    "name_tw": "星源",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_136_hsguma",
+    "name": "星熊",
+    "name_en": "Hoshiguma",
+    "name_jp": "ホシグマ",
+    "name_kr": "호시구마",
+    "name_tw": "星熊",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_137_brownb",
+    "name": "猎蜂",
+    "name_en": "Beehunter",
+    "name_jp": "ビーハンター",
+    "name_kr": "비헌터",
+    "name_tw": "獵蜂",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_4203_kichi",
+    "name": "吉星",
+    "name_en": "Kichisei",
+    "name_jp": "キチセイ",
+    "name_kr": "키치세이",
+    "name_tw": "吉星",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_140_whitew",
+    "name": "拉普兰德",
+    "name_en": "Lappland",
+    "name_jp": "ラップランド",
+    "name_kr": "라플란드",
+    "name_tw": "拉普蘭德",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_143_ghost",
+    "name": "幽灵鲨",
+    "name_en": "Specter",
+    "name_jp": "スペクター",
+    "name_kr": "스펙터",
+    "name_tw": "幽靈鯊",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_144_red",
+    "name": "红",
+    "name_en": "Projekt Red",
+    "name_jp": "レッド",
+    "name_kr": "레드",
+    "name_tw": "紅",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_145_prove",
+    "name": "普罗旺斯",
+    "name_en": "Provence",
+    "name_jp": "プロヴァンス",
+    "name_kr": "프로방스",
+    "name_tw": "普羅旺斯",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_393_toledo",
+    "name": "德·托莱多",
+    "name_en": "德·托莱多",
+    "name_jp": "德·托莱多",
+    "name_kr": "德·托莱多",
+    "name_tw": "德·托莱多",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4106_bryota",
+    "name": "苍苔",
+    "name_en": "Bryophyta",
+    "name_jp": "ブライオファイタ",
+    "name_kr": "브라이오피타",
+    "name_tw": "蒼苔",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_147_shining",
+    "name": "闪灵",
+    "name_en": "Shining",
+    "name_jp": "シャイニング",
+    "name_kr": "샤이닝",
+    "name_tw": "閃靈",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_148_nearl",
+    "name": "临光",
+    "name_en": "Nearl",
+    "name_jp": "ニアール",
+    "name_kr": "니어",
+    "name_tw": "臨光",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_149_scave",
+    "name": "清道夫",
+    "name_en": "Scavenger",
+    "name_jp": "スカベンジャー",
+    "name_kr": "스캐빈저",
+    "name_tw": "清道夫",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_1502_crosly",
+    "name": "弑君者",
+    "name_en": "Crownslayer",
+    "name_jp": "クラウンスレイヤー",
+    "name_kr": "크라운슬레이어",
+    "name_tw": "弒君者",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_150_snakek",
+    "name": "蛇屠箱",
+    "name_en": "Cuora",
+    "name_jp": "クオーラ",
+    "name_kr": "쿠오라",
+    "name_tw": "蛇屠箱",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_512_aprot",
+    "name": "暮落",
+    "name_en": "Shalem",
+    "name_jp": "シャレム",
+    "name_kr": "샬렘",
+    "name_tw": "暮落",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_151_myrtle",
+    "name": "桃金娘",
+    "name_en": "Myrtle",
+    "name_jp": "テンニンカ",
+    "name_kr": "머틀",
+    "name_tw": "桃金娘",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_154_morgan",
+    "name": "摩根",
+    "name_en": "Morgan",
+    "name_jp": "モーガン",
+    "name_kr": "모건",
+    "name_tw": "摩根",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_155_tiger",
+    "name": "因陀罗",
+    "name_en": "Indra",
+    "name_jp": "インドラ",
+    "name_kr": "인드라",
+    "name_tw": "因陀羅",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_157_dagda",
+    "name": "达格达",
+    "name_en": "Dagda",
+    "name_jp": "ダグザ",
+    "name_kr": "다그다",
+    "name_tw": "達格達",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_159_peacok",
+    "name": "断罪者",
+    "name_en": "Conviction",
+    "name_jp": "コンビクション",
+    "name_kr": "컨빅션",
+    "name_tw": "斷罪者",
+    "own": false,
+    "rarity": 4
+   },
+   {
+    "id": "char_376_therex",
+    "name": "THRM-EX",
+    "name_en": "THRM-EX",
+    "name_jp": "THRM-EX",
+    "name_kr": "THRM-EX",
+    "name_tw": "THRM-EX",
+    "own": true,
+    "rarity": 1
+   },
+   {
+    "id": "char_163_hpsts",
+    "name": "火神",
+    "name_en": "Vulcan",
+    "name_jp": "ヴァルカン",
+    "name_kr": "벌컨",
+    "name_tw": "火神",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_164_nightm",
+    "name": "夜魔",
+    "name_en": "Nightmare",
+    "name_jp": "ナイトメア",
+    "name_kr": "나이트메어",
+    "name_tw": "夜魔",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_496_wildmn",
+    "name": "野鬃",
+    "name_en": "Wild Mane",
+    "name_jp": "ワイルドメイン",
+    "name_kr": "와일드메인",
+    "name_tw": "野鬃",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4122_grabds",
+    "name": "小满",
+    "name_en": "Grain Buds",
+    "name_jp": "グレインバッズ",
+    "name_kr": "그레인버즈",
+    "name_tw": "小滿",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_491_humus",
+    "name": "休谟斯",
+    "name_en": "Humus",
+    "name_jp": "ヒューマス",
+    "name_kr": "휴머스",
+    "name_tw": "休謨斯",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_358_lisa",
+    "name": "铃兰",
+    "name_en": "Suzuran",
+    "name_jp": "スズラン",
+    "name_kr": "스즈란",
+    "name_tw": "鈴蘭",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_166_skfire",
+    "name": "天火",
+    "name_en": "Skyfire",
+    "name_jp": "スカイフレア",
+    "name_kr": "스카이파이어",
+    "name_tw": "天火",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_171_bldsk",
+    "name": "华法琳",
+    "name_en": "Warfarin",
+    "name_jp": "ワルファリン",
+    "name_kr": "와파린",
+    "name_tw": "華法琳",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_172_svrash",
+    "name": "银灰",
+    "name_en": "SilverAsh",
+    "name_jp": "シルバーアッシュ",
+    "name_kr": "실버애쉬",
+    "name_tw": "銀灰",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_484_robrta",
+    "name": "罗比菈塔",
+    "name_en": "Roberta",
+    "name_jp": "ロベルタ",
+    "name_kr": "로베르타",
+    "name_tw": "羅比菈塔",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_173_slchan",
+    "name": "崖心",
+    "name_en": "Cliffheart",
+    "name_jp": "クリフハート",
+    "name_kr": "클리프하트",
+    "name_tw": "崖心",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_174_slbell",
+    "name": "初雪",
+    "name_en": "Pramanix",
+    "name_jp": "プラマニクス",
+    "name_kr": "프라마닉스",
+    "name_tw": "初雪",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4141_marcil",
+    "name": "玛露西尔",
+    "name_en": "Marcille",
+    "name_jp": "マルシル",
+    "name_kr": "마르실",
+    "name_tw": "瑪露希爾",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_179_cgbird",
+    "name": "夜莺",
+    "name_en": "Nightingale",
+    "name_jp": "ナイチンゲール",
+    "name_kr": "나이팅게일",
+    "name_tw": "夜鶯",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4087_ines",
+    "name": "伊内丝",
+    "name_en": "Ines",
+    "name_jp": "イネス",
+    "name_kr": "이네스",
+    "name_tw": "伊內絲",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4104_coldst",
+    "name": "冰酿",
+    "name_en": "Coldshot",
+    "name_jp": "コールドショット",
+    "name_kr": "콜드샷",
+    "name_tw": "冰釀",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_180_amgoat",
+    "name": "艾雅法拉",
+    "name_en": "Eyjafjalla",
+    "name_jp": "エイヤフィヤトラ",
+    "name_kr": "에이야퍄들라",
+    "name_tw": "艾雅法拉",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4077_palico",
+    "name": "泰拉大陆调查团",
+    "name_en": "Terra Research Commission",
+    "name_jp": "テラ大陸調査団",
+    "name_kr": "테라 대륙 조사단",
+    "name_tw": "泰拉大陸調查團",
+    "own": false,
+    "rarity": 1
+   },
+   {
+    "id": "char_505_rcast",
+    "name": "预备干员-术师",
+    "name_en": "Reserve Operator - Caster",
+    "name_jp": "予備隊員-術師",
+    "name_kr": "예비 오퍼레이터 - 캐스터",
+    "name_tw": "預備幹員-術師",
+    "own": false,
+    "rarity": 3
+   },
+   {
+    "id": "char_183_skgoat",
+    "name": "地灵",
+    "name_en": "Earthspirit",
+    "name_jp": "アーススピリット",
+    "name_kr": "어스스피릿",
+    "name_tw": "地靈",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_185_frncat",
+    "name": "慕斯",
+    "name_en": "Mousse",
+    "name_jp": "ムース",
+    "name_kr": "무스",
+    "name_tw": "慕斯",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_187_ccheal",
+    "name": "嘉维尔",
+    "name_en": "Gavial",
+    "name_jp": "ガヴィル",
+    "name_kr": "가비알",
+    "name_tw": "嘉維爾",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_4230_mcnist",
+    "name": "机械师",
+    "name_en": "机械师",
+    "name_jp": "机械师",
+    "name_kr": "机械师",
+    "name_tw": "机械师",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_188_helage",
+    "name": "赫拉格",
+    "name_en": "Hellagur",
+    "name_jp": "ヘラグ",
+    "name_kr": "헬라그",
+    "name_tw": "赫拉格",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_332_archet",
+    "name": "空弦",
+    "name_en": "Archetto",
+    "name_jp": "アルケット",
+    "name_kr": "아르케토",
+    "name_tw": "空弦",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_190_clour",
+    "name": "红云",
+    "name_en": "Vermeil",
+    "name_jp": "ヴァーミル",
+    "name_kr": "버메일",
+    "name_tw": "紅雲",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_4227_gallus",
+    "name": "GALLUS²",
+    "name_en": "GALLUS²",
+    "name_jp": "GALLUS²",
+    "name_kr": "GALLUS²",
+    "name_tw": "GALLUS²",
+    "own": true,
+    "rarity": 1
+   },
+   {
+    "id": "char_2025_shu",
+    "name": "黍",
+    "name_en": "Shu",
+    "name_jp": "シュウ",
+    "name_kr": "슈",
+    "name_tw": "黍",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_192_falco",
+    "name": "翎羽",
+    "name_en": "Plume",
+    "name_jp": "プリュム",
+    "name_kr": "플룸",
+    "name_tw": "翎羽",
+    "own": true,
+    "rarity": 3
+   },
+   {
+    "id": "char_194_leto",
+    "name": "烈夏",
+    "name_en": "Leto",
+    "name_jp": "リェータ",
+    "name_kr": "레토",
+    "name_tw": "烈夏",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_197_poca",
+    "name": "早露",
+    "name_en": "Rosa",
+    "name_jp": "ロサ",
+    "name_kr": "로사",
+    "name_tw": "早露",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4198_christ",
+    "name": "Miss.Christine",
+    "name_en": "Miss.Christine",
+    "name_jp": "ミス・クリスティーン",
+    "name_kr": "미스 크리스틴",
+    "name_tw": "Miss.Christine",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_198_blackd",
+    "name": "讯使",
+    "name_en": "Courier",
+    "name_jp": "クーリエ",
+    "name_kr": "쿠리어",
+    "name_tw": "訊使",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_199_yak",
+    "name": "角峰",
+    "name_en": "Matterhorn",
+    "name_jp": "マッターホルン",
+    "name_kr": "마터호른",
+    "name_tw": "角峰",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_2013_cerber",
+    "name": "刻俄柏",
+    "name_en": "Ceobe",
+    "name_jp": "ケオベ",
+    "name_kr": "케오베",
+    "name_tw": "刻俄柏",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_4064_mlynar",
+    "name": "玛恩纳",
+    "name_en": "Młynar",
+    "name_jp": "ムリナール",
+    "name_kr": "무에나",
+    "name_tw": "瑪恩納",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_2014_nian",
+    "name": "年",
+    "name_en": "Nian",
+    "name_jp": "ニェン",
+    "name_kr": "니엔",
+    "name_tw": "年",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4079_haini",
+    "name": "海霓",
+    "name_en": "Lucilla",
+    "name_jp": "ルシーラ",
+    "name_kr": "루실라",
+    "name_tw": "海霓",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_2015_dusk",
+    "name": "夕",
+    "name_en": "Dusk",
+    "name_jp": "シー",
+    "name_kr": "시",
+    "name_tw": "夕",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4213_skybx",
+    "name": "天空盒",
+    "name_en": "Skybox",
+    "name_jp": "スカイボックス",
+    "name_kr": "스카이박스",
+    "name_tw": "天空盒",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_201_moeshd",
+    "name": "可颂",
+    "name_en": "Croissant",
+    "name_jp": "クロワッサン",
+    "name_kr": "크루아상",
+    "name_tw": "可頌",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_2023_ling",
+    "name": "令",
+    "name_en": "Ling",
+    "name_jp": "リィン",
+    "name_kr": "링",
+    "name_tw": "令",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4204_mantra",
+    "name": "真言",
+    "name_en": "Mantra",
+    "name_jp": "マントラ",
+    "name_kr": "만트라",
+    "name_tw": "真言",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_235_jesica",
+    "name": "杰西卡",
+    "name_en": "Jessica",
+    "name_jp": "ジェシカ",
+    "name_kr": "제시카",
+    "name_tw": "潔西卡",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_245_cello",
+    "name": "塑心",
+    "name_en": "Virtuosa",
+    "name_jp": "ヴィルトゥオーサ",
+    "name_kr": "비르투오사",
+    "name_tw": "塑心",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_2024_chyue",
+    "name": "重岳",
+    "name_en": "Chongyue",
+    "name_jp": "チョンユエ",
+    "name_kr": "총웨",
+    "name_tw": "重岳",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_2026_yu",
+    "name": "余",
+    "name_en": "Yu",
+    "name_jp": "ユー",
+    "name_kr": "위",
+    "name_tw": "餘",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_602_cdfend",
+    "name": "预备干员-重装",
+    "name_en": "Reserve Operator - Defender",
+    "name_jp": "予備隊員-重装",
+    "name_kr": "예비 오퍼레이터 - 디펜더",
+    "name_tw": "預備幹員-重裝",
+    "own": false,
+    "rarity": 4
+   },
+   {
+    "id": "char_2027_wang",
+    "name": "望",
+    "name_en": "Wang",
+    "name_jp": "ウァン",
+    "name_kr": "왕",
+    "name_tw": "望",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_202_demkni",
+    "name": "塞雷娅",
+    "name_en": "Saria",
+    "name_jp": "サリア",
+    "name_kr": "사리아",
+    "name_tw": "塞雷婭",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_204_platnm",
+    "name": "白金",
+    "name_en": "Platinum",
+    "name_jp": "プラチナ",
+    "name_kr": "플래티넘",
+    "name_tw": "白金",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_206_gnosis",
+    "name": "灵知",
+    "name_en": "Gnosis",
+    "name_jp": "ノーシス",
+    "name_kr": "노시스",
+    "name_tw": "靈知",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_208_melan",
+    "name": "玫兰莎",
+    "name_en": "Melantha",
+    "name_jp": "メランサ",
+    "name_kr": "멜란사",
+    "name_tw": "玫蘭莎",
+    "own": true,
+    "rarity": 3
+   },
+   {
+    "id": "char_209_ardign",
+    "name": "卡缇",
+    "name_en": "Cardigan",
+    "name_jp": "カーディ",
+    "name_kr": "카디건",
+    "name_tw": "卡緹",
+    "own": true,
+    "rarity": 3
+   },
+   {
+    "id": "char_211_adnach",
+    "name": "安德切尔",
+    "name_en": "Adnachiel",
+    "name_jp": "アドナキエル",
+    "name_kr": "아드나키엘",
+    "name_tw": "安德切爾",
+    "own": true,
+    "rarity": 3
+   },
+   {
+    "id": "char_4130_luton",
+    "name": "露托",
+    "name_en": "Lutonada",
+    "name_jp": "ルトナダ",
+    "name_kr": "루토나다",
+    "name_tw": "露托",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_212_ansel",
+    "name": "安赛尔",
+    "name_en": "Ansel",
+    "name_jp": "アンセル",
+    "name_kr": "안셀",
+    "name_tw": "安賽爾",
+    "own": true,
+    "rarity": 3
+   },
+   {
+    "id": "char_213_mostma",
+    "name": "莫斯提马",
+    "name_en": "Mostima",
+    "name_jp": "モスティマ",
+    "name_kr": "모스티마",
+    "name_tw": "莫斯提馬",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_214_kafka",
+    "name": "卡夫卡",
+    "name_en": "Kafka",
+    "name_jp": "カフカ",
+    "name_kr": "카프카",
+    "name_tw": "卡夫卡",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_281_popka",
+    "name": "泡普卡",
+    "name_en": "Popukar",
+    "name_jp": "ポプカル",
+    "name_kr": "포푸카",
+    "name_tw": "泡普卡",
+    "own": true,
+    "rarity": 3
+   },
+   {
+    "id": "char_215_mantic",
+    "name": "狮蝎",
+    "name_en": "Manticore",
+    "name_jp": "マンティコア",
+    "name_kr": "맨티코어",
+    "name_tw": "獅蠍",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_218_cuttle",
+    "name": "安哲拉",
+    "name_en": "Andreana",
+    "name_jp": "アンドレアナ",
+    "name_kr": "안드레아나",
+    "name_tw": "安哲拉",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_306_leizi",
+    "name": "惊蛰",
+    "name_en": "Leizi",
+    "name_jp": "レイズ",
+    "name_kr": "레이즈",
+    "name_tw": "驚蟄",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_219_meteo",
+    "name": "陨星",
+    "name_en": "Meteorite",
+    "name_jp": "メテオリーテ",
+    "name_kr": "메테오라이트",
+    "name_tw": "隕星",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_222_bpipe",
+    "name": "风笛",
+    "name_en": "Bagpipe",
+    "name_jp": "バグパイプ",
+    "name_kr": "백파이프",
+    "name_tw": "風笛",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_4177_brigid",
+    "name": "水灯心",
+    "name_en": "Brigid",
+    "name_jp": "ブリギッド",
+    "name_kr": "브리지드",
+    "name_tw": "水燈心",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4151_tinman",
+    "name": "锡人",
+    "name_en": "Tin Man",
+    "name_jp": "ブリキ",
+    "name_kr": "틴맨",
+    "name_tw": "錫人",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_225_haak",
+    "name": "阿",
+    "name_en": "Aak",
+    "name_jp": "ア",
+    "name_kr": "아",
+    "name_tw": "阿",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_226_hmau",
+    "name": "吽",
+    "name_en": "Hung",
+    "name_jp": "ウン",
+    "name_kr": "훔",
+    "name_tw": "吽",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_498_inside",
+    "name": "隐现",
+    "name_en": "Insider",
+    "name_jp": "インサイダー",
+    "name_kr": "인사이더",
+    "name_tw": "隱現",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_459_tachak",
+    "name": "战车",
+    "name_en": "Tachanka",
+    "name_jp": "Tachanka",
+    "name_kr": "Tachanka",
+    "name_tw": "TACHANKA",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4051_akkord",
+    "name": "协律",
+    "name_en": "Akkord",
+    "name_jp": "アコルト",
+    "name_kr": "아코르트",
+    "name_tw": "協律",
+    "own": false,
+    "rarity": 4
+   },
+   {
+    "id": "char_4212_nasti",
+    "name": "娜斯提",
+    "name_en": "Nasti",
+    "name_jp": "ナスティ",
+    "name_kr": "내스티",
+    "name_tw": "娜斯提",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_230_savage",
+    "name": "暴行",
+    "name_en": "Savage",
+    "name_jp": "サベージ",
+    "name_kr": "새비지",
+    "name_tw": "暴行",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_236_rope",
+    "name": "暗索",
+    "name_en": "Rope",
+    "name_jp": "ロープ",
+    "name_kr": "로프",
+    "name_tw": "暗索",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_241_panda",
+    "name": "食铁兽",
+    "name_en": "FEater",
+    "name_jp": "エフイーター",
+    "name_kr": "에프이터",
+    "name_tw": "食鐵獸",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4225_tanya",
+    "name": "裂响",
+    "name_en": "Crackborne",
+    "name_jp": "クラックボーン",
+    "name_kr": "크랙본",
+    "name_tw": "裂响",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_340_shwaz",
+    "name": "黑",
+    "name_en": "Schwarz",
+    "name_jp": "シュヴァルツ",
+    "name_kr": "슈바르츠",
+    "name_tw": "黑",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_242_otter",
+    "name": "梅尔",
+    "name_en": "Mayer",
+    "name_jp": "メイヤー",
+    "name_kr": "메이어",
+    "name_tw": "梅爾",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4009_irene",
+    "name": "艾丽妮",
+    "name_en": "Irene",
+    "name_jp": "アイリーニ",
+    "name_kr": "아이린",
+    "name_tw": "艾麗妮",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_243_waaifu",
+    "name": "槐琥",
+    "name_en": "Waai Fu",
+    "name_jp": "ワイフー",
+    "name_kr": "와이후",
+    "name_tw": "槐琥",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_248_mgllan",
+    "name": "麦哲伦",
+    "name_en": "Magallan",
+    "name_jp": "マゼラン",
+    "name_kr": "마젤란",
+    "name_tw": "麥哲倫",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_346_aosta",
+    "name": "奥斯塔",
+    "name_en": "Aosta",
+    "name_jp": "アオスタ",
+    "name_kr": "아오스타",
+    "name_tw": "奥斯塔",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_254_vodfox",
+    "name": "巫恋",
+    "name_en": "Shamare",
+    "name_jp": "シャマレ",
+    "name_kr": "샤마르",
+    "name_tw": "巫戀",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_258_podego",
+    "name": "波登可",
+    "name_en": "Podenco",
+    "name_jp": "ポデンコ",
+    "name_kr": "포덴코",
+    "name_tw": "波登可",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_421_crow",
+    "name": "羽毛笔",
+    "name_en": "La Pluma",
+    "name_jp": "ラ・プルマ",
+    "name_kr": "라 플루마",
+    "name_tw": "羽毛筆",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_322_lmlee",
+    "name": "老鲤",
+    "name_en": "Lee",
+    "name_jp": "リー",
+    "name_kr": "리",
+    "name_tw": "老鯉",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_261_sddrag",
+    "name": "苇草",
+    "name_en": "Reed",
+    "name_jp": "リード",
+    "name_kr": "리드",
+    "name_tw": "葦草",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4171_wulfen",
+    "name": "钼铅",
+    "name_en": "Wulfenite",
+    "name_jp": "ウルフェナイト",
+    "name_kr": "울페나이트",
+    "name_tw": "鉬鉛",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_510_amedic",
+    "name": "Touch",
+    "name_en": "Touch",
+    "name_jp": "Touch",
+    "name_kr": "터치",
+    "name_tw": "Touch",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_263_skadi",
+    "name": "斯卡蒂",
+    "name_en": "Skadi",
+    "name_jp": "スカジ",
+    "name_kr": "스카디",
+    "name_tw": "斯卡蒂",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_502_nblade",
+    "name": "夜刀",
+    "name_en": "Yato",
+    "name_jp": "ヤトウ",
+    "name_kr": "야토",
+    "name_tw": "夜刀",
+    "own": true,
+    "rarity": 2
+   },
+   {
+    "id": "char_264_f12yin",
+    "name": "山",
+    "name_en": "Mountain",
+    "name_jp": "マウンテン",
+    "name_kr": "마운틴",
+    "name_tw": "山",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4188_confes",
+    "name": "CONFESS-47",
+    "name_en": "CONFESS-47",
+    "name_jp": "CONFESS-47",
+    "name_kr": "CONFESS-47",
+    "name_tw": "CONFESS-47",
+    "own": false,
+    "rarity": 1
+   },
+   {
+    "id": "char_328_cammou",
+    "name": "卡达",
+    "name_en": "Click",
+    "name_jp": "カシャ",
+    "name_kr": "클릭",
+    "name_tw": "卡達",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_4056_titi",
+    "name": "缇缇",
+    "name_en": "Titi",
+    "name_jp": "ティティ",
+    "name_kr": "티티",
+    "name_tw": "緹緹",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_265_sophia",
+    "name": "鞭刃",
+    "name_en": "Whislash",
+    "name_jp": "ウィスラッシュ",
+    "name_kr": "위슬래시",
+    "name_tw": "鞭刃",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_271_spikes",
+    "name": "芳汀",
+    "name_en": "Arene",
+    "name_jp": "アレーン",
+    "name_kr": "아렌",
+    "name_tw": "芳汀",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_272_strong",
+    "name": "孑",
+    "name_en": "Jaye",
+    "name_jp": "ジェイ",
+    "name_kr": "제이",
+    "name_tw": "孑",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_479_sleach",
+    "name": "琴柳",
+    "name_en": "Saileach",
+    "name_jp": "サイラッハ",
+    "name_kr": "사일라흐",
+    "name_tw": "琴柳",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_274_astesi",
+    "name": "星极",
+    "name_en": "Astesia",
+    "name_jp": "アステシア",
+    "name_kr": "아스테시아",
+    "name_tw": "星極",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_275_breeze",
+    "name": "微风",
+    "name_en": "Breeze",
+    "name_jp": "ブリーズ",
+    "name_kr": "브리즈",
+    "name_tw": "微風",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4119_wanqin",
+    "name": "万顷",
+    "name_en": "Wanqing",
+    "name_jp": "ワンチィン",
+    "name_kr": "완칭",
+    "name_tw": "萬頃",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_277_sqrrel",
+    "name": "阿消",
+    "name_en": "Shaw",
+    "name_jp": "ショウ",
+    "name_kr": "쇼",
+    "name_tw": "阿消",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_378_asbest",
+    "name": "石棉",
+    "name_en": "Asbestos",
+    "name_jp": "アスベストス",
+    "name_kr": "아스베스토스",
+    "name_tw": "石棉",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_278_orchid",
+    "name": "梓兰",
+    "name_en": "Orchid",
+    "name_jp": "オーキッド",
+    "name_kr": "오키드",
+    "name_tw": "梓蘭",
+    "own": true,
+    "rarity": 3
+   },
+   {
+    "id": "char_279_excu",
+    "name": "送葬人",
+    "name_en": "Executor",
+    "name_jp": "イグゼキュター",
+    "name_kr": "이그제큐터",
+    "name_tw": "送葬人",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4178_alanna",
+    "name": "阿兰娜",
+    "name_en": "Alanna",
+    "name_jp": "アランナ",
+    "name_kr": "알라나",
+    "name_tw": "阿蘭娜",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_282_catap",
+    "name": "空爆",
+    "name_en": "Catapult",
+    "name_jp": "カタパルト",
+    "name_kr": "캐터펄트",
+    "name_tw": "空爆",
+    "own": true,
+    "rarity": 3
+   },
+   {
+    "id": "char_284_spot",
+    "name": "斑点",
+    "name_en": "Spot",
+    "name_jp": "スポット",
+    "name_kr": "스팟",
+    "name_tw": "斑點",
+    "own": true,
+    "rarity": 3
+   },
+   {
+    "id": "char_285_medic2",
+    "name": "Lancet-2",
+    "name_en": "Lancet-2",
+    "name_jp": "Lancet-2",
+    "name_kr": "Lancet-2",
+    "name_tw": "Lancet-2",
+    "own": true,
+    "rarity": 1
+   },
+   {
+    "id": "char_4016_kazema",
+    "name": "风丸",
+    "name_en": "Kazemaru",
+    "name_jp": "カゼマル",
+    "name_kr": "카제마루",
+    "name_tw": "風丸",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_286_cast3",
+    "name": "Castle-3",
+    "name_en": "Castle-3",
+    "name_jp": "Castle-3",
+    "name_kr": "Castle-3",
+    "name_tw": "Castle-3",
+    "own": true,
+    "rarity": 1
+   },
+   {
+    "id": "char_4125_rdoc",
+    "name": "医生",
+    "name_en": "Doc",
+    "name_jp": "Doc",
+    "name_kr": "Doc",
+    "name_tw": "DOC",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_290_vigna",
+    "name": "红豆",
+    "name_en": "Vigna",
+    "name_jp": "ヴィグナ",
+    "name_kr": "비그나",
+    "name_tw": "紅豆",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_501_durin",
+    "name": "杜林",
+    "name_en": "Durin",
+    "name_jp": "ドゥリン",
+    "name_kr": "두린",
+    "name_tw": "杜林",
+    "own": true,
+    "rarity": 2
+   },
+   {
+    "id": "char_291_aglina",
+    "name": "安洁莉娜",
+    "name_en": "Angelina",
+    "name_jp": "アンジェリーナ",
+    "name_kr": "안젤리나",
+    "name_tw": "安潔莉娜",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_293_thorns",
+    "name": "棘刺",
+    "name_en": "Thorns",
+    "name_jp": "ソーンズ",
+    "name_kr": "쏜즈",
+    "name_tw": "棘刺",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_294_ayer",
+    "name": "断崖",
+    "name_en": "Ayerscarpe",
+    "name_jp": "エアースカーペ",
+    "name_kr": "에이어스카르페",
+    "name_tw": "斷崖",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4102_threye",
+    "name": "凛视",
+    "name_en": "Valarqvin",
+    "name_jp": "ヴァラルクビン",
+    "name_kr": "발라크빈",
+    "name_tw": "凜視",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_297_hamoni",
+    "name": "和弦",
+    "name_en": "Harmonie",
+    "name_jp": "ハーモニー",
+    "name_kr": "아르모니",
+    "name_tw": "和弦",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_426_billro",
+    "name": "卡涅利安",
+    "name_en": "Carnelian",
+    "name_jp": "カーネリアン",
+    "name_kr": "카넬리안",
+    "name_tw": "卡涅利安",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_298_susuro",
+    "name": "苏苏洛",
+    "name_en": "Sussurro",
+    "name_jp": "ススーロ",
+    "name_kr": "수수로",
+    "name_tw": "蘇蘇洛",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_4236_tmslot",
+    "name": "时隙",
+    "name_en": "时隙",
+    "name_jp": "时隙",
+    "name_kr": "时隙",
+    "name_tw": "时隙",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_506_rmedic",
+    "name": "预备干员-后勤",
+    "name_en": "Reserve Operator - Logistics",
+    "name_jp": "予備隊員-支援",
+    "name_kr": "예비 오퍼레이터 - 지원",
+    "name_tw": "預備幹員-後勤",
+    "own": false,
+    "rarity": 3
+   },
+   {
+    "id": "char_300_phenxi",
+    "name": "菲亚梅塔",
+    "name_en": "Fiammetta",
+    "name_jp": "フィアメッタ",
+    "name_kr": "피아메타",
+    "name_tw": "菲亞梅塔",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_379_sesa",
+    "name": "慑砂",
+    "name_en": "Sesa",
+    "name_jp": "シェーシャ",
+    "name_kr": "세사",
+    "name_tw": "懾砂",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_304_zebra",
+    "name": "暴雨",
+    "name_en": "Heavyrain",
+    "name_jp": "ヘビーレイン",
+    "name_kr": "헤비레인",
+    "name_tw": "暴雨",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_311_mudrok",
+    "name": "泥岩",
+    "name_en": "Mudrock",
+    "name_jp": "マドロック",
+    "name_kr": "머드락",
+    "name_tw": "泥岩",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_325_bison",
+    "name": "拜松",
+    "name_en": "Bison",
+    "name_jp": "バイソン",
+    "name_kr": "바이슨",
+    "name_tw": "拜松",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_326_glacus",
+    "name": "格劳克斯",
+    "name_en": "Glaucus",
+    "name_jp": "グラウコス",
+    "name_kr": "글라우쿠스",
+    "name_tw": "格勞克斯",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_333_sidero",
+    "name": "铸铁",
+    "name_en": "Sideroca",
+    "name_jp": "シデロカ",
+    "name_kr": "시데로카",
+    "name_tw": "鑄鐵",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_337_utage",
+    "name": "宴",
+    "name_en": "Utage",
+    "name_jp": "ウタゲ",
+    "name_kr": "우타게",
+    "name_tw": "宴",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_338_iris",
+    "name": "爱丽丝",
+    "name_en": "Iris",
+    "name_jp": "アイリス",
+    "name_kr": "아이리스",
+    "name_tw": "愛麗絲",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_341_sntlla",
+    "name": "寒檀",
+    "name_en": "Santalla",
+    "name_jp": "サンタラ",
+    "name_kr": "산탈라",
+    "name_tw": "寒檀",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_343_tknogi",
+    "name": "月禾",
+    "name_en": "Tsukinogi",
+    "name_jp": "ツキノギ",
+    "name_kr": "츠키노기",
+    "name_tw": "月禾",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4202_haruka",
+    "name": "遥",
+    "name_en": "Haruka",
+    "name_jp": "ハルカ",
+    "name_kr": "하루카",
+    "name_tw": "遙",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_388_mint",
+    "name": "薄绿",
+    "name_en": "Mint",
+    "name_jp": "ミント",
+    "name_kr": "민트",
+    "name_tw": "薄綠",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_344_beewax",
+    "name": "蜜蜡",
+    "name_en": "Beeswax",
+    "name_jp": "ビーズワクス",
+    "name_kr": "비즈왁스",
+    "name_tw": "蜜蠟",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_383_snsant",
+    "name": "雪雉",
+    "name_en": "Snowsant",
+    "name_jp": "スノーズント",
+    "name_kr": "스노우상트",
+    "name_tw": "雪雉",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_365_aprl",
+    "name": "四月",
+    "name_en": "April",
+    "name_jp": "エイプリル",
+    "name_kr": "에이프릴",
+    "name_tw": "四月",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_345_folnic",
+    "name": "亚叶",
+    "name_en": "Folinic",
+    "name_jp": "フォリニック",
+    "name_kr": "폴리닉",
+    "name_tw": "亞葉",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_347_jaksel",
+    "name": "杰克",
+    "name_en": "Jackie",
+    "name_jp": "ジャッキー",
+    "name_kr": "재키",
+    "name_tw": "傑克",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_349_chiave",
+    "name": "贾维",
+    "name_en": "Chiave",
+    "name_jp": "キアーベ",
+    "name_kr": "키아베",
+    "name_tw": "賈維",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_350_surtr",
+    "name": "史尔特尔",
+    "name_en": "Surtr",
+    "name_jp": "スルト",
+    "name_kr": "수르트",
+    "name_tw": "史爾特爾",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_423_blemsh",
+    "name": "瑕光",
+    "name_en": "Blemishine",
+    "name_jp": "ブレミシャイン",
+    "name_kr": "블레미샤인",
+    "name_tw": "瑕光",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_355_ethan",
+    "name": "伊桑",
+    "name_en": "Ethan",
+    "name_jp": "イーサン",
+    "name_kr": "에단",
+    "name_tw": "伊桑",
+    "own": false,
+    "rarity": 4
+   },
+   {
+    "id": "char_469_indigo",
+    "name": "深靛",
+    "name_en": "Indigo",
+    "name_jp": "インディゴ",
+    "name_kr": "인디고",
+    "name_tw": "深靛",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_4186_tmoris",
+    "name": "八幡海铃",
+    "name_en": "Umiri Yahata",
+    "name_jp": "八幡海鈴",
+    "name_kr": "야하타 우미리",
+    "name_tw": "八幡海鈴",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_356_broca",
+    "name": "布洛卡",
+    "name_en": "Broca",
+    "name_jp": "ブローカ",
+    "name_kr": "브로카",
+    "name_tw": "布洛卡",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_362_saga",
+    "name": "嵯峨",
+    "name_en": "Saga",
+    "name_jp": "サガ",
+    "name_kr": "사가",
+    "name_tw": "嵯峨",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_363_toddi",
+    "name": "熔泉",
+    "name_en": "Toddifons",
+    "name_jp": "トギフォンス",
+    "name_kr": "토디폰스",
+    "name_tw": "熔泉",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_366_acdrop",
+    "name": "酸糖",
+    "name_en": "Aciddrop",
+    "name_jp": "アシッドドロップ",
+    "name_kr": "애시드드롭",
+    "name_tw": "酸糖",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_367_swllow",
+    "name": "灰喉",
+    "name_en": "GreyThroat",
+    "name_jp": "グレースロート",
+    "name_kr": "그레이스롯",
+    "name_tw": "灰喉",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4047_pianst",
+    "name": "车尔尼",
+    "name_en": "Czerny",
+    "name_jp": "ツェルニー",
+    "name_kr": "체르니",
+    "name_tw": "車爾尼",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_369_bena",
+    "name": "贝娜",
+    "name_en": "Bena",
+    "name_jp": "ベナ",
+    "name_kr": "베나",
+    "name_tw": "貝娜",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_373_lionhd",
+    "name": "莱恩哈特",
+    "name_en": "Leonhardt",
+    "name_jp": "レオンハルト",
+    "name_kr": "레온하르트",
+    "name_tw": "萊恩哈特",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_381_bubble",
+    "name": "泡泡",
+    "name_en": "Bubble",
+    "name_jp": "バブル",
+    "name_kr": "버블",
+    "name_tw": "泡泡",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_385_finlpp",
+    "name": "清流",
+    "name_en": "Purestream",
+    "name_jp": "セイリュウ",
+    "name_kr": "퓨어스트림",
+    "name_tw": "清流",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_391_rosmon",
+    "name": "迷迭香",
+    "name_en": "Rosmontis",
+    "name_jp": "ロスモンティス",
+    "name_kr": "로즈몬티스",
+    "name_tw": "迷迭香",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4000_jnight",
+    "name": "正义骑士号",
+    "name_en": "'Justice Knight'",
+    "name_jp": "ジャスティスナイト",
+    "name_kr": "저스티스 나이트",
+    "name_tw": "正義騎士號",
+    "own": true,
+    "rarity": 1
+   },
+   {
+    "id": "char_4042_lumen",
+    "name": "流明",
+    "name_en": "Lumen",
+    "name_jp": "ルーメン",
+    "name_kr": "루멘",
+    "name_tw": "流明",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4006_melnte",
+    "name": "玫拉",
+    "name_en": "Melanite",
+    "name_jp": "メラナイト",
+    "name_kr": "멜라나이트",
+    "name_tw": "玫拉",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_400_weedy",
+    "name": "温蒂",
+    "name_en": "Weedy",
+    "name_jp": "ウィーディ",
+    "name_kr": "위디",
+    "name_tw": "溫蒂",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4134_cetsyr",
+    "name": "魔王",
+    "name_en": "Civilight Eterna",
+    "name_jp": "シヴィライト・エテルナ",
+    "name_kr": "시빌라이트 에테르나",
+    "name_tw": "魔王",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_617_sharp2",
+    "name": "领主·Sharp",
+    "name_en": "Lord/Sharp",
+    "name_jp": "領主・Sharp",
+    "name_kr": "로드·샤프",
+    "name_tw": "領主·Sharp",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_614_acsupo",
+    "name": "Raidian",
+    "name_en": "Raidian",
+    "name_jp": "Raidian",
+    "name_kr": "라이디언",
+    "name_tw": "Raidian",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4010_etlchi",
+    "name": "隐德来希",
+    "name_en": "Entelechia",
+    "name_jp": "エンテレケイア",
+    "name_kr": "엔텔레키아",
+    "name_tw": "隱德來希",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_500_noirc",
+    "name": "黑角",
+    "name_en": "Noir Corne",
+    "name_jp": "ノイルホーン",
+    "name_kr": "느와르 코르네",
+    "name_tw": "黑角",
+    "own": true,
+    "rarity": 2
+   },
+   {
+    "id": "char_4011_lessng",
+    "name": "止颂",
+    "name_en": "Lessing",
+    "name_jp": "レッシング",
+    "name_kr": "레싱",
+    "name_tw": "止頌",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4116_blkkgt",
+    "name": "锏",
+    "name_en": "Degenbrecher",
+    "name_jp": "デーゲンブレヒャー",
+    "name_kr": "데겐블레허",
+    "name_tw": "鐧",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4013_kjera",
+    "name": "耶拉",
+    "name_en": "Kjera",
+    "name_jp": "イェラ",
+    "name_kr": "쉐라",
+    "name_tw": "耶拉",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4014_lunacu",
+    "name": "子月",
+    "name_en": "Lunacub",
+    "name_jp": "ルナカブ",
+    "name_kr": "루나컵",
+    "name_tw": "子月",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4017_puzzle",
+    "name": "谜图",
+    "name_en": "Puzzle",
+    "name_jp": "パズル",
+    "name_kr": "퍼즐",
+    "name_tw": "謎圖",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4019_ncdeer",
+    "name": "九色鹿",
+    "name_en": "Nine-Colored Deer",
+    "name_jp": "九色鹿",
+    "name_kr": "나인컬러드 디어",
+    "name_tw": "九色鹿",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4080_lin",
+    "name": "林",
+    "name_en": "Lin",
+    "name_jp": "リン",
+    "name_kr": "린",
+    "name_tw": "林",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_401_elysm",
+    "name": "极境",
+    "name_en": "Elysium",
+    "name_jp": "エリジウム",
+    "name_kr": "엘리시움",
+    "name_tw": "極境",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4194_rmixer",
+    "name": "信仰搅拌机",
+    "name_en": "Sankta Miksaparato",
+    "name_jp": "サンクタ・ミキサー",
+    "name_kr": "산크타 믹사파라토",
+    "name_tw": "信仰攪拌機",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4026_vulpis",
+    "name": "忍冬",
+    "name_en": "Vulpisfoglia",
+    "name_jp": "ウルピスフォリア",
+    "name_kr": "불피스폴리아",
+    "name_tw": "忍冬",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_475_akafyu",
+    "name": "赤冬",
+    "name_en": "Akafuyu",
+    "name_jp": "アカフユ",
+    "name_kr": "아카후유",
+    "name_tw": "赤冬",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_402_tuye",
+    "name": "图耶",
+    "name_en": "Tuye",
+    "name_jp": "トゥイエ",
+    "name_kr": "투예",
+    "name_tw": "圖耶",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_433_windft",
+    "name": "掠风",
+    "name_en": "Windflit",
+    "name_jp": "ウインドフリット",
+    "name_kr": "윈드플릿",
+    "name_tw": "掠風",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4031_liesel",
+    "name": "复奏",
+    "name_en": "Ripresa",
+    "name_jp": "リプレーザ",
+    "name_kr": "리프레사",
+    "name_tw": "復奏",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_440_pinecn",
+    "name": "松果",
+    "name_en": "Pinecone",
+    "name_jp": "パインコーン",
+    "name_kr": "파인콘",
+    "name_tw": "松果",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_4032_provs",
+    "name": "但书",
+    "name_en": "Proviso",
+    "name_jp": "プロヴァイゾ",
+    "name_kr": "프로바이조",
+    "name_tw": "但書",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4036_forcer",
+    "name": "见行者",
+    "name_en": "Enforcer",
+    "name_jp": "エンフォーサー",
+    "name_kr": "인포서",
+    "name_tw": "見行者",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4037_demetr",
+    "name": "贝洛内",
+    "name_en": "Bellone",
+    "name_jp": "ベッローネ",
+    "name_kr": "벨로네",
+    "name_tw": "貝洛內",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_4039_horn",
+    "name": "号角",
+    "name_en": "Horn",
+    "name_jp": "ホルン",
+    "name_kr": "혼",
+    "name_tw": "號角",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4235_thumpy",
+    "name": "珊比",
+    "name_en": "珊比",
+    "name_jp": "珊比",
+    "name_kr": "珊比",
+    "name_tw": "珊比",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4219_yukari",
+    "name": "岳羽由加莉",
+    "name_en": "岳羽由加莉",
+    "name_jp": "岳羽由加莉",
+    "name_kr": "岳羽由加莉",
+    "name_tw": "岳羽由加莉",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4040_rockr",
+    "name": "洛洛",
+    "name_en": "Rockrock",
+    "name_jp": "ロックロック",
+    "name_kr": "락락",
+    "name_tw": "洛洛",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4041_chnut",
+    "name": "褐果",
+    "name_en": "Chestnut",
+    "name_jp": "チェストナット",
+    "name_kr": "체스트넛",
+    "name_tw": "褐果",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_612_accast",
+    "name": "Pith",
+    "name_en": "Pith",
+    "name_jp": "Pith",
+    "name_kr": "피스",
+    "name_tw": "Pith",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4043_erato",
+    "name": "埃拉托",
+    "name_en": "Erato",
+    "name_jp": "エラト",
+    "name_kr": "에라토",
+    "name_tw": "埃拉托",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_451_robin",
+    "name": "罗宾",
+    "name_en": "Robin",
+    "name_jp": "ロビン",
+    "name_kr": "로빈",
+    "name_tw": "羅賓",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4045_heidi",
+    "name": "海蒂",
+    "name_en": "Heidi",
+    "name_jp": "ハイディ",
+    "name_kr": "하이디",
+    "name_tw": "海蒂",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4046_ebnhlz",
+    "name": "黑键",
+    "name_en": "Ebenholz",
+    "name_jp": "エーベンホルツ",
+    "name_kr": "에벤홀츠",
+    "name_tw": "黑鍵",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4048_doroth",
+    "name": "多萝西",
+    "name_en": "Dorothy",
+    "name_jp": "ドロシー",
+    "name_kr": "도로시",
+    "name_tw": "多蘿西",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4052_surfer",
+    "name": "寻澜",
+    "name_en": "Surfer",
+    "name_jp": "サーファー",
+    "name_kr": "서퍼",
+    "name_tw": "尋瀾",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4100_caper",
+    "name": "跃跃",
+    "name_en": "Caper",
+    "name_jp": "ケイパー",
+    "name_kr": "케이퍼",
+    "name_tw": "躍躍",
+    "own": false,
+    "rarity": 4
+   },
+   {
+    "id": "char_4054_malist",
+    "name": "至简",
+    "name_en": "Minimalist",
+    "name_jp": "ミニマリスト",
+    "name_kr": "미니멀리스트",
+    "name_tw": "至簡",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4055_bgsnow",
+    "name": "鸿雪",
+    "name_en": "Pozëmka",
+    "name_jp": "パゼオンカ",
+    "name_kr": "파죰카",
+    "name_tw": "鴻雪",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_4166_varkis",
+    "name": "摆渡人",
+    "name_en": "Varkáris",
+    "name_jp": "ヴァルカリス",
+    "name_kr": "바르카리스",
+    "name_tw": "擺渡人",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4058_pepe",
+    "name": "佩佩",
+    "name_en": "Pepe",
+    "name_jp": "ペペ",
+    "name_kr": "페페",
+    "name_tw": "佩佩",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4195_radian",
+    "name": "电弧",
+    "name_en": "Raidian",
+    "name_jp": "レイディアン",
+    "name_kr": "라이디언",
+    "name_tw": "電弧",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4062_totter",
+    "name": "铅踝",
+    "name_en": "Totter",
+    "name_jp": "トター",
+    "name_kr": "토터",
+    "name_tw": "鉛踝",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_4140_lasher",
+    "name": "衡沙",
+    "name_en": "Sand Reckoner",
+    "name_jp": "サンドレコナー",
+    "name_kr": "샌드레코너",
+    "name_tw": "衡沙",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4063_quartz",
+    "name": "石英",
+    "name_en": "Quartz",
+    "name_jp": "クォーツ",
+    "name_kr": "쿼츠",
+    "name_tw": "石英",
+    "own": false,
+    "rarity": 4
+   },
+   {
+    "id": "char_4065_judge",
+    "name": "斥罪",
+    "name_en": "Penance",
+    "name_jp": "ペナンス",
+    "name_kr": "페넌스",
+    "name_tw": "斥罪",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4066_highmo",
+    "name": "海沫",
+    "name_en": "Highmore",
+    "name_jp": "ハイモア",
+    "name_kr": "하이모어",
+    "name_tw": "海沫",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4223_botany",
+    "name": "伯塔尼",
+    "name_en": "Botani",
+    "name_jp": "ボタニ",
+    "name_kr": "보타니",
+    "name_tw": "伯塔尼",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4067_lolxh",
+    "name": "罗小黑",
+    "name_en": "Luo Xiaohei",
+    "name_jp": "羅小黒",
+    "name_kr": "나소흑",
+    "name_tw": "羅小黑",
+    "own": false,
+    "rarity": 4
+   },
+   {
+    "id": "char_4144_chilc",
+    "name": "齐尔查克",
+    "name_en": "Chilchuck",
+    "name_jp": "チルチャック",
+    "name_kr": "칠책",
+    "name_tw": "奇爾查克",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4071_peper",
+    "name": "明椒",
+    "name_en": "Paprika",
+    "name_jp": "パプリカ",
+    "name_kr": "파프리카",
+    "name_tw": "明椒",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_606_csuppo",
+    "name": "预备干员-辅助",
+    "name_en": "Reserve Operator - Supporter",
+    "name_jp": "予備隊員-補助",
+    "name_kr": "예비 오퍼레이터 - 서포터",
+    "name_tw": "預備幹員-輔助",
+    "own": false,
+    "rarity": 4
+   },
+   {
+    "id": "char_4072_ironmn",
+    "name": "白铁",
+    "name_en": "Stainless",
+    "name_jp": "ステインレス",
+    "name_kr": "스테인리스",
+    "name_tw": "白鐵",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_4078_bdhkgt",
+    "name": "截云",
+    "name_en": "Jieyun",
+    "name_jp": "ジエユン",
+    "name_kr": "지에윈",
+    "name_tw": "截雲",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4224_turdus",
+    "name": "乌啾",
+    "name_en": "Ukusik",
+    "name_jp": "ウクシク",
+    "name_kr": "우쿠시크",
+    "name_tw": "烏啾",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4081_warmy",
+    "name": "温米",
+    "name_en": "Warmy",
+    "name_jp": "ウォーミー",
+    "name_kr": "워미",
+    "name_tw": "溫米",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4121_zuole",
+    "name": "左乐",
+    "name_en": "Zuo Le",
+    "name_jp": "ズオ・ラウ",
+    "name_kr": "좌락",
+    "name_tw": "左樂",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_4082_qiubai",
+    "name": "仇白",
+    "name_en": "Qiubai",
+    "name_jp": "チューバイ",
+    "name_kr": "치우바이",
+    "name_tw": "仇白",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4083_chimes",
+    "name": "铎铃",
+    "name_en": "Wind Chimes",
+    "name_jp": "ウィンドチャイム",
+    "name_kr": "윈드차임스",
+    "name_tw": "鐸鈴",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4088_hodrer",
+    "name": "赫德雷",
+    "name_en": "Hoederer",
+    "name_jp": "ヘドリー",
+    "name_kr": "외드레르",
+    "name_tw": "赫德雷",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_4091_ulika",
+    "name": "U-Official",
+    "name_en": "U-Official",
+    "name_jp": "U-Official",
+    "name_kr": "U-Official",
+    "name_tw": "U-Official",
+    "own": false,
+    "rarity": 1
+   },
+   {
+    "id": "char_4093_frston",
+    "name": "Friston-3",
+    "name_en": "Friston-3",
+    "name_jp": "Friston-3",
+    "name_kr": "Friston-3",
+    "name_tw": "Friston-3",
+    "own": true,
+    "rarity": 1
+   },
+   {
+    "id": "char_4098_vvana",
+    "name": "薇薇安娜",
+    "name_en": "Viviana",
+    "name_jp": "ヴィヴィアナ",
+    "name_kr": "비비아나",
+    "name_tw": "薇薇安娜",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4110_delphn",
+    "name": "戴菲恩",
+    "name_en": "Delphine",
+    "name_jp": "デルフィーン",
+    "name_kr": "델핀",
+    "name_tw": "戴菲恩",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4105_almond",
+    "name": "杏仁",
+    "name_en": "Almond",
+    "name_jp": "アーモンド",
+    "name_kr": "아몬드",
+    "name_tw": "杏仁",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4107_vrdant",
+    "name": "维荻",
+    "name_en": "Verdant",
+    "name_jp": "ヴァーダント",
+    "name_kr": "버던트",
+    "name_tw": "維荻",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_4109_baslin",
+    "name": "深律",
+    "name_en": "Bassline",
+    "name_jp": "ベースライン",
+    "name_kr": "베이스라인",
+    "name_tw": "深律",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_493_firwhl",
+    "name": "火哨",
+    "name_en": "Firewhistle",
+    "name_jp": "ファイヤーホイッスル",
+    "name_kr": "파이어휘슬",
+    "name_tw": "火哨",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4114_harold",
+    "name": "哈洛德",
+    "name_en": "Harold",
+    "name_jp": "ハロルド",
+    "name_kr": "해럴드",
+    "name_tw": "哈洛德",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_455_nothin",
+    "name": "乌有",
+    "name_en": "Mr. Nothing",
+    "name_jp": "ウユウ",
+    "name_kr": "우요우",
+    "name_tw": "烏有",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_427_vigil",
+    "name": "伺夜",
+    "name_en": "Vigil",
+    "name_jp": "ヴィジェル",
+    "name_kr": "비질",
+    "name_tw": "伺夜",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4117_ray",
+    "name": "莱伊",
+    "name_en": "Ray",
+    "name_jp": "レイ",
+    "name_kr": "레이",
+    "name_tw": "萊伊",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_411_tomimi",
+    "name": "特米米",
+    "name_en": "Tomimi",
+    "name_jp": "トミミ",
+    "name_kr": "토미미",
+    "name_tw": "特米米",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4123_ela",
+    "name": "艾拉",
+    "name_en": "Ela",
+    "name_jp": "Ela",
+    "name_kr": "Ela",
+    "name_tw": "ELA",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4164_tecno",
+    "name": "特克诺",
+    "name_en": "Tecno",
+    "name_jp": "テクノ",
+    "name_kr": "테크노",
+    "name_tw": "特克諾",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4124_iana",
+    "name": "双月",
+    "name_en": "Iana",
+    "name_jp": "Iana",
+    "name_kr": "Iana",
+    "name_tw": "IANA",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4126_fuze",
+    "name": "导火索",
+    "name_en": "Fuze",
+    "name_jp": "Fuze",
+    "name_kr": "Fuze",
+    "name_tw": "FUZE",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4131_odda",
+    "name": "奥达",
+    "name_en": "Odda",
+    "name_jp": "オッダ",
+    "name_kr": "오다",
+    "name_tw": "奧達",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4132_ascln",
+    "name": "阿斯卡纶",
+    "name_en": "Ascalon",
+    "name_jp": "アスカロン",
+    "name_kr": "아스카론",
+    "name_tw": "阿斯卡綸",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4163_rosesa",
+    "name": "瑰盐",
+    "name_en": "Rose Salt",
+    "name_jp": "ローズソルト",
+    "name_kr": "로즈솔트",
+    "name_tw": "瑰鹽",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4133_logos",
+    "name": "逻各斯",
+    "name_en": "Logos",
+    "name_jp": "ロゴス",
+    "name_kr": "로고스",
+    "name_tw": "邏各斯",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4136_phonor",
+    "name": "PhonoR-0",
+    "name_en": "PhonoR-0",
+    "name_jp": "PhonoR-0",
+    "name_kr": "PhonoR-0",
+    "name_tw": "PhonoR-0",
+    "own": true,
+    "rarity": 1
+   },
+   {
+    "id": "char_4137_udflow",
+    "name": "深巡",
+    "name_en": "Underflow",
+    "name_jp": "アンダーフロー",
+    "name_kr": "언더플로우",
+    "name_tw": "深巡",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4138_narant",
+    "name": "娜仁图亚",
+    "name_en": "Narantuya",
+    "name_jp": "ナラントゥヤ",
+    "name_kr": "나란투야",
+    "name_tw": "娜仁圖亞",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4214_cairn",
+    "name": "响石",
+    "name_en": "Cairn",
+    "name_jp": "ケルン",
+    "name_kr": "케언",
+    "name_tw": "響石",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4142_laios",
+    "name": "莱欧斯",
+    "name_en": "Laios",
+    "name_jp": "ライオス",
+    "name_kr": "라이오스",
+    "name_tw": "萊歐斯",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4143_sensi",
+    "name": "森西",
+    "name_en": "Senshi",
+    "name_jp": "センシ",
+    "name_kr": "센시",
+    "name_tw": "先西",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4222_taraxa",
+    "name": "风絮",
+    "name_en": "Taraxacum",
+    "name_jp": "タラクサカム",
+    "name_kr": "타락사쿰",
+    "name_tw": "風絮",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4146_nymph",
+    "name": "妮芙",
+    "name_en": "Nymph",
+    "name_jp": "ニンフ",
+    "name_kr": "님프",
+    "name_tw": "妮芙",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4148_philae",
+    "name": "菲莱",
+    "name_en": "Philae",
+    "name_jp": "フィラエ",
+    "name_kr": "필라에",
+    "name_tw": "菲萊",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4155_talr",
+    "name": "裁度",
+    "name_en": "Figurino",
+    "name_jp": "フィグリーノ",
+    "name_kr": "피구리노",
+    "name_tw": "裁度",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_430_fartth",
+    "name": "远牙",
+    "name_en": "Fartooth",
+    "name_jp": "ファートゥース",
+    "name_kr": "파투스",
+    "name_tw": "遠牙",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4162_cathy",
+    "name": "凯瑟琳",
+    "name_en": "Catherine",
+    "name_jp": "キャサリン",
+    "name_kr": "캐서린",
+    "name_tw": "凱瑟琳",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_416_zumama",
+    "name": "森蚺",
+    "name_en": "Eunectes",
+    "name_jp": "ユーネクテス",
+    "name_kr": "유넥티스",
+    "name_tw": "森蚺",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_4172_xingzh",
+    "name": "行箸",
+    "name_en": "Xingzhu",
+    "name_jp": "シィンズゥ",
+    "name_kr": "싱주",
+    "name_tw": "行箸",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4211_snhunt",
+    "name": "雪猎",
+    "name_en": "Snow Hunter",
+    "name_jp": "スノーハンター",
+    "name_kr": "스노우헌터",
+    "name_tw": "雪獵",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4173_nowell",
+    "name": "诺威尔",
+    "name_en": "Nowell",
+    "name_jp": "ノウエル",
+    "name_kr": "노웰",
+    "name_tw": "諾威爾",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4199_makiri",
+    "name": "松桐",
+    "name_en": "Matsukiri",
+    "name_jp": "マツキリ",
+    "name_kr": "마츠키리",
+    "name_tw": "松桐",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4182_oblvns",
+    "name": "丰川祥子",
+    "name_en": "Sakiko Togawa",
+    "name_jp": "豊川祥子",
+    "name_kr": "토가와 사키코",
+    "name_tw": "豐川祥子",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4183_mortis",
+    "name": "若叶睦",
+    "name_en": "Mutsumi Wakaba",
+    "name_jp": "若葉睦",
+    "name_kr": "와카바 무츠미",
+    "name_tw": "若葉睦",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4185_amoris",
+    "name": "祐天寺若麦",
+    "name_en": "Nyamu Yūtenji",
+    "name_jp": "祐天寺にゃむ",
+    "name_kr": "유텐지 냐무",
+    "name_tw": "祐天寺若麥",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_472_pasngr",
+    "name": "异客",
+    "name_en": "Passenger",
+    "name_jp": "パッセンジャー",
+    "name_kr": "패신저",
+    "name_tw": "異客",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4187_graceb",
+    "name": "聆音",
+    "name_en": "Gracebearer",
+    "name_jp": "グレースベアラー",
+    "name_kr": "그레이스베어러",
+    "name_tw": "聆音",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4193_lemuen",
+    "name": "蕾缪安",
+    "name_en": "Lemuen",
+    "name_jp": "レミュアン",
+    "name_kr": "르무엔",
+    "name_tw": "蕾繆安",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4196_reckpr",
+    "name": "录武官",
+    "name_en": "Record Keeper",
+    "name_jp": "レコードキーパー",
+    "name_kr": "레코드키퍼",
+    "name_tw": "錄武官",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4208_wintim",
+    "name": "冬时",
+    "name_en": "Snegurochka",
+    "name_jp": "スネグーラチカ",
+    "name_kr": "스네구로치카",
+    "name_tw": "冬時",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_420_flamtl",
+    "name": "焰尾",
+    "name_en": "Flametail",
+    "name_jp": "フレイムテイル",
+    "name_kr": "플레임테일",
+    "name_tw": "焰尾",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4215_buddy",
+    "name": "罗德岛隐秘队",
+    "name_en": "罗德岛隐秘队",
+    "name_jp": "罗德岛隐秘队",
+    "name_kr": "罗德岛隐秘队",
+    "name_tw": "罗德岛隐秘队",
+    "own": true,
+    "rarity": 1
+   },
+   {
+    "id": "char_4217_makoto",
+    "name": "结城理",
+    "name_en": "结城理",
+    "name_jp": "结城理",
+    "name_kr": "结城理",
+    "name_tw": "结城理",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_488_buildr",
+    "name": "青枳",
+    "name_en": "Poncirus",
+    "name_jp": "ポンシラス",
+    "name_kr": "폰사이러스",
+    "name_tw": "青枳",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4218_aigis",
+    "name": "埃癸斯",
+    "name_en": "埃癸斯",
+    "name_jp": "埃癸斯",
+    "name_kr": "埃癸斯",
+    "name_tw": "埃癸斯",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4220_kormr",
+    "name": "虎狼丸",
+    "name_en": "虎狼丸",
+    "name_jp": "虎狼丸",
+    "name_kr": "虎狼丸",
+    "name_tw": "虎狼丸",
+    "own": true,
+    "rarity": 1
+   },
+   {
+    "id": "char_4221_ju",
+    "name": "矩",
+    "name_en": "Ju",
+    "name_jp": "ジュー",
+    "name_kr": "쥐",
+    "name_tw": "矩",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4226_veen",
+    "name": "维伊",
+    "name_en": "Viy",
+    "name_jp": "ヴィイ",
+    "name_kr": "비이",
+    "name_tw": "维伊",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4228_closur",
+    "name": "可露希尔",
+    "name_en": "Closure",
+    "name_jp": "クロージャ",
+    "name_kr": "클로저",
+    "name_tw": "可露希尔",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_4229_aphris",
+    "name": "谬因",
+    "name_en": "谬因",
+    "name_jp": "谬因",
+    "name_kr": "谬因",
+    "name_tw": "谬因",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_422_aurora",
+    "name": "极光",
+    "name_en": "Aurora",
+    "name_jp": "オーロラ",
+    "name_kr": "오로라",
+    "name_tw": "極光",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4234_pedro",
+    "name": "佩德洛",
+    "name_en": "佩德洛",
+    "name_jp": "佩德洛",
+    "name_kr": "佩德洛",
+    "name_tw": "佩德洛",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_4231_clemnt",
+    "name": "克莱门莎",
+    "name_en": "克莱门莎",
+    "name_jp": "克莱门莎",
+    "name_kr": "克莱门莎",
+    "name_tw": "克莱门莎",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_4232_hbound",
+    "name": "旅骨",
+    "name_en": "旅骨",
+    "name_jp": "旅骨",
+    "name_kr": "旅骨",
+    "name_tw": "旅骨",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_4237_jcinta",
+    "name": "嘉辛塔",
+    "name_en": "嘉辛塔",
+    "name_jp": "嘉辛塔",
+    "name_kr": "嘉辛塔",
+    "name_tw": "嘉辛塔",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_431_ashlok",
+    "name": "灰毫",
+    "name_en": "Ashlock",
+    "name_jp": "アッシュロック",
+    "name_kr": "애쉬락",
+    "name_tw": "灰毫",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_436_whispr",
+    "name": "絮雨",
+    "name_en": "Whisperain",
+    "name_jp": "ウィスパーレイン",
+    "name_kr": "위스퍼레인",
+    "name_tw": "絮雨",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_437_mizuki",
+    "name": "水月",
+    "name_en": "Mizuki",
+    "name_jp": "ミヅキ",
+    "name_kr": "미즈키",
+    "name_tw": "水月",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_445_wscoot",
+    "name": "骋风",
+    "name_en": "Windscoot",
+    "name_jp": "ウィンドスクート",
+    "name_kr": "윈드스쿠트",
+    "name_tw": "騁風",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_446_aroma",
+    "name": "阿罗玛",
+    "name_en": "Aroma",
+    "name_jp": "アロマ",
+    "name_kr": "아로마",
+    "name_tw": "阿羅瑪",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_449_glider",
+    "name": "蜜莓",
+    "name_en": "Honeyberry",
+    "name_jp": "ハニーベリー",
+    "name_kr": "허니베리",
+    "name_tw": "蜜莓",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_450_necras",
+    "name": "死芒",
+    "name_en": "Necrass",
+    "name_jp": "ネクラス",
+    "name_kr": "네크라스",
+    "name_tw": "死芒",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_452_bstalk",
+    "name": "豆苗",
+    "name_en": "Beanstalk",
+    "name_jp": "ビーンストーク",
+    "name_kr": "빈스토크",
+    "name_tw": "豆苗",
+    "own": true,
+    "rarity": 4
+   },
+   {
+    "id": "char_456_ash",
+    "name": "灰烬",
+    "name_en": "Ash",
+    "name_jp": "Ash",
+    "name_kr": "Ash",
+    "name_tw": "ASH",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_457_blitz",
+    "name": "闪击",
+    "name_en": "Blitz",
+    "name_jp": "Blitz",
+    "name_kr": "Blitz",
+    "name_tw": "BLITZ",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_458_rfrost",
+    "name": "霜华",
+    "name_en": "Frost",
+    "name_jp": "Frost",
+    "name_kr": "Frost",
+    "name_tw": "FROST",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_616_pithst",
+    "name": "盟约·辅助干员",
+    "name_en": "Alliance/Supportive Operator",
+    "name_jp": "盟約・補助オペレーター",
+    "name_kr": "맹약·서포터 오퍼레이터",
+    "name_tw": "盟約·輔助幹員",
+    "own": false,
+    "rarity": 4
+   },
+   {
+    "id": "char_473_mberry",
+    "name": "桑葚",
+    "name_en": "Mulberry",
+    "name_jp": "マルベリー",
+    "name_kr": "멀베리",
+    "name_tw": "桑葚",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_476_blkngt",
+    "name": "夜半",
+    "name_en": "Blacknight",
+    "name_jp": "ブラックナイト",
+    "name_kr": "블랙나이트",
+    "name_tw": "夜半",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_478_kirara",
+    "name": "绮良",
+    "name_en": "Kirara",
+    "name_jp": "キララ",
+    "name_kr": "키라라",
+    "name_tw": "綺良",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_485_pallas",
+    "name": "帕拉斯",
+    "name_en": "Pallas",
+    "name_jp": "パラス",
+    "name_kr": "팔라스",
+    "name_tw": "帕拉斯",
+    "own": true,
+    "rarity": 6
+   },
+   {
+    "id": "char_486_takila",
+    "name": "龙舌兰",
+    "name_en": "Tequila",
+    "name_jp": "テキーラ",
+    "name_kr": "테킬라",
+    "name_tw": "龍舌蘭",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_487_bobb",
+    "name": "波卜",
+    "name_en": "Bobbing",
+    "name_jp": "ボビング",
+    "name_kr": "보빙",
+    "name_tw": "波卜",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_489_serum",
+    "name": "蚀清",
+    "name_en": "Corroserum",
+    "name_jp": "コロセラム",
+    "name_kr": "코로세럼",
+    "name_tw": "蝕清",
+    "own": true,
+    "rarity": 5
+   },
+   {
+    "id": "char_497_ctable",
+    "name": "晓歌",
+    "name_en": "Cantabile",
+    "name_jp": "カンタービレ",
+    "name_kr": "칸타빌레",
+    "name_tw": "曉歌",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_503_rang",
+    "name": "巡林者",
+    "name_en": "Rangers",
+    "name_jp": "レンジャー",
+    "name_kr": "레인저",
+    "name_tw": "巡林者",
+    "own": true,
+    "rarity": 2
+   },
+   {
+    "id": "char_504_rguard",
+    "name": "预备干员-近战",
+    "name_en": "Reserve Operator - Melee",
+    "name_jp": "予備隊員-近距離",
+    "name_kr": "예비 오퍼레이터 - 근거리",
+    "name_tw": "預備幹員-近戰",
+    "own": false,
+    "rarity": 3
+   },
+   {
+    "id": "char_507_rsnipe",
+    "name": "预备干员-狙击",
+    "name_en": "Reserve Operator - Sniper",
+    "name_jp": "予備隊員-狙撃",
+    "name_kr": "예비 오퍼레이터 - 스나이퍼",
+    "name_tw": "預備幹員-狙擊",
+    "own": false,
+    "rarity": 3
+   },
+   {
+    "id": "char_508_aguard",
+    "name": "Sharp",
+    "name_en": "Sharp",
+    "name_jp": "Sharp",
+    "name_kr": "샤프",
+    "name_tw": "Sharp",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_509_acast",
+    "name": "Pith",
+    "name_en": "Pith",
+    "name_jp": "Pith",
+    "name_kr": "피스",
+    "name_tw": "Pith",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_511_asnipe",
+    "name": "Stormeye",
+    "name_en": "Stormeye",
+    "name_jp": "Stormeye",
+    "name_kr": "스톰아이",
+    "name_tw": "Stormeye",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_600_cpione",
+    "name": "预备干员-先锋",
+    "name_en": "Reserve Operator - Vanguard",
+    "name_jp": "予備隊員-先鋒",
+    "name_kr": "예비 오퍼레이터 - 뱅가드",
+    "name_tw": "預備幹員-先鋒",
+    "own": false,
+    "rarity": 4
+   },
+   {
+    "id": "char_513_apionr",
+    "name": "郁金香",
+    "name_en": "Tulip",
+    "name_jp": "チューリップ",
+    "name_kr": "튤립",
+    "name_tw": "鬱金香",
+    "own": false,
+    "rarity": 5
+   },
+   {
+    "id": "char_514_rdfend",
+    "name": "预备干员-重装",
+    "name_en": "Reserve Operator - Defender",
+    "name_jp": "予備隊員-重装",
+    "name_kr": "예비 오퍼레이터 - 디펜더",
+    "name_tw": "預備幹員-重裝",
+    "own": false,
+    "rarity": 3
+   },
+   {
+    "id": "char_601_cguard",
+    "name": "预备干员-近卫",
+    "name_en": "Reserve Operator - Guard",
+    "name_jp": "予備隊員-前衛",
+    "name_kr": "예비 오퍼레이터 - 가드",
+    "name_tw": "預備幹員-近衛",
+    "own": false,
+    "rarity": 4
+   },
+   {
+    "id": "char_603_csnipe",
+    "name": "预备干员-狙击",
+    "name_en": "Reserve Operator - Sniper",
+    "name_jp": "予備隊員-狙撃",
+    "name_kr": "예비 오퍼레이터 - 스나이퍼",
+    "name_tw": "預備幹員-狙擊",
+    "own": false,
+    "rarity": 4
+   },
+   {
+    "id": "char_605_cmedic",
+    "name": "预备干员-医疗",
+    "name_en": "Reserve Operator - Medic",
+    "name_jp": "予備隊員-医療",
+    "name_kr": "예비 오퍼레이터 - 메딕",
+    "name_tw": "預備幹員-醫療",
+    "own": false,
+    "rarity": 4
+   },
+   {
+    "id": "char_607_cspec",
+    "name": "预备干员-特种",
+    "name_en": "Reserve Operator - Specialist",
+    "name_jp": "予備隊員-特殊",
+    "name_kr": "예비 오퍼레이터 - 스페셜리스트",
+    "name_tw": "預備幹員-特種",
+    "own": false,
+    "rarity": 4
+   },
+   {
+    "id": "char_608_acpion",
+    "name": "郁金香",
+    "name_en": "Tulip",
+    "name_jp": "チューリップ",
+    "name_kr": "튤립",
+    "name_tw": "鬱金香",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_609_acguad",
+    "name": "Sharp",
+    "name_en": "Sharp",
+    "name_jp": "Sharp",
+    "name_kr": "샤프",
+    "name_tw": "Sharp",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_611_acnipe",
+    "name": "Stormeye",
+    "name_en": "Stormeye",
+    "name_jp": "Stormeye",
+    "name_kr": "스톰아이",
+    "name_tw": "Stormeye",
+    "own": false,
+    "rarity": 6
+   },
+   {
+    "id": "char_615_acspec",
+    "name": "Misery",
+    "name_en": "Misery",
+    "name_jp": "Misery",
+    "name_kr": "미저리",
+    "name_tw": "Misery",
+    "own": false,
+    "rarity": 6
+   }
+  ]
+ }
+}

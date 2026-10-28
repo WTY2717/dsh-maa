@@ -1,10 +1,12 @@
 # @local/dsh-maa —— MAA 插件（DSH）
 
-把 MAA（MaaAssistantArknights）接到 DSH 里的**正式插件**：22 个原生工具，三条通道并存；**启动时先检查 MuMu 模拟器，没开就自动拉起**；`maa_wakeup` 复用 MAA「开始唤醒」直接进主界面（实测可单独调用，不用自己点登录）；抄作业带**中途生命值守则**（掉血立刻停、退出关卡返还理智）；**多用户换号 / 新用户登录**（本地账号簿 + 动态账号切换 + 手机号验证码 / 扫码登录）；**任务状态文件**（给外部排队用，QQ 机器人 `/liw` 联动）。
+把 MAA（MaaAssistantArknights）接到 DSH 里的**正式插件**：24 个原生工具，三条通道并存；**启动时先检查 MuMu 模拟器，没开就自动拉起**；`maa_wakeup` 复用 MAA「开始唤醒」直接进主界面（实测可单独调用，不用自己点登录）；抄作业带**中途生命值守则**（掉血立刻停、退出关卡返还理智）；**多用户换号 / 新用户登录**（本地账号簿 + 动态账号切换 + 手机号验证码 / 扫码登录）；**任务状态文件**（给外部排队用，QQ 机器人 `/liw` 联动）；**可编程任务链**（自己编排「只刷 1-7 三次不吃药」「只跑基建+公招」）与**小工具**（干员识别 / 仓库识别 / 视频识别 / 抽卡糖）。
 
 | 能力 | 后端 | 工具 |
 |---|---|---|
 | 日常 / 刷关 / 基建 / 公招 / 截图 / 改配置 | **远程控制协议**（MAA 主动轮询本机桥） | `maa_health` `maa_run` `maa_tasks` `maa_wait` `maa_screenshot` `maa_current` `maa_stop` `maa_set` |
+| 可编程任务链（只刷几把 / 只跑基建+公招 / 领奖+刷关） | **MaaCore 直连**（同一会话多条 `AsstAppendTask`） | `maa_chain` |
+| 小工具：干员识别 / 仓库识别 / 视频识别 / 抽卡糖 | MaaCore 直连 + 远程控制桥 | `maa_toolbox` |
 | 唤醒到主界面（= MAA「开始唤醒」，可单独调用） | 远程控制协议 | `maa_wakeup` |
 | 到作业站找作业并自动抄（含练度容差） | **MaaCore 直连**（koffi + 子进程） | `maa_copilot_find` `maa_copilot_run` `maa_copilot_verify` `maa_click` |
 | 抄作业中途盯防（后台跑 / 看进度 / 掉血止损） | 同上（后台子进程 + adb 截图） | `maa_copilot_status` `maa_copilot_stop` |
@@ -22,6 +24,17 @@
 
 **任务状态文件（v2.1.0，给外部排队用）**：插件把「当前有没有任务在跑」原子写到 `data\task-state.json`（tmp + rename），并注册只读工具 `maa_task_state`（`waitMs` 可长轮询下一次变化）。字段：`epoch`（每次插件加载都变）、`running`、`taskType`、`sequence`、`lastFinishedSeq`、`lastFinished{type,status,at}`、`active[]`、`coverage` 等。口径：**只统计经本插件下发的有意义任务**（`LinkStart*` / 抄作业 / 账号切换 / 唤醒），截图/心跳/StopTask/Settings/Toolbox 不算；**MAA 界面里手点的任务看不到**（`coverage:"plugin-observable"`）；`AccountSwitch` 与 `LinkStart-WakeUp` 是交接任务，**它们的结束不算用户服务结束**。跨插件契约见 `docs\plans\qqbot-side-integration-spec.md` §3；MAA 侧不读 QQ 队列、不发 QQ 消息。
 
+**可编程任务链（v2.2.0，`maa_chain`）**：MAA 的 `LinkStart` 只能跑 GUI 里勾好的固定队列。`maa_chain` 直连 MaaCore，把 `tasks` 按顺序 append 到**同一个会话**再统一 start，适合「只刷 1-7 三次不吃药」「只跑基建+公招」「领奖后再刷关」这类临时编排：
+
+```jsonc
+maa_chain({ tasks: [{ type: "Fight", params: { stage: "1-7", times: 3, medicine: 0, stone: 0 } }] })
+maa_chain({ tasks: [{ type: "Infrast", params: {} }, { type: "Recruit", params: { times: 4 } }] })
+```
+
+`dryRun:true` 只 append 校验、不连接不 startTask、**绝不执行**；`background:true` 立刻返回 runId，复用 `maa_copilot_status/stop` 盯和停（task-state 里记成 `Custom`）。`Fight` **消耗理智**、`StartUp` 会**切号/登游戏**、`CloseDown` 会**关游戏**——真实消耗前先问用户。`OperBox/Depot/VideoRecognition` 的结构化结果在 `structured` 里给摘要。**改 MAA 一键长草的固定配置不要手改 `gui.new.json`**：临时编排用 `maa_chain`，永久改在 MAA GUI 里改。
+
+**小工具（v2.2.0，`maa_toolbox`）**：`action="operbox"` 干员识别（**不消耗理智**，全量 400+ 条、本机实测约 30s；返回 `total/ownedCount/summary` + 前 50 条 `chars`，完整 JSON 落 `data\logs\toolbox-operbox-*.json`）；`action="depot"` 仓库识别（物品 id→数量，带 `item_index.json` 中文名，按数量倒序返回前 50 条 + `dumpFile`）；`action="video"` 视频识别（本地游戏战斗录像 → Copilot 作业 JSON，复制到 `data\jobs\` 返回 `jobFile`，**纯本地识别、不需要模拟器**，**成功路径未真机验证**）；`action="gacha"` 抽卡糖（`Toolbox-GachaOnce` / `GachaTenTimes`，**消耗抽卡资源、先问用户**，回执截图用 `read_image` 看）。
+
 **给模型的通用引导**（首次使用也能找到关卡）：主线 = 终端 → 曲谱 → 乐章收录（章节列表上下滑，右下角 `EPxx` = 第 xx 章）；往期活动在同一个章节列表的最下方（艺术字封面 + 普通/EX/特殊关切换）；当期活动是终端页左侧海报（结束后显示「作战已结束」）；H 关要先切到最高难度才出现在地图最右侧。这段话同时写在 `skill/SKILL.md`（「怎么走到目标关卡」）和 `maa_swipe` 的工具描述里。
 
 ## 安装
@@ -32,9 +45,9 @@
 plugins\maa-plugin\
 ├─ package.json        # dsh.bundle.patch / dsh.client + 依赖（koffi / schemastery）
 ├─ cordis.patch.yml    # 唯一的 Loader 行：id=maa-plugin
-├─ index.js            # apply(ctx, config)：模拟器自启 + 起桥 + 设置页路由 + 任务状态文件 + 注册 22 个工具
+├─ index.js            # apply(ctx, config)：模拟器自启 + 起桥 + 设置页路由 + 任务状态文件 + 注册 24 个工具
 ├─ client.js           # Web 客户端半：设置页（settings.plugins.tab）
-├─ src\                # 实现：config / maa / pe / doctor / roster / stages / stages-hard / copilot / adb / emulator / wakeup / account-book / switch-account / task-state
+├─ src\                # 实现：config / maa / pe / doctor / roster / stages / stages-hard / copilot / chain / toolbox / adb / emulator / wakeup / account-book / switch-account / task-state
 │  ├─ input\           #   滑动手势：coords（换算）/ adb-input（注入）/ backend（后端探测）
 │  ├─ prts\            #   作业站查询、练度容差匹配、严格优先的作业挑选
 │  ├─ remote\          #   远程控制桥（MAA 反向轮询）
@@ -43,7 +56,7 @@ plugins\maa-plugin\
 ├─ icon.svg
 ├─ skill\SKILL.md      # 模型侧技能（复制到 ~\.dsh\skills\ 后所有会话可见）
 ├─ scripts\recover.ps1 # 插件把 DSH 搞挂时的自救脚本
-└─ test\               # 11 份自测：selftest / hardening / swipe / match / emulator / copilot-runner / wakeup / account-book / switch-account / input-text / task-state
+└─ test\               # 12 份自测：selftest / hardening / swipe / match / emulator / copilot-runner / wakeup / account-book / switch-account / input-text / task-state / toolbox
 ```
 
 装进当前 profile（走插件管理器，不要手改 profile）：
@@ -100,7 +113,7 @@ plugin_manager(action="remove_bundle", target="@local/dsh-maa")
 
 本工作区里 `plugins\maa-plugin` 已经用 `link:` 装进 desktop profile，改完代码不用重装，重载即可。
 
-**跑自测**（11 份 / 187 项，全绿才算可发；除 `selftest` 外都不碰 MAA 和模拟器）：
+**跑自测**（12 份 / 216 项，全绿才算可发；除 `selftest` 外都不碰 MAA 和模拟器）：
 
 ```powershell
 node test/selftest.mjs          # 需要本机装了 MAA（自动探测；只读文件、不连接、不消耗理智）
@@ -114,6 +127,7 @@ node test/account-book.test.mjs  # 本地账号簿（掩码登录名）
 node test/switch-account.test.mjs # 动态切号（假 CoreWorker）
 node test/input-text.test.mjs    # 手机号/验证码输入
 node test/task-state.test.mjs    # 任务状态文件（跨插件契约 v1）
+node test/toolbox.test.mjs       # 可编程任务链 + 小工具（假 CoreWorker + 真实回调 fixture）
 # 有 npm 的机器也可以直接：npm test
 ```
 

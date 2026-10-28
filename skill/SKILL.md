@@ -1,7 +1,7 @@
 ---
 name: maa-arknights
-description: 用 maa_* 工具驱动本机 MAA（明日方舟）——日常/刷关/基建/公招/信用商店/肉鸽/生息演算/抽卡/截图，多用户换号与新用户登录（手机号+验证码 / 扫码），以及到作业站找作业并自动抄（Copilot）。用户提到明日方舟、MAA、抄作业、刷本、看游戏画面、换号、登录时加载。
-whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打某关 / 基建换班 / 公招 / 信用商店 / 肉鸽 / 生息演算 / 牛牛抽卡 / 抄作业 / 看看现在什么画面 / 理智还剩多少 / 换号 / 登录 / 新用户 / 扫码 时。
+description: 用 maa_* 工具驱动本机 MAA（明日方舟）——日常/刷关/基建/公招/信用商店/肉鸽/生息演算/抽卡/截图，自定义任务链（只刷几把、只跑基建+公招），干员/仓库/视频识别，多用户换号与新用户登录（手机号+验证码 / 扫码），以及到作业站找作业并自动抄（Copilot）。用户提到明日方舟、MAA、抄作业、刷本、看游戏画面、换号、登录时加载。
+whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打某关 / 基建换班 / 公招 / 信用商店 / 肉鸽 / 生息演算 / 牛牛抽卡 / 抄作业 / 只刷几次 / 自定义任务链 / 干员识别 / 仓库识别 / 视频识别 / 看看现在什么画面 / 理智还剩多少 / 换号 / 登录 / 新用户 / 扫码 时。
 ---
 
 # MAA 明日方舟（`maa_*` 工具）
@@ -83,6 +83,8 @@ whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打�
 |---|---|
 | 跑日常 / 打扫卫生 | `maa_run(type="LinkStart")`（按 MAA 里勾选的队列） |
 | 刷某关 | `maa_set(name="Stage1", value="1-7")` → `maa_run(type="LinkStart-Combat")` |
+| 自定义任务链（只刷几把 / 只跑基建+公招 / 领奖+刷关） | `maa_chain({tasks:[...], dryRun?:true, background?:true})`（MaaCore 直连；Fight 先问用户） |
+| 干员 / 仓库 / 视频识别、抽卡 | `maa_toolbox`：`action` 取 `operbox` / `depot` / `video` / `gacha`（识别不消耗理智；抽卡先问用户） |
 | 基建 / 公招 / 领奖 / 信用商店 | `LinkStart-Base` / `-Recruiting` / `-Mission` / `-Mall` |
 | 肉鸽 / 生息演算 | `LinkStart-AutoRoguelike` / `-Reclamation`（需 MAA 里已有配置） |
 | 牛牛抽卡 | `Toolbox-GachaOnce` / `GachaTenTimes`（**先问用户**） |
@@ -98,6 +100,14 @@ whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打�
 | 输入手机号 / 验证码 | `maa_input_text({text})`（先用 `maa_click` 点中输入框） |
 | 停 | `maa_stop` → `maa_current` / 截图确认（无回执） |
 | 自检 / 路径不对 / 练度没解析出来 | `maa_doctor` |
+
+## 怎么自定义刷关 / 识别（v2.2.0）
+
+1. **先 dryRun**：`maa_chain({tasks:[...], dryRun:true})` 只 append 校验参数（不连接、不 startTask、不消耗）；返回的 appended 都拿到 taskId 后再去掉 dryRun。
+2. **Fight 先问用户**（消耗理智）：只刷 1-7 三次不吃药 = `[{type:"Fight",params:{stage:"1-7",times:3,medicine:0,stone:0}}]`；只跑基建+公招 = `Infrast` + `Recruit`；领奖+刷关 = `Award` → `Fight`。`StartUp` 会切号/登游戏、`CloseDown` 会关游戏，同样先问。
+3. **长链后台跑**：`background:true` 拿 runId → `maa_copilot_status/stop` 盯/停；Fight 掉血立刻 stop，再自己点「暂停 → 退出行动」（结算前退全退理智）。
+4. **识别**：干员 `maa_toolbox({action:"operbox"})`（实测约 30s；`total/ownedCount` + 前 50 条，完整在 `dumpFile`）；仓库 `depot`；视频 `video` + `file`（纯本地、不用模拟器；产出 `jobFile` 可直接抄）；抽卡 `gacha` + `times`（**先问用户**）。
+5. **别手改 `gui.new.json`**：临时编排用 `maa_chain`；永久改 MAA 一键长草队列/关卡在 MAA GUI 里改（MAA 运行时会覆盖手改）。
 
 ## 长任务节奏
 
@@ -128,6 +138,7 @@ whenToUse: 用户说 明日方舟 / MAA / 日常 / 打扫卫生 / 刷 1-7 / 打�
 ## 禁则
 
 - 抽卡 / 碎石 / 吃药 / `StopTask` 打断正在跑的长草 → **先征得用户同意**。
+- `maa_chain` 里的 Fight / StartUp / CloseDown 有真实代价（理智 / 切号 / 关游戏）→ **先问用户**；链失败/超时不要自动重发 Fight。
 - 一次只排一个长任务；**同一个 `LinkStart` 绝不重发**（会抢占、从头重开）。
 - 任务跑着时 `maa_set` 会排在它后面，别以为立刻生效。
 - 抄作业：**不许起跑后不管生命值**（阻塞模式只用于已验证过的作业）；掉血必须立刻退，别赌能三星。

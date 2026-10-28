@@ -1,6 +1,7 @@
 /**
- * 工具定义（22 个）：远程控制 8 个 + 抄作业 3 个（+ 后台 2 个） + 自检 1 个 + 点击 1 个 + 滑动 1 个 + 模拟器 1 个
- * + 账号 3 个（账号簿 / 输入文字 / 账号切换）+ 任务状态 1 个（给外部排队用，见 src/task-state.js）。
+ * 工具定义（24 个）：远程控制 8 个 + 抄作业 3 个（+ 后台 2 个） + 自检 1 个 + 点击 1 个 + 滑动 1 个 + 模拟器 1 个
+ * + 账号 3 个（账号簿 / 输入文字 / 账号切换）+ 任务状态 1 个（给外部排队用，见 src/task-state.js）
+ * + 可编程任务链 1 个（maa_chain）+ 小工具 1 个（maa_toolbox：干员/仓库/视频识别、抽卡糖）。
  *
  * 这里是**唯一**把能力暴露给模型的地方；实现都在 src/ 下，工具只做参数校验与调度。
  * 描述里的口径与禁则是踩过坑的结论，改之前先读 docs/tools/maa*.md。
@@ -11,6 +12,8 @@ import { resolveConfig } from './config.js';
 import { swipe, typeText } from './input/index.js';
 import { ensureEmulator } from './emulator.js';
 import { wakeupGame } from './wakeup.js';
+import { runChain, validateChainTasks, chainHint, CORE_TASK_TYPES, CHAIN_TIMEOUT_RANGE } from './chain.js';
+import { recognizeOperBox, recognizeDepot, recognizeVideo, runGacha, TOOLBOX_ACTIONS } from './toolbox.js';
 import {
   accountBookFile,
   readBook,
@@ -61,8 +64,9 @@ const clampSec = (v, def, max) => Math.min(Math.max(Number(v) || def, 1), max);
  * @param {string} deps.pkgDir 插件包目录
  * @param {() => Promise<object|null>} deps.getBridge 取（必要时启动）bridge 实例
  * @param {string} deps.pkgVersion 插件版本
+ * @param {object} [deps.deps] 单测注入（CoreWorker / resolveAdbPath / connectionExtras / itemIndex），生产为空
  */
-export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiState = () => null, copilotRunner = null, taskState = null }) {
+export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiState = () => null, copilotRunner = null, taskState = null, deps = {} }) {
   /** 每次调用都重新解析配置：路径、端口、开关都立即生效。 */
   const cfgOf = async () => resolveConfig(getConfig() ?? {}, pkgDir);
 
@@ -667,6 +671,120 @@ export function createTools({ getConfig, pkgDir, getBridge, pkgVersion, getUiSta
           if (token) taskState?.endTask({ token, status: result?.ok ? 'SUCCESS' : 'FAILED' });
         }
         return result;
+      },
+    },
+
+    /* ───────────── 可编程任务链（MaaCore 直连）───────────── */
+    {
+      name: 'maa_chain',
+      description:
+        '可编程 MaaCore 任务链（**不经过 MAA GUI 的队列**）：按顺序把 tasks 里每条 append 到同一个会话，再 startTask，等整条链结束。' +
+        '可用 type：StartUp / CloseDown / Fight / Recruit / Infrast / Mall / Award / Roguelike / Copilot / SSSCopilot / Depot / OperBox / VideoRecognition / Reclamation / Custom / SingleStep。' +
+        '典型用法：只刷 1-7 三次不吃药 = `[{"type":"Fight","params":{"stage":"1-7","times":3,"medicine":0,"stone":0}}]`；只跑基建+公招 = `[{"type":"Infrast","params":{}},{"type":"Recruit","params":{"times":4}}]`；领奖后再刷关 = Award → Fight。' +
+        '**危险任务（真实消耗/改变游戏状态，动手前必须先问用户）**：Fight 会刷关**消耗理智**（吃药/碎石按 params）；StartUp 会启动/唤醒游戏、带 account_name 会**切换账号（登出当前账号）**；CloseDown 会**关闭游戏**。不要擅自跑 Fight / Copilot。' +
+        'dryRun=true 只 append 校验 core 能不能接受（不连接模拟器、不 startTask、绝不执行），适合先验证参数。' +
+        'background=true 立刻返回 runId，用 maa_copilot_status 看进度、maa_copilot_stop 随时取消（长链推荐）。' +
+        'OperBox / Depot / VideoRecognition 的结构化结果只在 structured 里给摘要；完整数据用 maa_toolbox。' +
+        '工具不会自动重试：失败/超时看 status + progress 尾部，先 maa_screenshot 确认现场。',
+      parameters: obj(
+        {
+          tasks: {
+            type: 'array',
+            description: '按顺序下发的任务数组，例如 [{"type":"Fight","params":{"stage":"1-7","times":3,"medicine":0,"stone":0}}]',
+            items: {
+              type: 'object',
+              properties: {
+                type: { type: 'string', enum: [...CORE_TASK_TYPES], description: 'MaaCore 任务类型' },
+                params: { type: 'object', description: 'MaaCore 原生任务参数（可选；空对象 = 用 core 默认值）', additionalProperties: true },
+              },
+              required: ['type'],
+              additionalProperties: false,
+            },
+          },
+          dryRun: bool('只 append 校验，不连接、不 startTask、绝不执行。默认 false'),
+          background: bool('后台跑：立刻返回 runId，用 maa_copilot_status / stop 盯和停。默认 false'),
+          timeoutSeconds: num(`整条链最长等待秒数，默认 ${CHAIN_TIMEOUT_RANGE.default}，范围 ${CHAIN_TIMEOUT_RANGE.min}~${CHAIN_TIMEOUT_RANGE.max}`),
+        },
+        ['tasks'],
+      ),
+      output: textOut('可编程任务链'),
+      async execute(args) {
+        const cfg = await cfgOf();
+        const checked = validateChainTasks(args.tasks);
+        if (!checked.ok) {
+          return { ok: false, status: 'invalid', error: checked.error, available: checked.available };
+        }
+        const timeoutSeconds = Math.min(
+          Math.max(Number(args.timeoutSeconds) || CHAIN_TIMEOUT_RANGE.default, CHAIN_TIMEOUT_RANGE.min),
+          CHAIN_TIMEOUT_RANGE.max,
+        );
+        const dangers = checked.dangers.length ? checked.dangers : null;
+        // 后台：runner 的 onBegin/onFinish 钩子会用 label 记账（task-state 里 'chain' → 'Custom'），
+        // 工具层**不再重复** beginTask，否则同一任务会被算成两条。
+        if (args.background && !args.dryRun) {
+          if (!copilotRunner) return { ok: false, status: 'invalid', error: '后台模式不可用：runner 未注入（用 background:false 或重载插件）' };
+          const started = copilotRunner.startJob({
+            label: 'chain',
+            run: ({ onEvent, onReady }) => runChain({ tasks: checked.tasks, cfg, timeoutSeconds, onEvent, onReady, deps }),
+          });
+          return { ...started, dangers, hint: chainHint({ tasks: checked.tasks, background: true }) };
+        }
+        const token = args.dryRun ? null : taskState?.beginTask({ type: 'Custom', source: 'core' });
+        let result;
+        try {
+          result = await runChain({ tasks: checked.tasks, cfg, dryRun: Boolean(args.dryRun), timeoutSeconds, deps });
+        } finally {
+          if (token) taskState?.endTask({ token, status: result?.ok ? 'SUCCESS' : 'FAILED' });
+        }
+        return dangers ? { ...result, dangers } : result;
+      },
+    },
+
+    /* ───────────── 小工具（干员/仓库/视频识别 + 抽卡糖）───────────── */
+    {
+      name: 'maa_toolbox',
+      description:
+        '小工具（MaaCore 直连 / 远程桥）：' +
+        '`action="operbox"` 干员识别（**不消耗理智**，扫干员列表，本机实测约 30s；返回 total / ownedCount / summary + 前 limit 条 chars，完整 JSON 落盘 dumpFile）；' +
+        '`action="depot"` 仓库识别（**不消耗理智**；返回 totalTypes / totalCount + 按数量倒序前 limit 条 items（带物品名）+ dumpFile）；' +
+        '`action="video"` 视频识别（file=本地游戏战斗录像，转成 Copilot 作业 JSON，复制到 jobsDir 返回 jobFile；**纯本地识别，不需要模拟器在线**；**成功路径未真机验证**）；' +
+        '`action="gacha"` 抽卡糖（times=1 或 10，**消耗游戏内抽卡资源（合成玉/寻访凭证）——先问用户**；走远程控制桥，MAA 必须在线，返回截图路径用 read_image 看）。' +
+        '识别类要求游戏已登录（工具会自己从主界面导航到干员/仓库页，但登录页/公告会挡住）；超时默认 operbox/depot 600s、video 900s，可调 30~1800。' +
+        '结果里 dumpFile 是完整数据（干员含 name_jp/name_kr/name_tw），工具结果只返回前 N 条避免撑爆上下文。',
+      parameters: obj(
+        {
+          action: { type: 'string', enum: [...TOOLBOX_ACTIONS], description: 'operbox=干员识别 / depot=仓库识别 / video=视频识别 / gacha=抽卡糖' },
+          limit: num('返回条数，默认 50，范围 0~500（0=不返回列表只给摘要）'),
+          ownedOnly: bool('operbox 专用：只返回已拥有的干员（默认 false）'),
+          file: str('video 专用：本地游戏战斗录像的绝对路径（mp4/mkv/avi/mov/flv/webm）'),
+          times: { type: 'number', enum: [1, 10], description: 'gacha 专用：抽 1 次或 10 次' },
+          timeoutSeconds: num('等待秒数；默认 operbox/depot 600、video 900，范围 30~1800'),
+        },
+        ['action'],
+      ),
+      output: textOut('小工具'),
+      async execute(args) {
+        const cfg = await cfgOf();
+        const action = String(args.action || '');
+        if (action === 'operbox') {
+          return recognizeOperBox({ cfg, timeoutSeconds: args.timeoutSeconds, limit: args.limit, ownedOnly: Boolean(args.ownedOnly), deps });
+        }
+        if (action === 'depot') {
+          return recognizeDepot({ cfg, timeoutSeconds: args.timeoutSeconds, limit: args.limit, deps });
+        }
+        if (action === 'video') {
+          return recognizeVideo({ cfg, file: args.file, timeoutSeconds: args.timeoutSeconds, deps });
+        }
+        if (action === 'gacha') {
+          let bridge;
+          try {
+            bridge = await bridgeOf();
+          } catch (e) {
+            return { ok: false, action: 'gacha', status: 'offline', error: String(e?.message || e), advice: '如实告诉用户 MAA 不在线，不要反复重试；抽卡会消耗游戏内资源。' };
+          }
+          return runGacha({ bridge, times: args.times ?? 1, timeoutSeconds: args.timeoutSeconds });
+        }
+        return { ok: false, status: 'invalid', error: `action 不认识: ${action}（可选 ${TOOLBOX_ACTIONS.join(' / ')}）` };
       },
     },
   ];

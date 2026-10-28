@@ -41,11 +41,14 @@ export function isMeaningfulBridgeTask(type) {
   return BRIDGE_TASK_TYPE_RE.test(String(type ?? ''));
 }
 
-/** 后台 runner 的 label → 规范 taskType（Copilot / AccountSwitch）。 */
+/** 后台 runner 的 label → 规范 taskType（Copilot / AccountSwitch / chain→Custom）。 */
 export function runnerLabelToTaskType(label) {
   const s = String(label ?? '');
   if (s === 'copilot') return 'Copilot';
   if (s === 'account-switch') return 'AccountSwitch';
+  // 可编程任务链（maa_chain background）在契约里归到 Custom：它可能是任意任务组合，
+  // 没有更准确的原生类型；不要在外部契约里新增 'chain'（QQ 侧只认既有枚举）。
+  if (s === 'chain') return 'Custom';
   return s || 'Job';
 }
 
